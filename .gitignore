@@ -1,3 +1,10 @@
 # The course textbook, the vendor tutorials and the notes taken from them may be
 # copyrighted. The whole folder stays on the author's computer and is never committed.
 sources/
+
+# Screenshots for review, kept out of the repository (docs/WORKFLOW.md).
+screenshots/
+
+# Claude Code: agents' worktrees and each person's own settings.
+.claude/worktrees/
+.claude/settings.local.json

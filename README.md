@@ -47,6 +47,8 @@ npm run build    # type-checks, then builds into dist/
 | --- | --- |
 | [`docs/VISION.md`](docs/VISION.md) | Research and product vision: why the tool exists, what it will and will not do, and the roadmap |
 | [`docs/SPEC.md`](docs/SPEC.md) | The core specification: the model, commands, rules and test cases. Where it differs from the vision, the specification wins |
+| [`docs/STATUS.md`](docs/STATUS.md) | What each piece of work delivered, and the gaps still open |
+| [`docs/WORKFLOW.md`](docs/WORKFLOW.md) | How work is branched, reviewed, checked and merged |
 | [`docs/mockups/STYLES.md`](docs/mockups/STYLES.md) | The look, "Drafting Paper", with its colours, typefaces and contrast checks |
 | [`docs/images/brand/`](docs/images/brand/) | The logo and wordmark, and how to use them |
 
