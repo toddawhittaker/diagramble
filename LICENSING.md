@@ -29,4 +29,4 @@ The idea: if you make money from Diagramble, the author should too.
 
 Each version becomes open source under the AGPL four years after it's released.
 
-To ask about a commercial license, contact *contact address to be added*.
+To ask about a commercial license, email todd@thewhittakers.org.

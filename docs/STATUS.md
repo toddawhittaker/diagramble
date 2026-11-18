@@ -20,8 +20,6 @@ that is not a gap in something built goes in a GitHub issue instead.
 
 ## Open items
 
-- `LICENSE` and `LICENSING.md` still say "contact address to be added" where
-  the commercial licensing contact belongs.
 - The prototype's Windows high-contrast mode rules for chips and marks have
   not been tried on Windows.
 - In the prototype's navigator, "Requirements definition" is cut short
