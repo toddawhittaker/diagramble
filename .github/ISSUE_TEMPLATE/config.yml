@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and how-to
+    url: https://github.com/toddawhittaker/diagramble/tree/main/docs
+    about: The vision and the specification answer most questions about what Diagramble does.
