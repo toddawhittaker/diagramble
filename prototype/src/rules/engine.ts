@@ -16,10 +16,26 @@ import {
   processesOn,
   topDiagram,
 } from '../model/queries';
-import type { DataFlow, Id, Model, Process } from '../model/types';
+import { modelForMode } from '../model/queries2';
+import type { DataFlow, Id, Mode, Model, Process } from '../model/types';
 import { RULES, type Severity } from './catalogue';
+import { physicalDataModelStarted, release2Rules } from './engine2';
 
-export type FindingArea = 'diagram' | 'dictionary' | 'dataModel';
+/** Where a finding is counted. The order is the order the areas are listed in. */
+export const FINDING_AREAS = [
+  'systemRequest',
+  'feasibility',
+  'requirements',
+  'diagram',
+  'dictionary',
+  'dataModel',
+  'alternatives',
+  'interface',
+  'structure',
+  'storage',
+  'testPlan',
+] as const;
+export type FindingArea = (typeof FINDING_AREAS)[number];
 
 export interface Finding {
   /** Stable while the problem stays the same, so it can be used as a React key and for selection. */
@@ -28,8 +44,13 @@ export interface Finding {
   severity: Severity;
   /** The elements involved, most relevant first. */
   elementIds: Id[];
-  /** The diagram the finding belongs to, or null when it belongs to the dictionary or the data model. */
+  /** The data flow diagram the finding belongs to, or null when it belongs somewhere else. */
   diagramId: Id | null;
+  /**
+   * The form, interface structure diagram or structure chart the finding belongs to, for
+   * the areas that hold several: a matrix, an interface diagram, a chart or a test. Otherwise null.
+   */
+  homeId: Id | null;
   /** Where the finding is counted. Each finding is counted in exactly one place. */
   area: FindingArea;
   /** Named values used to fill the message. Balancing findings also carry `BalanceValues`. */
@@ -75,10 +96,13 @@ function fill(template: string, values: Record<string, unknown>): string {
 }
 
 /**
- * Runs every rule on the whole model. Nothing is reported on a diagram above the
- * project's top diagram, or on an element shown only there (SPEC 3.7).
+ * Runs every rule on the whole model, as one mode shows it (SPEC 11.1). In logical mode
+ * everything marked `systemRelated` is left out and the physical rules do not run. In
+ * physical mode it is all included. Nothing is reported on a diagram above the project's
+ * top diagram, or on an element shown only there (SPEC 3.7).
  */
-export function runRules(model: Model): Finding[] {
+export function runRules(full: Model, mode: Mode = 'logical'): Finding[] {
+  const model = modelForMode(full, mode);
   const out: Finding[] = [];
   const order = diagramsInOrder(model).map((r) => r.diagram.id);
   const ctx = contextDiagram(model);
@@ -91,20 +115,22 @@ export function runRules(model: Model): Finding[] {
     where: Id | FindingArea,
     values: Record<string, unknown>,
     key = '',
+    homeId: Id | null = null,
   ) => {
     const rule = RULES[ruleId];
-    const isArea = where === 'dictionary' || where === 'dataModel' || where === 'diagram';
+    const isArea = (FINDING_AREAS as readonly string[]).includes(where);
     out.push({
       id: `${ruleId}:${elementIds.slice(0, 2).join(',')}${key ? `:${key}` : ''}`,
       ruleId,
       severity: rule.severity,
       elementIds,
       diagramId: isArea ? null : where,
+      homeId,
       area: isArea ? (where as FindingArea) : 'diagram',
       values,
       message: fill(rule.message, values),
-      why: sentence(rule.why),
-      fix: sentence(rule.fix),
+      why: sentence(fill(rule.why, values)),
+      fix: sentence(fill(rule.fix, values)),
     });
   };
 
@@ -243,11 +269,15 @@ export function runRules(model: Model): Finding[] {
   }
 
   // Provisional data model rules. They run only when the project has an entity.
-  if (hasEntities) dataModelRules(model, add);
+  // ERD-04 counts an identifier that is system-related, so it reads the whole model. In
+  // physical mode PDM-02 says the same thing about the table and takes its place.
+  if (hasEntities) dataModelRules(model, add, full, mode === 'physical' && physicalDataModelStarted(model));
+
+  // The rules of SPEC sections 10 and 11.
+  release2Rules(model, mode, add, homeOf, top?.id ?? null);
 
   const rank = (f: Finding) =>
-    (f.severity === 'error' ? 0 : 1000) +
-    (f.diagramId ? order.indexOf(f.diagramId) : f.area === 'dictionary' ? 500 : 600);
+    (f.severity === 'error' ? 0 : 10000) + (f.diagramId ? 1000 + order.indexOf(f.diagramId) : FINDING_AREAS.indexOf(f.area) * 500);
   return out
     .filter((f) => !(f.diagramId && above.has(f.diagramId)) && !onlyAbove(f.elementIds[0]))
     .map((f, i) => ({ f, i }))
@@ -255,7 +285,14 @@ export function runRules(model: Model): Finding[] {
     .map((x) => x.f);
 }
 
-type Add = (ruleId: string, elementIds: Id[], where: Id | FindingArea, values: Record<string, unknown>, key?: string) => void;
+export type Add = (
+  ruleId: string,
+  elementIds: Id[],
+  where: Id | FindingArea,
+  values: Record<string, unknown>,
+  key?: string,
+  homeId?: Id | null,
+) => void;
 
 function kindWord(kind: string): string {
   return kind === 'externalEntity' ? 'external entity' : kind === 'dataStore' ? 'data store' : kind;
@@ -378,14 +415,14 @@ function balance(model: Model, p: Process, add: Add): void {
 }
 
 /** ERD-01 to ERD-05, ERD-10, ERD-11, DM-01 and DM-02. The specification names them but has not settled their wording. */
-function dataModelRules(model: Model, add: Add): void {
+function dataModelRules(model: Model, add: Add, full: Model, skipIdentifier: boolean): void {
   const entities = all(model, 'entity');
   const name = (id: Id) => model.elements[id]?.name ?? '';
 
   for (const en of entities) {
     if (!en.name.trim()) add('ERD-01', [en.id], 'dataModel', { what: 'This entity', missing: 'name' });
     if (en.attributes.length === 0) add('ERD-03', [en.id], 'dataModel', { name: en.name });
-    if (fullIdentifier(model, en.id).length === 0) add('ERD-04', [en.id], 'dataModel', { name: en.name });
+    if (!skipIdentifier && fullIdentifier(full, en.id).length === 0) add('ERD-04', [en.id], 'dataModel', { name: en.name });
     if (!en.storeId) add('DM-01', [en.id], 'dataModel', { name: en.name });
     const repeating = en.attributes.filter((a) => a.repeats).map((a) => a.dataId);
     if (repeating.length > 0)
@@ -446,4 +483,61 @@ export function worstFor(findings: Finding[], elementId: Id): Severity | null {
   const own = findingsForElement(findings, elementId);
   if (own.length === 0) return null;
   return own.some((f) => f.severity === 'error') ? 'error' : 'warning';
+}
+
+/** The findings that belong to one form, interface structure diagram, structure chart or test. */
+export function findingsForHome(findings: Finding[], homeId: Id): Finding[] {
+  return findings.filter((f) => f.homeId === homeId);
+}
+
+/** The findings counted in one area. */
+export function findingsForArea(findings: Finding[], area: FindingArea): Finding[] {
+  return findings.filter((f) => f.area === area);
+}
+
+/** The words for each area, as the navigator and the problems list name it. */
+export const AREA_WORDS: Record<FindingArea, string> = {
+  systemRequest: 'System request',
+  feasibility: 'Feasibility analysis',
+  requirements: 'Requirements definition',
+  diagram: 'Diagrams',
+  dictionary: 'Data dictionary',
+  dataModel: 'Data model',
+  alternatives: 'Alternative matrix',
+  interface: 'Interface structure',
+  structure: 'Structure charts',
+  storage: 'Storage size estimate',
+  testPlan: 'Test plan',
+};
+
+/** The route of the place where a finding is counted, and words for a link to it. */
+export function findingPlace(finding: Finding): { to: string; text: string } {
+  if (finding.diagramId) return { to: `/diagram/${finding.diagramId}`, text: 'Show on diagram' };
+  const home = finding.homeId ? `/${finding.homeId}` : '';
+  switch (finding.area) {
+    case 'systemRequest':
+      return { to: '/system-request', text: 'Open system request' };
+    case 'feasibility':
+      return { to: '/feasibility', text: 'Open feasibility analysis' };
+    case 'requirements':
+      return { to: '/requirements', text: 'Open requirements definition' };
+    case 'alternatives':
+      return { to: `/alternatives${home}`, text: 'Open alternative matrix' };
+    case 'interface':
+      return { to: `/interfaces${home}`, text: 'Open interface structure diagram' };
+    case 'structure':
+      return finding.ruleId === 'PS-01'
+        ? { to: `/programs/${finding.elementIds[0]}`, text: 'Open program specification' }
+        : { to: `/structure${home}`, text: 'Open structure chart' };
+    case 'storage':
+      return { to: '/storage', text: 'Open storage size estimate' };
+    case 'testPlan':
+      return { to: `/test-plan${home}`, text: 'Open test plan' };
+    case 'dataModel':
+      return { to: '/data-model', text: 'Open data model' };
+    case 'dictionary':
+      return { to: finding.elementIds[0] ? `/dictionary/${finding.elementIds[0]}` : '/dictionary', text: 'Open in data dictionary' };
+    default:
+      return { to: '/problems', text: 'Open problems' };
+  }
 }

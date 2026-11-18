@@ -7,11 +7,13 @@ import {
   dispatch,
   getFindings,
   getFindingsVisible,
+  getMode,
   getModel,
   loadProjectFile,
   loadStarter,
   projectAsStarterFile,
   resetToSample,
+  setMode,
   undo,
 } from './store';
 
@@ -61,5 +63,24 @@ describe('Loading a project', () => {
     expect(loadProjectFile('not json')).toEqual({ ok: false, error: 'This file is not a Diagramble project. It could not be read.' });
     expect(loadProjectFile('{"a":1}')).toEqual({ ok: false, error: 'This file is not a Diagramble project.' });
     expect(getModel().name).toBe('Clinic appointments');
+  });
+});
+
+describe('Logical and physical mode', () => {
+  it('is session state: it changes the findings and not the model, and a change to the model keeps it', () => {
+    resetToSample();
+    expect(getMode()).toBe('logical');
+    expect(getFindings()).toHaveLength(11);
+    const before = getModel();
+    setMode('physical');
+    expect(getModel()).toBe(before);
+    expect(getFindings()).toHaveLength(15);
+    // Giving 'Record Visit' an implementation clears PD-01, and the mode stays physical.
+    expect(dispatch({ type: 'setPhysical', id: 'p2', implementation: 'Python' }).ok).toBe(true);
+    expect(getMode()).toBe('physical');
+    expect(getFindings()).toHaveLength(14);
+    setMode('logical');
+    expect(getFindings()).toHaveLength(11);
+    resetToSample();
   });
 });

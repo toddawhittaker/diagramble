@@ -16,9 +16,10 @@ import {
   type Relationship,
   type RelationshipEnd,
 } from '../../model';
-import { clearSelection, dispatch, useModel, useSelection } from '../../store';
+import { clearSelection, dispatch, useMode, useSelection, useViewModel } from '../../store';
 import { Button, EntryFields, Missing } from '../../components';
 import { DraftField, plural } from './shared';
+import { ForeignKeyControl, ForeignKeyOverview, TableFields } from './Physical';
 
 /** "Delete", then a question before anything is removed. */
 function DeleteControl({ question, onDelete }: { question: string; onDelete: () => void }) {
@@ -48,8 +49,9 @@ function DeleteControl({ question, onDelete }: { question: string; onDelete: () 
 
 // ---- An entity ----
 
-function EntityDetails({ model, entity }: { model: Model; entity: Entity }) {
+function EntityDetails({ model, entity, physical }: { model: Model; entity: Entity; physical: boolean }) {
   const [newName, setNewName] = useState('');
+  const [newSystem, setNewSystem] = useState(false);
   const listId = useId();
   const storeFieldId = useId();
   const stores = all(model, 'dataStore');
@@ -69,17 +71,47 @@ function EntityDetails({ model, entity }: { model: Model; entity: Entity }) {
   const add = () => {
     const name = newName.trim();
     if (!name) return;
-    const result = dispatch({ type: 'addAttribute', entityId: entity.id, dataName: name });
-    if (result.ok) setNewName('');
+    const result = dispatch({ type: 'addAttribute', entityId: entity.id, dataName: name, ...(physical && newSystem ? { systemRelated: true } : {}) });
+    if (result.ok) {
+      setNewName('');
+      setNewSystem(false);
+    }
   };
 
   return (
     <>
       <div>
-        <div className="datamodel-kind">Entity</div>
+        <div className="datamodel-kind">{physical ? (entity.systemRelated ? 'Table, system-related' : 'Table') : 'Entity'}</div>
         <h2 className="panel-heading">{entity.name || <Missing>No name yet</Missing>}</h2>
       </div>
-      <DraftField label="Name" value={entity.name} onSave={(name) => dispatch({ type: 'rename', id: entity.id, name: name.trim() })} />
+      <DraftField
+        label={physical ? 'Name of the entity' : 'Name'}
+        value={entity.name}
+        onSave={(name) => dispatch({ type: 'rename', id: entity.id, name: name.trim() })}
+      />
+      {physical && (
+        <>
+          <DraftField
+            label="Table name"
+            value={entity.tableName}
+            placeholder="No table name yet"
+            hint="The name the table will have in the database. It is drawn in the band at the top of the box."
+            onSave={(tableName) => dispatch({ type: 'setPhysical', id: entity.id, tableName: tableName.trim() })}
+          />
+          <label className="datamodel-check">
+            <input
+              type="checkbox"
+              checked={entity.systemRelated}
+              onChange={(e) => dispatch({ type: 'setPhysical', id: entity.id, systemRelated: e.target.checked })}
+            />
+            System-related
+          </label>
+          <div className="field-hint">
+            Tick this for a table that exists only for the way the system is built, such as an audit file. It is then left out of the logical
+            model, with its relationships.
+          </div>
+        </>
+      )}
       <DraftField
         label="Code"
         value={entity.code}
@@ -113,7 +145,7 @@ function EntityDetails({ model, entity }: { model: Model; entity: Entity }) {
         </select>
       </div>
 
-      <h3 className="panel-subheading">Attributes</h3>
+      <h3 className="panel-subheading">{physical ? 'Attributes, which become the fields' : 'Attributes'}</h3>
       {attributes.length === 0 ? (
         <div>
           <Missing>No attributes yet</Missing>
@@ -206,12 +238,22 @@ function EntityDetails({ model, entity }: { model: Model; entity: Entity }) {
             <option key={d.id} value={d.name} />
           ))}
         </datalist>
+        {physical && (
+          <label className="datamodel-check">
+            <input type="checkbox" checked={newSystem} onChange={(e) => setNewSystem(e.target.checked)} />
+            The new attribute is system-related
+          </label>
+        )}
         <div className="field-hint">
           Pick a data element that no entity owns yet, or type a new name. A new name is added to the data dictionary.
+          {physical &&
+            ' To give a table with no identifier a generated key, add an attribute, tick it as system-related, then tick its asterisk.'}
         </div>
       </div>
 
-      {attributes.length > 0 && (
+      {physical && <TableFields model={model} entity={entity} />}
+
+      {!physical && attributes.length > 0 && (
         <div>
           <div className="table-caption">Dictionary entry</div>
           <table className="table datamodel-dict">
@@ -352,7 +394,7 @@ function Direction({ model, rel, from }: { model: Model; rel: Relationship; from
   );
 }
 
-function RelationshipDetails({ model, rel }: { model: Model; rel: Relationship }) {
+function RelationshipDetails({ model, rel, physical }: { model: Model; rel: Relationship; physical: boolean }) {
   const names = rel.ends.map((e) => get(model, e.entityId, 'entity')?.name || 'entity');
   const parent = parentEnd(rel);
   const maxOpen = rel.ends.some((e) => e.max === null);
@@ -396,6 +438,12 @@ function RelationshipDetails({ model, rel }: { model: Model; rel: Relationship }
         child is drawn with a double border.
       </div>
       <hr className="datamodel-divider" />
+      {physical && (
+        <>
+          <ForeignKeyControl model={model} rel={rel} />
+          <hr className="datamodel-divider" />
+        </>
+      )}
       <EntryFields elementId={rel.id} compact />
       <DeleteControl
         question={`Delete the relationship between '${names[0]}' and '${names[1]}'?`}
@@ -411,7 +459,9 @@ function RelationshipDetails({ model, rel }: { model: Model; rel: Relationship }
 // ---- The panel ----
 
 export function DetailsPanel() {
-  const model = useModel();
+  // The model as the mode shows it: a system-related table cannot be selected in logical mode.
+  const model = useViewModel();
+  const physical = useMode() === 'physical';
   const selection = useSelection();
   const selected = selection.elementIds.map((id) => model.elements[id]).find((e) => e?.kind === 'entity' || e?.kind === 'relationship');
 
@@ -420,12 +470,17 @@ export function DetailsPanel() {
     if (selection.elementIds.length > 0 && selection.elementIds.every((id) => !model.elements[id])) clearSelection();
   }, [model, selection.elementIds]);
 
-  if (selected?.kind === 'entity') return <EntityDetails key={selected.id} model={model} entity={selected} />;
-  if (selected?.kind === 'relationship') return <RelationshipDetails key={selected.id} model={model} rel={selected} />;
+  if (selected?.kind === 'entity') return <EntityDetails key={selected.id} model={model} entity={selected} physical={physical} />;
+  if (selected?.kind === 'relationship') return <RelationshipDetails key={selected.id} model={model} rel={selected} physical={physical} />;
   return (
     <>
       <h2 className="panel-heading">Details</h2>
-      <div className="muted">Select an entity or a relationship on the diagram to see and change its details.</div>
+      <div className="muted">
+        {physical
+          ? 'Select a table or a relationship on the diagram to see and change its details: the table name, the fields, and the foreign key.'
+          : 'Select an entity or a relationship on the diagram to see and change its details.'}
+      </div>
+      {physical && <ForeignKeyOverview model={model} />}
     </>
   );
 }

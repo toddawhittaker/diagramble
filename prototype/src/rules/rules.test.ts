@@ -264,8 +264,8 @@ describe('Case C: course registration', () => {
 });
 
 describe('The sample data', () => {
-  it('gives exactly BAL-01, BAL-03, DFD-13 and DM-01 twice', () => {
-    const m = sampleModel();
+  it('gives exactly BAL-01, BAL-03, DFD-13 and DM-01 twice, before the second-release content is added', () => {
+    const m = buildClinic({ secondRelease: false });
     const findings = runRules(m);
     expect(ids(findings)).toEqual(['BAL-01', 'BAL-03', 'DFD-13', 'DM-01', 'DM-01']);
 

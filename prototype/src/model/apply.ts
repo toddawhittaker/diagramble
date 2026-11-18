@@ -23,7 +23,6 @@ import type {
   DataFlow,
   Diagram,
   Element,
-  ElementKind,
   Entity,
   Id,
   Model,
@@ -37,12 +36,8 @@ import type {
   UseCaseException,
 } from './types';
 import { NODE_SIZE } from './types';
-
-class Refused extends Error {}
-
-function refuse(message: string): never {
-  throw new Refused(message);
-}
+import { base, need, needData, newId, refuse, Refused } from './helpers';
+import { checkRelease2, removeRelease2, runRelease2 } from './apply2';
 
 /**
  * Applies one command. Returns a new model and the ids it created, or an error when
@@ -75,33 +70,6 @@ export function applyAll(model: Model, commands: Command[]): Model {
 }
 
 // ---- Helpers ----
-
-function newId(m: Model, prefix: string, wanted?: Id): Id {
-  if (wanted) {
-    if (m.elements[wanted] || m.views.occurrences[wanted]) refuse(`The id '${wanted}' is already in use.`);
-    return wanted;
-  }
-  let id: Id;
-  do id = `${prefix}${m.nextId++}`;
-  while (m.elements[id] || m.views.occurrences[id]);
-  return id;
-}
-
-function need<K extends ElementKind>(m: Model, id: Id | null | undefined, kind: K) {
-  const e = get(m, id, kind);
-  if (!e) refuse(`There is no ${kind} with the id '${id}'.`);
-  return e!;
-}
-
-function needData(m: Model, id: Id | undefined) {
-  const e = id ? m.elements[id] : undefined;
-  if (!isData(e)) refuse(`There is no data definition with the id '${id}'.`);
-  return e as Extract<Element, { kind: 'dataStructure' | 'dataElement' }>;
-}
-
-function base(cmd: { description?: string; origin?: Origin }, name: string) {
-  return { name, description: cmd.description ?? '', aliases: [] as string[], notes: '', origin: cmd.origin ?? ('student' as Origin) };
-}
 
 /** A plain string keeps the meaning that value already has. */
 function allowedValues(input: AllowedValueInput[], existing: AllowedValue[] = []): AllowedValue[] {
@@ -160,6 +128,8 @@ function bringDown(m: Model, p: Process, child: Diagram, flows: DataFlow[], crea
       sourceId: into ? otherId : null,
       targetId: into ? null : otherId,
       dataId: f.dataId,
+      physicalName: '',
+      systemRelated: f.systemRelated,
     };
     m.views.routes[id] = {
       flowId: id,
@@ -196,6 +166,7 @@ function resolveData(
   created: Id[],
   newKind: 'dataStructure' | 'dataElement' = 'dataStructure',
   dataType = 'Text',
+  systemRelated = false,
 ): Id {
   if (cmd.dataId) return needData(m, cmd.dataId).id;
   const name = (cmd.dataName ?? '').trim();
@@ -206,9 +177,14 @@ function resolveData(
   m.elements[id] =
     newKind === 'dataStructure'
       ? { id, kind: 'dataStructure', ...base({}, name), components: [] }
-      : { id, kind: 'dataElement', ...base({}, name), dataType, length: null, nullable: null };
+      : { id, kind: 'dataElement', ...base({}, name), dataType, length: null, nullable: null, ...elementDefaults(systemRelated) };
   created.push(id);
   return id;
+}
+
+/** The physical and storage fields a new data element starts with. */
+function elementDefaults(systemRelated: boolean) {
+  return { systemRelated, fieldName: '', defaultValue: '', averageWidth: null };
 }
 
 function normalUses(uses: string): string {
@@ -269,7 +245,10 @@ function removeElement(m: Model, id: Id): void {
     case 'useCase':
     case 'relationship':
       break;
+    default:
+      break;
   }
+  removeRelease2(m, e, (other) => removeElement(m, other));
   delete m.elements[id];
 }
 
@@ -283,6 +262,11 @@ function removeNode(m: Model, id: Id): void {
 
 function run(m: Model, cmd: Command, created: Id[]): void {
   switch (cmd.type) {
+    default:
+      // Every command of the second release (SPEC sections 10 and 11).
+      runRelease2(m, cmd, created, resolveData);
+      return;
+
     case 'createProject': {
       if (contextDiagram(m)) refuse('This project already has a context diagram.');
       m.name = cmd.name;
@@ -294,6 +278,9 @@ function run(m: Model, cmd: Command, created: Id[]): void {
         ordinal: 0,
         processDescription: '',
         crud: [],
+        implementation: '',
+        human: false,
+        systemRelated: false,
       };
       const diagram: Diagram = {
         id: newId(m, 'dg', cmd.id),
@@ -313,8 +300,10 @@ function run(m: Model, cmd: Command, created: Id[]): void {
     case 'addExternalEntity':
     case 'addDataStore': {
       need(m, cmd.diagramId, 'diagram');
-      const kind = cmd.type === 'addExternalEntity' ? 'externalEntity' : 'dataStore';
-      const el = { id: newId(m, kind === 'externalEntity' ? 'x' : 's', cmd.id), kind, ...base(cmd, cmd.name) } as NodeElement;
+      const el: NodeElement =
+        cmd.type === 'addExternalEntity'
+          ? { id: newId(m, 'x', cmd.id), kind: 'externalEntity', ...base(cmd, cmd.name), human: false }
+          : { id: newId(m, 's', cmd.id), kind: 'dataStore', ...base(cmd, cmd.name), physicalName: '', systemRelated: cmd.systemRelated ?? false };
       m.elements[el.id] = el;
       created.push(el.id, place(m, cmd.diagramId, el, cmd.x, cmd.y).id);
       return;
@@ -334,6 +323,9 @@ function run(m: Model, cmd: Command, created: Id[]): void {
         ordinal,
         processDescription: '',
         crud: [],
+        implementation: '',
+        human: false,
+        systemRelated: cmd.systemRelated ?? false,
       };
       m.elements[el.id] = el;
       created.push(el.id, place(m, cmd.diagramId, el, cmd.x, cmd.y).id);
@@ -388,6 +380,8 @@ function run(m: Model, cmd: Command, created: Id[]): void {
         sourceId: cmd.sourceId,
         targetId: cmd.targetId,
         dataId,
+        physicalName: '',
+        systemRelated: cmd.systemRelated ?? false,
       };
       m.views.routes[id] = {
         flowId: id,
@@ -414,6 +408,7 @@ function run(m: Model, cmd: Command, created: Id[]): void {
               ...(cmd.allowedValues ? { allowedValues: allowedValues(cmd.allowedValues) } : {}),
               length: cmd.length ?? null,
               nullable: cmd.nullable ?? null,
+              ...elementDefaults(cmd.systemRelated ?? false),
             };
       created.push(id);
       return;
@@ -608,15 +603,19 @@ function run(m: Model, cmd: Command, created: Id[]): void {
       if (!e) refuse(`There is nothing with the id '${cmd.id}'.`);
       if (e.kind === 'process' && e.parentProcessId === null) refuse('Process 0 stands for the whole system and cannot be deleted.');
       if (e.kind === 'diagram' && e.diagramKind === 'context') refuse('The context diagram cannot be deleted.');
+      if (e.kind === 'module' && e.parentModuleId === null)
+        refuse('This is the top module of its structure chart. Delete the chart instead.');
       if (isData(e) && !cmd.cascade) {
         const carried = all(m, 'dataFlow').filter((f) => f.dataId === e.id).length;
         const partOf = all(m, 'dataStructure').filter((s) => s.components.some((c) => c.dataId === e.id)).length;
         const attr = all(m, 'entity').some((en) => en.attributes.some((a) => a.dataId === e.id));
-        if (carried || partOf || attr) {
+        const couples = all(m, 'couple').filter((c) => c.dataId === e.id).length;
+        if (carried || partOf || attr || couples) {
           const why = [
             carried ? `${carried} ${carried === 1 ? 'flow carries' : 'flows carry'} it` : '',
             partOf ? `${partOf} ${partOf === 1 ? 'structure contains' : 'structures contain'} it` : '',
             attr ? 'an entity has it as an attribute' : '',
+            couples ? `${couples} ${couples === 1 ? 'couple passes' : 'couples pass'} it on a structure chart` : '',
           ].filter(Boolean);
           refuse(`'${e.name}' is still in use: ${why.join(', and ')}.`);
         }
@@ -701,6 +700,13 @@ function run(m: Model, cmd: Command, created: Id[]): void {
         code: cmd.code ?? '',
         attributes: [],
         storeId: cmd.storeId ?? null,
+        systemRelated: cmd.systemRelated ?? false,
+        tableName: '',
+        copies: [],
+        initialRecords: null,
+        growthPerMonth: null,
+        growthPerYear: null,
+        recordSize: null,
       };
       m.elements[id] = en;
       m.views.erd[id] = { x: cmd.x ?? 60, y: cmd.y ?? 60 };
@@ -723,7 +729,7 @@ function run(m: Model, cmd: Command, created: Id[]): void {
 
     case 'addAttribute': {
       const en = need(m, cmd.entityId, 'entity');
-      const dataId = resolveData(m, cmd, created, 'dataElement', cmd.dataType);
+      const dataId = resolveData(m, cmd, created, 'dataElement', cmd.dataType, cmd.systemRelated ?? false);
       if (m.elements[dataId]?.kind !== 'dataElement') refuse('An attribute must be a single data element, not a structure.');
       if (en.attributes.some((a) => a.dataId === dataId)) refuse('This entity already has that attribute.');
       en.attributes.push({ dataId, identifier: cmd.identifier ?? false, repeats: cmd.repeats ?? false });
@@ -756,6 +762,7 @@ function run(m: Model, cmd: Command, created: Id[]): void {
         ...base(cmd, ''),
         ends: [relationshipEnd(cmd.ends[0]), relationshipEnd(cmd.ends[1])],
         identifying: cmd.identifying ?? false,
+        foreignKey: false,
       };
       m.elements[id] = rel;
       created.push(id);
@@ -915,7 +922,7 @@ export function checkInvariants(m: Model): string | null {
       stack.push(...parentsOf(id));
     }
   }
-  return null;
+  return checkRelease2(m);
 }
 
 /** Invariants 2 and 3 for one flow. */

@@ -5,10 +5,15 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router';
 import { AppLayout } from './frame';
 import { get, topDiagram } from './model/queries';
 import { CLINIC } from './sample/clinic';
-import { CrudScreen, DataModelScreen } from './screens/datamodel';
+import { BinderScreen } from './screens/binder';
+import { CrudScreen, DataModelScreen, StorageScreen } from './screens/datamodel';
 import { DictionaryScreen } from './screens/dictionary';
+import { InterfaceDiagramScreen, TestPlanScreen } from './screens/interface';
 import { OutlineScreen } from './screens/outline';
+import { FeasibilityScreen, SystemRequestScreen } from './screens/planning';
 import { ExportScreen, HelpScreen, ProblemsScreen, ProjectScreen, SearchScreen } from './screens/project';
+import { AlternativeMatrixScreen, RequirementsScreen } from './screens/requirements';
+import { ProgramSpecScreen, StructureChartScreen } from './screens/structure';
 import { UseCasesScreen } from './screens/usecases';
 import { WorkspaceScreen } from './screens/workspace';
 import { useModel } from './store/store';
@@ -34,6 +39,22 @@ export function App() {
           <Route path="dictionary/:dataId" element={<DictionaryScreen />} />
           <Route path="data-model" element={<DataModelScreen />} />
           <Route path="crud" element={<CrudScreen />} />
+          <Route path="storage" element={<StorageScreen />} />
+          <Route path="system-request" element={<SystemRequestScreen />} />
+          <Route path="feasibility" element={<FeasibilityScreen />} />
+          <Route path="requirements" element={<RequirementsScreen />} />
+          <Route path="alternatives" element={<AlternativeMatrixScreen />} />
+          <Route path="alternatives/:matrixId" element={<AlternativeMatrixScreen />} />
+          <Route path="interfaces" element={<InterfaceDiagramScreen />} />
+          <Route path="interfaces/:diagramId" element={<InterfaceDiagramScreen />} />
+          <Route path="test-plan" element={<TestPlanScreen />} />
+          <Route path="test-plan/:testId" element={<TestPlanScreen />} />
+          <Route path="binder" element={<BinderScreen />} />
+          <Route path="binder/:sectionId" element={<BinderScreen />} />
+          <Route path="structure" element={<StructureChartScreen />} />
+          <Route path="structure/:chartId" element={<StructureChartScreen />} />
+          <Route path="programs" element={<ProgramSpecScreen />} />
+          <Route path="programs/:moduleId" element={<ProgramSpecScreen />} />
           <Route path="search" element={<SearchScreen />} />
           <Route path="project" element={<ProjectScreen />} />
           <Route path="problems" element={<ProblemsScreen />} />

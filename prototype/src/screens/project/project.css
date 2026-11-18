@@ -26,13 +26,9 @@
 
 .project-problem {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 170px;
+  grid-template-columns: minmax(0, 1fr) 240px;
   gap: 12px;
   align-items: start;
-}
-
-.project-problem > .btn {
-  margin-top: 8px;
 }
 
 /* ---- Help ---- */
@@ -573,4 +569,218 @@
   .project-fragment {
     break-inside: avoid;
   }
+}
+
+/* ---- Export: the second release ---- */
+
+.project-doc-choice {
+  padding: 4px 0;
+}
+
+.project-doc-choice .project-choice-about {
+  font-size: 13px;
+}
+
+.project-outline-list {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.project-doc-kind {
+  margin: 6px 0 2px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.project-physical-note {
+  font-weight: 400;
+}
+
+.project-text {
+  white-space: pre-wrap;
+}
+
+.project-text-mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.project-page > .project-block {
+  margin-top: 26px;
+}
+
+.project-page-title + .project-block {
+  margin-top: 0;
+}
+
+.project-spaced-list > li + li {
+  margin-top: 8px;
+}
+
+/* A table inside a cell of a form. */
+.project-inner-table {
+  margin: 4px 0;
+}
+
+.project-inner-table th,
+.project-inner-table td {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-size: 13px;
+}
+
+.project-form .project-inner-table th {
+  width: auto;
+  padding-top: 4px;
+}
+
+.project-cash th,
+.project-cash td {
+  font-size: 13px;
+}
+
+.project-cash th div {
+  font-weight: 400;
+}
+
+.project-cash td.is-numeric {
+  white-space: nowrap;
+}
+
+/* A heading row inside a table, such as "Benefits". */
+.project-band-row td {
+  padding-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.project-total-row td {
+  font-weight: 700;
+  border-top: 1px solid var(--ink);
+}
+
+.project-matrix td {
+  vertical-align: top;
+  font-size: 13px;
+}
+
+.project-matrix-score {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.project-outline-user {
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.project-outline-group {
+  margin-top: 8px;
+}
+
+.project-outline-head {
+  font-weight: 700;
+}
+
+.project-outline-item {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 8px;
+  padding: 3px 0 3px 18px;
+}
+
+.project-binder-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.project-binder-body p {
+  margin: 0;
+}
+
+.project-binder-h1 {
+  margin-top: 8px;
+  font-family: var(--font-title);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.project-binder-h2 {
+  font-weight: 700;
+}
+
+.project-figure {
+  margin: 18px 0 0;
+}
+
+.project-figure img {
+  display: block;
+  max-width: 100%;
+  border: 1px solid var(--hairline);
+}
+
+.project-subtitle-note {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+@media print {
+  .project-block,
+  .project-figure,
+  .project-outline-item {
+    break-inside: avoid;
+  }
+}
+
+/* ---- Problems, help and the project page: the second release ---- */
+
+.project-mode-note {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--hairline);
+}
+
+.project-problem-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.project-problem-side .muted {
+  font-size: 13px;
+}
+
+.project-group-note {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.project-rename {
+  display: grid;
+  grid-template-columns: minmax(0, 420px) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.project-count-tables {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 40px;
+  align-items: flex-start;
+}
+
+.project-count-tables .project-counts {
+  flex: 1 1 280px;
 }

@@ -2,10 +2,10 @@
 
 import { Fragment, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { Button, Mark, Missing, Tabs, TextField } from '../../components';
+import { Button, Mark, Missing, ModeSwitch, Tabs, TextField } from '../../components';
 import { PageHeader, WorkArea } from '../../frame';
 import { RULE_LIST, type RuleInfo } from '../../rules';
-import { useFindings, useFindingsVisible } from '../../store';
+import { useFindings, useFindingsVisible, useMode } from '../../store';
 import {
   EndPicture,
   EntityPicture,
@@ -16,6 +16,7 @@ import {
   RepeatingPicture,
   StorePicture,
 } from './drawings';
+import { ConditionalPicture, CouplePicture, InterfacePicture, LinkPicture, ModulePicture, RepeatedPicture2 } from './drawings2';
 import { familyOf, plural } from './shared';
 import './project.css';
 
@@ -25,9 +26,25 @@ const FAMILY_TITLES: Record<string, string> = {
   BAL: 'Balancing rules',
   ERD: 'Entity relationship diagram rules',
   DM: 'Rules that compare the data model with the diagrams',
+  SR: 'System request rules',
+  FA: 'Feasibility analysis rules',
+  RQ: 'Requirements definition rules',
+  AM: 'Alternative matrix rules',
+  TP: 'Test plan rules',
+  ISD: 'Interface structure diagram rules',
+  SC: 'Structure chart rules',
+  PS: 'Program specification rules',
+  PD: 'Physical data flow diagram rules',
+  PDM: 'Physical data model rules',
+  VOL: 'Storage size estimate rules',
 };
 
-type Filter = 'all' | 'error' | 'warning';
+/** The families in the order the help page lists them: the first release, then the forms, the design diagrams and the physical model. */
+const FAMILY_ORDER = ['DFD', 'DD', 'BAL', 'ERD', 'DM', 'SR', 'FA', 'RQ', 'AM', 'ISD', 'SC', 'PS', 'TP', 'PD', 'PDM', 'VOL'];
+
+const PHYSICAL_WORDS = 'physical mode only';
+
+type Filter = 'all' | 'error' | 'warning' | 'physical';
 
 /** Shows a message such as "'{name}' has no description." with each blank in italics. */
 function Template({ text }: { text: string }) {
@@ -58,15 +75,19 @@ function Symbol({ picture, name, children }: { picture: ReactNode; name: string;
   );
 }
 
-function RuleEntry({ rule, count }: { rule: RuleInfo; count: number | null }) {
+function RuleEntry({ rule, count, resting }: { rule: RuleInfo; count: number | null; resting: boolean }) {
   return (
     <div className="project-rule">
       <div className="project-rule-head">
         <span className="mono project-rule-code">{rule.id}</span>
         <Mark kind={rule.severity} word />
+        {rule.physicalOnly && <span>Physical mode only</span>}
         {rule.provisional && <span className="muted">Provisional wording</span>}
         <span className="grow" />
-        {count === null ? (
+        {resting ? (
+          // In logical mode a physical rule does not run, so a count of 0 would be wrong.
+          <span className="muted">Not run in logical mode</span>
+        ) : count === null ? (
           <span className="muted">Problems hidden</span>
         ) : count > 0 ? (
           <Link to="/problems" className="project-rule-count">
@@ -97,6 +118,7 @@ function RuleEntry({ rule, count }: { rule: RuleInfo; count: number | null }) {
 export function HelpScreen() {
   const findings = useFindings();
   const visible = useFindingsVisible();
+  const mode = useMode();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const body = useRef<HTMLDivElement>(null);
@@ -109,11 +131,16 @@ export function HelpScreen() {
   const words = search.trim().toLowerCase();
   const matches = RULE_LIST.filter(
     (rule) =>
-      (filter === 'all' || rule.severity === filter) &&
-      (!words || [rule.id, rule.when, rule.message, rule.why, rule.fix].some((text) => text.toLowerCase().includes(words))),
+      (filter === 'all' || (filter === 'physical' ? rule.physicalOnly === true : rule.severity === filter)) &&
+      (!words ||
+        [rule.id, rule.when, rule.message, rule.why, rule.fix, FAMILY_TITLES[familyOf(rule.id)] ?? '', rule.physicalOnly ? PHYSICAL_WORDS : ''].some(
+          (text) => text.toLowerCase().includes(words),
+        )),
   );
-  const families: string[] = [];
+  // A family the list above does not know still gets shown, after the others.
+  const families = [...FAMILY_ORDER];
   for (const rule of RULE_LIST) if (!families.includes(familyOf(rule.id))) families.push(familyOf(rule.id));
+  const physicalFamilies = new Set(RULE_LIST.filter((r) => r.physicalOnly).map((r) => familyOf(r.id)));
 
   return (
     <WorkArea>
@@ -129,6 +156,12 @@ export function HelpScreen() {
         </Button>
         <Button small onClick={() => jump('project-help-balancing')}>
           Balancing
+        </Button>
+        <Button small onClick={() => jump('project-help-modes')}>
+          Modes
+        </Button>
+        <Button small onClick={() => jump('project-help-forms')}>
+          Forms and binder
         </Button>
         <Button small onClick={() => jump('project-help-projects')}>
           Projects
@@ -197,6 +230,47 @@ export function HelpScreen() {
               Read the symbols at an entity&rsquo;s end of the line as how many of that entity go with one of the entity at the
               other end. The symbol next to the box is the most, and the symbol beyond it is the least.
             </p>
+
+            <h3 className="project-help-subheading">On an interface structure diagram</h3>
+            <div className="project-symbols">
+              <Symbol picture={<InterfacePicture />} name="Interface">
+                A screen, form or report. The box has three parts: its number at the top, its name in the middle, and at the
+                bottom the numbers of the processes it carries out. Interface 0 is the main menu.
+              </Symbol>
+              <Symbol picture={<LinkPicture />} name="Navigation link">
+                A plain line with no arrowhead. The user can move between the two interfaces, in either direction. Most
+                diagrams are a tree, but a link may cut across it as a shortcut.
+              </Symbol>
+            </div>
+
+            <h3 className="project-help-subheading">On a structure chart</h3>
+            <div className="project-symbols">
+              <Symbol picture={<ModulePicture />} name="Module">
+                One piece of the program, with a single job. The box holds its number and its name. The module above it on
+                the chart is the one that calls it.
+              </Symbol>
+              <Symbol picture={<ModulePicture library />} name="Library module">
+                A standard module used in several places, drawn with a bar inside each side. It is drawn once in every place
+                it is called.
+              </Symbol>
+              <Symbol picture={<ConditionalPicture />} name="Conditional call">
+                A diamond on the line. The module above calls the module below only in some cases.
+              </Symbol>
+              <Symbol picture={<RepeatedPicture2 />} name="Repeated call">
+                A curved arrow across the line. The module above calls the module below more than once.
+              </Symbol>
+              <Symbol picture={<CouplePicture />} name="Data couple">
+                A short arrow with an empty circle at its tail: data passed along the line, in the direction of the arrow. Its
+                label is the name of the data in the dictionary.
+              </Symbol>
+              <Symbol picture={<CouplePicture control />} name="Control couple">
+                A short arrow with a filled circle at its tail. It is a flag: a message such as &ldquo;no stock&rdquo; that
+                tells the other module what happened. A flag should be passed up, not down.
+              </Symbol>
+            </div>
+            <p className="muted project-help-note">
+              In the app and in an export, the couples of a line are listed beside its lower end, each with its own arrow.
+            </p>
           </section>
 
           <section id="project-help-marks" className="project-help-section">
@@ -259,7 +333,7 @@ export function HelpScreen() {
                   hideLabel
                   value={search}
                   onChange={setSearch}
-                  placeholder="Search the rules, such as BAL or description"
+                  placeholder="Search the rules, such as BAL, description or physical"
                 />
               </div>
               <div className="project-filter">
@@ -271,6 +345,7 @@ export function HelpScreen() {
                     { id: 'all', label: 'All', count: RULE_LIST.length },
                     { id: 'error', label: 'Errors', count: RULE_LIST.filter((r) => r.severity === 'error').length },
                     { id: 'warning', label: 'Warnings', count: RULE_LIST.filter((r) => r.severity === 'warning').length },
+                    { id: 'physical', label: 'Physical', count: RULE_LIST.filter((r) => r.physicalOnly).length },
                   ]}
                 />
               </div>
@@ -287,9 +362,10 @@ export function HelpScreen() {
                 <div key={family} className="project-family">
                   <h3 className="project-help-subheading">
                     <span className="mono">{family}</span> {FAMILY_TITLES[family] ?? 'Rules'} <span className="count">{rules.length}</span>
+                    {physicalFamilies.has(family) && <span className="project-group-note">Physical mode only</span>}
                   </h3>
                   {rules.map((rule) => (
-                    <RuleEntry key={rule.id} rule={rule} count={countOf(rule.id)} />
+                    <RuleEntry key={rule.id} rule={rule} count={countOf(rule.id)} resting={rule.physicalOnly === true && mode === 'logical'} />
                   ))}
                 </div>
               );
@@ -312,6 +388,56 @@ export function HelpScreen() {
               Data on the parent that is missing from the child is an error (<span className="mono">BAL-01</span> and{' '}
               <span className="mono">BAL-02</span>). Data the child adds is only a warning (<span className="mono">BAL-03</span>),
               because a child diagram is allowed to show more detail than its parent.
+            </p>
+          </section>
+
+          <section id="project-help-modes" className="project-help-section">
+            <h2 className="project-help-heading">Logical and physical modes</h2>
+            <p>
+              A project has one model, and the switch in the top bar shows it in two ways. The logical mode shows what the
+              business needs: the processes, the data and the entities, with nothing about how they will be built. The
+              physical mode shows the same model with the design added to it, such as how each process is carried out, the
+              physical names of flows and data stores, and the table and field names.
+            </p>
+            <p>
+              The physical model is not a copy, so a change made in one mode is there in the other and the two cannot drift
+              apart. Anything marked as system-related exists only because of the way the system is built, such as an audit
+              file, and is shown in physical mode only.
+            </p>
+            <p>
+              The rules run on whichever mode is showing. Every rule of the logical model also runs on the physical model.
+              The rules marked &ldquo;Physical mode only&rdquo; in the list above run only there, and each set of them waits
+              until that part of the physical work has been started.
+            </p>
+            <div className="hstack">
+              <ModeSwitch small />
+              <span className="muted">The app is showing the {mode} model.</span>
+            </div>
+          </section>
+
+          <section id="project-help-forms" className="project-help-section">
+            <h2 className="project-help-heading">Forms, the binder, and what is checked</h2>
+            <p>
+              Many of a project&rsquo;s documents are not diagrams. Five of them are forms with fixed fields: the system
+              request, the feasibility analysis, the requirements definition, the alternative matrix and the test plan. The
+              rules check that a form is complete, that its entries point at things that exist in the model, and that its
+              arithmetic is right.
+            </p>
+            <p>
+              Where a form holds a table of numbers, the totals are added up for you. The measures that the textbook teaches as
+              formulas, such as return on investment, are yours to work out and type. The rule then says whether your figure
+              matches and shows the working, so that you can see which step went wrong.
+            </p>
+            <p>
+              Everything else goes in the binder: sections of text, in folders by phase, each with any files you attach.
+              A new section can start from a layout for that kind of document. Nothing in the binder is checked, because
+              software cannot judge a work plan or a set of interview notes.
+            </p>
+            <p>
+              Some things on the checked pages are left to judgment too. The rules do not read pseudocode, do not judge
+              whether a module does one job well, and do not say whether a conversion strategy or a choice to repeat data in
+              a table is right. The <Link to="/export">export page</Link> compiles the forms, diagrams and binder sections
+              into the documents a project produces at the end of each phase.
             </p>
           </section>
 

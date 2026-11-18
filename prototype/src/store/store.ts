@@ -5,8 +5,9 @@ import { useMemo, useSyncExternalStore } from 'react';
 import { apply } from '../model/apply';
 import type { ApplyResult, Command } from '../model/commands';
 import { asStarter, normalizeModel } from '../model/normalize';
-import type { Id, Model } from '../model/types';
-import { countFindings, runRules, type Counts, type Finding } from '../rules/engine';
+import { modelForMode } from '../model/queries2';
+import type { Id, Mode, Model } from '../model/types';
+import { countFindings, runRules, type Counts, type Finding, type FindingArea } from '../rules/engine';
 import { sampleModel } from '../sample/clinic';
 import { starterById } from '../sample/starters';
 
@@ -15,7 +16,9 @@ const HISTORY_LIMIT = 200;
 
 interface ProjectState {
   model: Model;
-  /** Always worked out, whether or not they are shown. */
+  /** Whether the model is being shown as the logical or the physical model (SPEC 11.1). Session state: it is not saved. */
+  mode: Mode;
+  /** Always worked out, for the current mode, whether or not they are shown. */
   findings: Finding[];
   /** False while the setting `showFindings` is 'onRequest' and the student has not asked since the last change. */
   findingsVisible: boolean;
@@ -60,7 +63,8 @@ function initial(): ProjectState {
   const model = stored?.model ?? sampleModel();
   return {
     model,
-    findings: runRules(model),
+    mode: 'logical',
+    findings: runRules(model, 'logical'),
     findingsVisible: model.settings.showFindings === 'always',
     past: [],
     future: [],
@@ -91,9 +95,10 @@ function shown(state: ProjectState): Finding[] {
 
 /** Any change to the model hides the findings again when they are shown only on request. */
 function setModel(model: Model, past: Model[], future: Model[]): void {
-  const findings = runRules(model);
+  const mode = project.mode;
+  const findings = runRules(model, mode);
   const findingsVisible = model.settings.showFindings === 'always';
-  project = { model, findings, findingsVisible, past, future, savedAt: save(model), lastError: null };
+  project = { model, mode, findings, findingsVisible, past, future, savedAt: save(model), lastError: null };
   // Drop a selection that no longer points at anything.
   const elementIds = selection.elementIds.filter((id) => model.elements[id]);
   const findingId = shown(project).some((f) => f.id === selection.findingId) ? selection.findingId : null;
@@ -142,6 +147,22 @@ export function checkNow(): void {
   if (project.findingsVisible) return;
   project = { ...project, findingsVisible: true };
   emit();
+}
+
+/**
+ * Shows the model as the logical or the physical model. The findings are worked out again
+ * for that mode. The findings stay shown or hidden as they were, because the model has not changed.
+ */
+export function setMode(mode: Mode): void {
+  if (mode === project.mode) return;
+  project = { ...project, mode, findings: runRules(project.model, mode) };
+  if (!shown(project).some((f) => f.id === selection.findingId)) selection = { ...selection, findingId: null };
+  emit();
+}
+
+/** The current mode, for code outside a component. Inside one use `useMode`. */
+export function getMode(): Mode {
+  return project.mode;
 }
 
 /** Replaces the project with a fresh copy of a starter case and clears the history. False if there is no such starter. */
@@ -231,6 +252,20 @@ export function useModel(): Model {
   return useProject((s) => s.model);
 }
 
+/** 'logical' or 'physical': how the model is being shown. Change it with `setMode`. */
+export function useMode(): Mode {
+  return useProject((s) => s.mode);
+}
+
+/**
+ * The model as the current mode shows it. In physical mode it is the model. In logical
+ * mode everything marked `systemRelated` is left out. Draw and list from this, and keep
+ * `useModel` for anything that must see the whole model.
+ */
+export function useViewModel(): Model {
+  return useProject((s) => modelForMode(s.model, s.mode));
+}
+
 /** Every finding in the project, recomputed after each change. Errors come first. Empty while the findings are hidden. */
 export function useFindings(): Finding[] {
   return useProject(shown);
@@ -245,6 +280,18 @@ export function useFindingsVisible(): boolean {
 export function useDiagramFindings(diagramId: Id | undefined): Finding[] {
   const findings = useFindings();
   return useMemo(() => findings.filter((f) => f.diagramId === diagramId), [findings, diagramId]);
+}
+
+/** The findings counted in one area, such as 'feasibility' or 'testPlan'. */
+export function useAreaFindings(area: FindingArea): Finding[] {
+  const findings = useFindings();
+  return useMemo(() => findings.filter((f) => f.area === area), [findings, area]);
+}
+
+/** The findings that belong to one matrix, interface structure diagram, structure chart or test. */
+export function useHomeFindings(homeId: Id | undefined): Finding[] {
+  const findings = useFindings();
+  return useMemo(() => (homeId ? findings.filter((f) => f.homeId === homeId) : []), [findings, homeId]);
 }
 
 /** The findings that name one element. */

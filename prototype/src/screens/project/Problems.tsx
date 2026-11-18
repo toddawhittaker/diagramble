@@ -2,17 +2,18 @@
 
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { Button, FindingMarks, Mark, ProblemCard, Tabs } from '../../components';
+import { Button, FindingMarks, Mark, ModeSwitch, ProblemCard, Tabs } from '../../components';
 import { PageHeader, WorkArea } from '../../frame';
-import { countFindings, type Finding } from '../../rules';
-import { checkNow, selectFinding, useFindings, useFindingsVisible, useModel, useSelection } from '../../store';
-import { groupFindings, placeOf, plural } from './shared';
+import { countFindings, physicalDataModelStarted, physicalDfdStarted, storageStarted, type Finding } from '../../rules';
+import { checkNow, selectFinding, useFindings, useFindingsVisible, useMode, useModel, useSelection } from '../../store';
+import { groupFindings, isPhysicalOnly, placeOf, plural } from './shared';
 import './project.css';
 
 type Filter = 'all' | 'error' | 'warning';
 
 export function ProblemsScreen() {
   const model = useModel();
+  const mode = useMode();
   const findings = useFindings();
   const visible = useFindingsVisible();
   const selection = useSelection();
@@ -23,6 +24,15 @@ export function ProblemsScreen() {
   const { errors, warnings } = countFindings(findings);
   const shown = filter === 'all' ? findings : findings.filter((f) => f.severity === filter);
   const groups = groupFindings(model, shown);
+  const physicalCount = findings.filter(isPhysicalOnly).length;
+  // The three sets of physical rules each wait until that part of the physical model is started.
+  const waiting = [
+    physicalDfdStarted(model) ? '' : 'the physical data flow diagrams',
+    physicalDataModelStarted(model) ? '' : 'the tables and fields',
+    storageStarted(model) ? '' : 'the storage size estimate',
+  ].filter(Boolean);
+  // The card of a finding outside the diagrams, the dictionary and the data model offers its own link once it is open.
+  const cardHasLink = (f: Finding) => f.diagramId === null && f.area !== 'dataModel' && f.area !== 'dictionary' && f.area !== 'diagram';
 
   // Selecting the finding first means the canvas highlights what it names when it opens.
   const goTo = (finding: Finding) => {
@@ -82,6 +92,21 @@ export function ProblemsScreen() {
               This project shows problems only when asked. They will be hidden again at your next change.
             </p>
           )}
+          <div className="project-mode-note">
+            <ModeSwitch small />
+            {mode === 'logical' ? (
+              <span>
+                These are the problems of the logical model. The rules for the physical data flow diagrams, the tables and
+                fields, and the storage size estimate run in physical mode only.
+              </span>
+            ) : (
+              <span>
+                These are the problems of the physical model: everything the logical model reports, and{' '}
+                {plural(physicalCount, 'problem')} that {physicalCount === 1 ? 'belongs' : 'belong'} to physical mode only.
+                {waiting.length > 0 && ` Nothing is reported yet about ${waiting.join(' or ')}, because that work has not been started.`}
+              </span>
+            )}
+          </div>
           <div className="project-filter">
             <Tabs
               label="Which problems to show"
@@ -106,6 +131,7 @@ export function ProblemsScreen() {
               <h2 className="section-heading project-group-heading">
                 <Link to={group.to}>{group.title}</Link>
                 <FindingMarks findings={group.findings} />
+                {group.physicalOnly && <span className="project-group-note">Physical mode only</span>}
               </h2>
               <div className="problem-list">
                 {group.findings.map((finding) => (
@@ -118,9 +144,14 @@ export function ProblemsScreen() {
                       currentDiagramId={finding.diagramId ?? undefined}
                       onToggle={() => toggle(finding)}
                     />
-                    <Button small onClick={() => goTo(finding)}>
-                      {placeOf(model, finding).text}
-                    </Button>
+                    <div className="project-problem-side">
+                      {!(openId === finding.id && cardHasLink(finding)) && (
+                        <Button small onClick={() => goTo(finding)}>
+                          {placeOf(model, finding).text}
+                        </Button>
+                      )}
+                      {isPhysicalOnly(finding) && <span className="muted">Physical mode only</span>}
+                    </div>
                   </div>
                 ))}
               </div>

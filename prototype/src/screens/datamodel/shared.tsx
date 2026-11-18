@@ -39,3 +39,17 @@ export function plural(name: string): string {
   if (/(s|x|z|ch|sh)$/i.test(name)) return name + 'es';
   return name + 's';
 }
+
+/** The data types offered for a field. Any other text may be typed. The dictionary screen offers the same list. */
+export const DATA_TYPES = ['Text', 'Number', 'Date', 'Date and time', 'Yes or no', 'Code'];
+
+/** The table name, or the entity's name while it has no table name. */
+export function tableLabel(entity: { name: string; tableName: string } | undefined): string {
+  return entity ? entity.tableName.trim() || entity.name || 'Table with no name' : 'table';
+}
+
+/** "Text(40)", "Number", or nothing while the field has no type. */
+export function typeAndLength(element: { dataType: string; length: number | null }): string {
+  const type = element.dataType.trim();
+  return element.length !== null ? `${type}(${element.length})` : type;
+}

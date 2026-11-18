@@ -1,19 +1,23 @@
-// The entity relationship diagram and the CRUD matrix. Routes: /data-model and /crud
+// The entity relationship diagram, the CRUD matrix and the storage size estimate.
+// Routes: /data-model, /crud and /storage
 
 import { PageHeader, RightPanel, UndoRedo, WorkArea } from '../../frame';
 import { ProblemList } from '../../components';
-import { useFindings } from '../../store';
+import { useFindings, useMode } from '../../store';
 import { ErdCanvas } from './ErdCanvas';
 import { DetailsPanel } from './DetailsPanel';
 import { CrudMatrix } from './CrudMatrix';
 import './datamodel.css';
 
+export { StorageScreen } from './Storage';
+
 export function DataModelScreen() {
   const findings = useFindings().filter((f) => f.area === 'dataModel');
+  const physical = useMode() === 'physical';
   return (
     <>
       <WorkArea>
-        <PageHeader breadcrumb={['Data model']} title="Entity relationship diagram">
+        <PageHeader breadcrumb={['Data model']} title={physical ? 'Physical entity relationship diagram' : 'Entity relationship diagram'}>
           <UndoRedo />
         </PageHeader>
         <div className="work-body">
@@ -31,9 +35,10 @@ export function DataModelScreen() {
 }
 
 export function CrudScreen() {
+  const physical = useMode() === 'physical';
   return (
     <WorkArea>
-      <PageHeader breadcrumb={['Data model']} title="CRUD matrix">
+      <PageHeader breadcrumb={['Data model']} title={physical ? 'CRUD matrix of the physical model' : 'CRUD matrix'}>
         <UndoRedo />
       </PageHeader>
       <div className="work-body">

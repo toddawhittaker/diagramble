@@ -29,13 +29,13 @@ offline. There is no other UI library. Styling is plain CSS with CSS variables.
 
 | Path | What it holds |
 | --- | --- |
-| `src/model/` | The model's types, the commands, `apply`, and the queries |
+| `src/model/` | The model's types, the commands, `apply`, the queries, the calculations and their tests |
 | `src/rules/` | The rule catalogue, the rule engine, the explanation text, and the tests |
 | `src/sample/` | The sample project, "Clinic appointments", and the starter cases |
 | `src/store/` | The one store: model, findings, undo and redo, saving, selection, and the hooks |
 | `src/theme/` | The CSS variables and class names, and the light and dark switch |
 | `src/frame/` | The top bar, the navigator and the page layout pieces |
-| `src/components/` | The marks, controls, problem card, problems panel and entry fields |
+| `src/components/` | The marks, controls, problem card, problems panel, entry fields and form controls |
 | `src/screens/` | One folder per screen agent |
 | `src/App.tsx` | The routes |
 
@@ -43,27 +43,40 @@ offline. There is no other UI library. Styling is plain CSS with CSS variables.
 
 1. **Edit only your own folder** under `src/screens/`. Do not change any file outside
    it: not the model, the rules, the store, the frame, the shared components, the
-   theme, `App.tsx` or `package.json`. Five other agents are working at the same time,
+   theme, `App.tsx` or `package.json`. Seven other agents are working at the same time,
    each in its own folder, and nobody merges by hand.
-2. **Keep the names your `index.tsx` exports.** `App.tsx` already imports them.
+2. **Keep the names your `index.tsx` exports.** `App.tsx` already imports them. You may
+   split your folder into as many files as you like.
 3. **Add no dependencies.** Everything you may use is installed.
 4. **If something you need is missing** from the shared code, build it inside your own
    folder and say so in your report.
 5. Put your own CSS in a `.css` file in your folder and import it from your component.
-   Begin every class name with your folder's name, such as `workspace-tool`, so that
+   Begin every class name with your folder's name, such as `planning-table`, so that
    two screens never clash.
 6. Use the CSS variables for every colour. Never write a hex value.
 7. Change the model only by calling `dispatch(command)`. Never change a model object.
+8. Read `docs/SPEC.md` for the sections your row names. The specification is the
+   authority for fields, formulas and rules. This file is the authority for names.
 
-| Folder | Exports | Routes | What it is |
-| --- | --- | --- | --- |
-| `src/screens/workspace/` | `WorkspaceScreen` | `/diagram/:diagramId` | The diagram canvas (screen 1 of the briefs) |
-| `src/screens/outline/` | `OutlineScreen` | `/diagram/:diagramId/outline` | The outline view (screen 2) |
-| `src/screens/dictionary/` | `DictionaryScreen` | `/dictionary`, `/dictionary/:dataId` | The data dictionary (screen 3) |
-| `src/screens/usecases/` | `UseCasesScreen` | `/use-cases`, `/use-cases/:id` | The use case form (screen 4) |
-| `src/screens/datamodel/` | `DataModelScreen`, `CrudScreen` | `/data-model`, `/crud` | The entity relationship diagram, and the CRUD matrix (create, read, update, delete) |
-| `src/screens/project/` | `ProblemsScreen`, `HelpScreen`, `ExportScreen` | `/problems`, `/help`, `/export` | The whole-project problems list, the help page, and the export page |
-| `src/screens/project/` | `SearchScreen`, `ProjectScreen` | `/search`, `/project` | Search across the whole model, and the project page: the settings, the starter cases, and opening and saving a project file. Both are placeholders in `index.tsx` |
+### What each screen agent builds
+
+The five new folders hold placeholders. The three others hold finished first-release
+screens, to be extended. `/storage` is the one new route in an existing folder.
+
+| Folder | Exports | Routes | Specification | Shared code waiting for it |
+| --- | --- | --- | --- | --- |
+| `planning/` | `SystemRequestScreen`, `FeasibilityScreen` | `/system-request`, `/feasibility` | 10.1, 10.2 | `systemRequest`, `feasibility`, `updateSystemRequest`, `updateFeasibility`; `expectedValue`, `probabilityTotal`, `cashFlow`, `lineAmounts`, `isQuantityLine`, `checkMeasures`; `FACTOR_WORDS`, `TECHNICAL_FACTORS`, `ORGANIZATIONAL_FACTORS`; rules SR and FA through `useAreaFindings('systemRequest')` and `useAreaFindings('feasibility')`; `NumberField`, `CheckedFigure`, `EditableRows`, `CellText` |
+| `requirements/` | `RequirementsScreen`, `AlternativeMatrixScreen` | `/requirements`, `/alternatives`, `/alternatives/:matrixId` | 10.3, 10.4 | `requirementsOutline`, `requirementsInOrder`, `requirementsFor`, `addRequirement`, `updateRequirement`, `reorderRequirements`, `setNoneExpected`, `NONFUNCTIONAL_TYPES`, `NONFUNCTIONAL_SUBTYPES`; `addAlternativeMatrix`, `updateAlternativeMatrix`, `removeAlternative`, `removeCriterion`, `matrixScores`; rules RQ and AM through `useAreaFindings('requirements')`, `useAreaFindings('alternatives')` and `useHomeFindings(matrixId)` |
+| `interface/` | `InterfaceDiagramScreen`, `TestPlanScreen` | `/interfaces`, `/interfaces/:diagramId`, `/test-plan`, `/test-plan/:testId` | 10.6, 10.5 | `interfacesOn`, `linksOn`, `interfaceReach`, `views.isd`, `INTERFACE_SIZE`, `addInterfaceDiagram`, `addInterface`, `updateInterface`, `moveInterface`, `addNavigationLink`; `testsInOrder`, `addTest`, `updateTest`, `TEST_STAGES`, `TEST_TYPES`; rules ISD and TP through `useAreaFindings('interface')`, `useAreaFindings('testPlan')` and `useHomeFindings` |
+| `binder/` | `BinderScreen` | `/binder`, `/binder/:sectionId` | 10.7 | `binderSections`, `PHASES`, `BINDER_LAYOUTS`, `MIGRATION_PLAN`, `addBinderSection`, `updateBinderSection`, `reorderBinderSections`, `addAttachment`, `removeAttachment`, `MAX_ATTACHMENT_BYTES`, `setConversion`, `CONVERSION_OPTIONS`, `conversionEffects`. No rules: nothing in the binder is checked |
+| `structure/` | `StructureChartScreen`, `ProgramSpecScreen` | `/structure`, `/structure/:chartId`, `/programs`, `/programs/:moduleId` | 11.3, 11.4 | `modulesOf`, `moduleChildren`, `moduleNumber`, `originalModule`, `chartOfModule`, `fanIn`, `fanOut`, `couplesOf`, `coupleLabel`, `programIo`, `addStructureChart`, `addModule`, `updateModule`, `addCouple`, `updateCouple`, `setProgramSpec`; rules SC and PS-01 through `useAreaFindings('structure')` and `useHomeFindings(chartId)` |
+| `workspace/` | `WorkspaceScreen` (unchanged) | `/diagram/:diagramId` (unchanged) | 11.1, 11.2 | The physical mode of the data flow diagram. `useMode`, `useViewModel`, `ModeSwitch`; the fields `implementation`, `human`, `physicalName`, `systemRelated`; `setPhysical`; `systemRelated` on `addProcess`, `addDataStore` and `addFlow`; rules PD-01 to PD-03, which arrive as ordinary diagram findings in physical mode |
+| `datamodel/` | `DataModelScreen`, `CrudScreen` (unchanged), `StorageScreen` (a placeholder in `Storage.tsx`) | `/data-model`, `/crud` (unchanged), `/storage` | 11.5, 11.6 | The physical mode of the ERD and of the CRUD matrix, and the storage size estimate. `useMode`, `useViewModel`, `tableFields`, `storageEstimate`, `tableVolume`, `setPhysical`, `setStorage`, `setStorageSettings`, `setDataDetails`, `systemRelated` on `addEntity` and `addAttribute`; rules PDM (area `dataModel`) and VOL-01 through `useAreaFindings('storage')` |
+| `project/` | `ProblemsScreen`, `HelpScreen`, `ExportScreen`, `SearchScreen`, `ProjectScreen` (unchanged) | `/problems`, `/help`, `/export`, `/search`, `/project` (unchanged) | 10.8, and the help and search for 10 and 11 | The compiled documents of section 10.8; the new rule families in the help page (`RULE_LIST`, each new rule has `provisional: true`, and the physical ones `physicalOnly: true`); search over the new kinds (`search` already finds them, and `routeOf` gives each one's route); grouping the new areas in the problems list (`FINDING_AREAS`, `AREA_WORDS`, `findingPlace`: `shared.ts` in this folder still sends them to "Whole project" and to the dictionary); `renameProject` for the project's name |
+
+Three screens need no route of their own and no folder: `outline/`, `dictionary/` and
+`usecases/` are finished and are not being extended. They read `useModel()`, so they
+show system-related items in both modes.
 
 The router is a hash router, so the address bar shows `/#/diagram/dg-1`. Inside the app,
 write routes without the hash: `<Link to="/diagram/dg-1">`. `/` opens the sample's child
@@ -74,13 +87,14 @@ parameter is missing, and a plain message when it names something that does not 
 Import from the folder indexes:
 
 ```ts
-import { apply, get, all, elementLabel, type Model, type Command } from '../../model';
-import { runRules, RULES, RULE_LIST, explain, type Finding } from '../../rules';
-import { dispatch, useModel, useFindings, useSelection, selectElements } from '../../store';
+import { apply, get, all, elementLabel, cashFlow, requirementsOutline, type Model, type Command } from '../../model';
+import { runRules, RULES, RULE_LIST, explain, findingPlace, type Finding } from '../../rules';
+import { dispatch, useModel, useViewModel, useMode, useFindings, useAreaFindings, useSelection, selectElements } from '../../store';
 import { PageHeader, WorkArea, RightPanel, ListColumn, UndoRedo, DiagramHeader } from '../../frame';
 import { Mark, Button, Switch, Tabs, TextField, ProblemList, ProblemsPanel, EntryFields } from '../../components';
+import { NumberField, SelectField, EditableRows, CellText, CheckedFigure, ModeSwitch } from '../../components';
 import { useTheme } from '../../theme/theme';
-import { CLINIC, dataIdOf } from '../../sample/clinic';
+import { CLINIC, CLINIC2, dataIdOf } from '../../sample/clinic';
 import { STARTERS } from '../../sample/starters';
 ```
 
@@ -122,13 +136,22 @@ interface Model {
     occurrences: Record<Id, NodeOccurrence>;   // a symbol on a diagram
     routes: Record<Id, FlowRoute>;             // keyed by flow id
     erd: Record<Id, { x: number; y: number }>; // entity positions on the one ERD, keyed by entity id
+    isd: Record<Id, { x: number; y: number }>; // interface positions on their interface structure diagrams, keyed by interface id
   };
   settings: {
     topDiagramId: Id | null;                // the project's top diagram. null means the context diagram
     showFindings: 'always' | 'onRequest';   // 'onRequest' holds the problems back until the student asks
   };
+  project: {
+    noneExpected: NonfunctionalType[];      // the nonfunctional types marked "none expected" (section 10.3)
+    overheadRate: number | null;            // storage: a percentage (section 11.6)
+    months: number | null;                  // storage: how many months ahead to estimate
+  };
 }
 ```
+
+The mode, logical or physical, is not in the model. It is a session setting of the
+store. See "Logical and physical" below.
 
 Every element has `id`, `kind`, `name`, `description`, `aliases: string[]`,
 `notes: string` and `origin` (`'student'`, `'starter'` or `'ai'`). An alias is another
@@ -137,17 +160,73 @@ name the business uses. It is never a second name: labels, messages and lists sh
 
 | `kind` | Extra fields |
 | --- | --- |
-| `process` | `parentProcessId: Id \| null` (null for process 0), `ordinal: number`, `processDescription: string` (the longer text of the process entry: what it does, step by step. Separate from the short `description`. No rule reads it), `crud: { dataId, uses }[]` |
-| `externalEntity` | None |
-| `dataStore` | None. Its label (D1) comes from `storeLabel` |
-| `dataFlow` | `diagramId`, `sourceId: Id \| null`, `targetId: Id \| null`, `dataId`. Its `name` is always empty: the label is the name of the data it carries. A `null` end is unattached |
+| `process` | `parentProcessId: Id \| null` (null for process 0), `ordinal: number`, `processDescription: string` (the longer text of the process entry: what it does, step by step. Separate from the short `description`. No rule reads it), `crud: { dataId, uses }[]`. Physical: `implementation: string`, `human: boolean`, `systemRelated: boolean` |
+| `externalEntity` | Physical: `human: boolean` |
+| `dataStore` | Its label (D1) comes from `storeLabel`. Physical: `physicalName: string`, `systemRelated: boolean` |
+| `dataFlow` | `diagramId`, `sourceId: Id \| null`, `targetId: Id \| null`, `dataId`. Its `name` is always empty: the label is the name of the data it carries. A `null` end is unattached. Physical: `physicalName: string`, `systemRelated: boolean` |
 | `controlFlow` | `diagramId`, `targetId`. Its `name` is the starting event |
 | `dataStructure` | `components: { dataId, occurs, limit? }[]`, where `occurs` is `'once'`, `'optional'` or `'many'`. `limit` is a whole number, 1 or more: the most times the part can occur. It is kept only while `occurs` is `'many'` |
-| `dataElement` | `dataType: string`, `allowedValues?: { value: string, meaning: string }[]`, `length: number \| null`, `nullable: boolean \| null`. `length` and `nullable` are for the entity's dictionary entry. `null` means not filled in. No rule reads them |
+| `dataElement` | `dataType: string`, `allowedValues?: { value: string, meaning: string }[]`, `length: number \| null`, `nullable: boolean \| null`. `length` and `nullable` are for the entity's dictionary entry. `null` means not filled in. No rule reads them. Physical: `systemRelated: boolean`, `fieldName: string`, `defaultValue: string`. Storage: `averageWidth: number \| null` |
 | `diagram` | `diagramKind: 'context' \| 'dfd'`, `decomposesProcessId: Id \| null` (null for the context diagram). Show its title with `diagramTitle`, not its `name` |
 | `useCase` | `ordinal`, `priority: 'high' \| 'medium' \| 'low'`, `actorId: Id \| null`, `trigger`, `triggerType: 'external' \| 'temporal'`, `preconditions: string[]`, `postconditions: string[]`, `steps: { text, substeps: string[], information: { direction: 'in' \| 'out', dataId }[] }[]`, `exceptions: { stepNumber, text, steps: string[] }[]` (`steps` is the numbered list of what is done about the exception), `summaryInputs: { dataId, sourceId }[]`, `summaryOutputs: { dataId, destinationId }[]`, `processId: Id \| null` |
-| `entity` | `code: string`, `attributes: { dataId, identifier: boolean, repeats: boolean }[]`, `storeId: Id \| null`. `repeats` marks an attribute that can hold several values for one instance. Draw it in braces |
-| `relationship` | `ends: [RelationshipEnd, RelationshipEnd]`, `identifying: boolean`. A `RelationshipEnd` is `{ entityId, verbPhrase, min: 0 \| 1 \| null, max: 'one' \| 'many' \| null }`. The values at an entity's end say how many of that entity go with one of the other. `null` means not decided yet: draw a question mark in place of the symbol. Its `name` is always empty |
+| `entity` | `code: string`, `attributes: { dataId, identifier: boolean, repeats: boolean }[]`, `storeId: Id \| null`. `repeats` marks an attribute that can hold several values for one instance. Draw it in braces. Physical: `systemRelated: boolean`, `tableName: string`, `copies: Id[]` (data elements of other entities that this table repeats). Storage: `initialRecords`, `growthPerMonth`, `growthPerYear` (a percentage, used in place of `growthPerMonth` when set), `recordSize` (used only while the entity has no fields), each `number \| null` |
+| `relationship` | `ends: [RelationshipEnd, RelationshipEnd]`, `identifying: boolean`. A `RelationshipEnd` is `{ entityId, verbPhrase, min: 0 \| 1 \| null, max: 'one' \| 'many' \| null }`. The values at an entity's end say how many of that entity go with one of the other. `null` means not decided yet: draw a question mark in place of the symbol. Its `name` is always empty. Physical: `foreignKey: boolean`, true once the student has placed the key in the child table |
+
+The kinds of the second release (sections 10 and 11 of the specification):
+
+| `kind` | Extra fields |
+| --- | --- |
+| `systemRequest` | At most one. `sponsor`, `businessNeed`, `businessRequirements: string[]`, `businessValue: { text, tangible, amount: number \| null, estimates: { label, amount, probability }[] }[]`, `specialIssues`. A probability is a percentage. Its `name` is not used. Read it with `systemRequest(model)` |
+| `feasibility` | At most one. `technical: Record<TechnicalFactor, { assessment, reasons }>`, `organizational: Record<OrganizationalFactor, string>`, `economic` (below). Read it with `feasibility(model)` |
+| `requirement` | Its sentence is its `name`. `requirementKind: 'user' \| 'functional' \| 'nonfunctional'`, `order: number`, `functionalType: 'process-oriented' \| 'information-oriented' \| null`, `group`, `userGroup` (an optional heading above the group), `nonfunctionalType: NonfunctionalType \| null`, `subtype` (one of `NONFUNCTIONAL_SUBTYPES[type]`, or empty), `priority: 'high' \| 'medium' \| 'low' \| number \| null` (a number is a release), `traceIds: Id[]` (use cases and processes) |
+| `alternativeMatrix` | Its `name` is its title. `alternatives: string[]`, `criteria: { name, group: 'technical' \| 'economic' \| 'organizational', weight: number \| null }[]`, `cells: { supportingInformation, score: number \| null }[][]` (`cells[c][a]` is criterion `c`, alternative `a`), `recommendation` |
+| `test` | Its `name` is a short title. `ordinal` (shown as T-1), `stage: 'unit' \| 'integration' \| 'system' \| 'acceptance'`, `testType` (one of `TEST_TYPES[stage]`, or empty), `programId: Id \| null` (a module) and `programText`, `version`, `tester`, `dateDesigned`, `dateConducted` (text), `requirementId: Id \| null` and `requirementText`, `objective`, `testCases: { interfaceId: Id \| null, interfaceText, dataField, valueEntered }[]`, `script`, `expectedResults`, `actualResults`, `result: '' \| 'passed' \| 'open items'`. Each "id or text" pair uses the text while the id is `null` |
+| `interfaceDiagram` | One interface structure diagram. Its `name` is its title |
+| `interface` | `diagramId`, `number: string` (such as `'0'` or `'1.2'`), `processIds: Id[]` |
+| `navigationLink` | `diagramId`, `aId`, `bId`. It has no direction. Its `name` is empty |
+| `binderSection` | Its `name` is its title. `phase: 'planning' \| 'analysis' \| 'design' \| 'implementation'`, `order: number`, `body: string`, `attachments: { id, name, mimeType, size, dataUrl }[]`, `layout: string \| null` (the key of the `BINDER_LAYOUTS` entry it started from), `conversion: { style, location, modules, reasons } \| null` (present only on a migration plan) |
+| `structureChart` | Its `name` is its title. `topModuleId` |
+| `module` | `parentModuleId: Id \| null` (null for a top module), `ordinal`, `conditional`, `repeated`, `library`, `repeatsId: Id \| null`, `processId: Id \| null`, and the program specification: `purpose`, `programmer`, `dateDue`, `language`, `events`, `ioNotes: { coupleId, notes }[]`, `pseudocode`, `other` |
+| `couple` | `moduleId` (the lower module of the line), `direction: 'down' \| 'up'`, `coupleKind: 'data' \| 'control'`, `dataId: Id \| null`. A data couple has an empty `name` and takes its label from its data. A control couple has a `name` and no data |
+
+The cash flow table, `feasibility.economic`:
+
+```ts
+interface Economic {
+  firstYear: number;            // the calendar year of year 0
+  years: number;                // years forecast after year 0, from 1 to 10. The table has years + 1 columns
+  rate: number | null;          // the required rate of return, a percentage
+  benefits: CashLine[];
+  developmentCosts: CashLine[];
+  operationalCosts: CashLine[];
+  intangibles: string[];
+  roi: number | null;           // typed by the student, a percentage
+  breakEven: number | null;     // typed by the student, in years
+  npv: number | null;           // typed by the student, in money
+}
+interface CashLine {
+  name: string;
+  amounts: (number | null)[];   // one for each column, year 0 first. null counts as 0
+  quantity: number | null;      // with unitAmount set as well, the tool fills the line in and ignores amounts
+  unitAmount: number | null;
+  growthRate: number | null;    // a yearly percentage
+  valueIndex: number | null;    // on a benefit: the index of a value in the system request
+}
+```
+
+**Body text of a binder section.** `body` is plain text. A line that starts with `#`
+is a heading, `-` or `1.` a list item, and `|` a table row. The layouts use only these.
+The binder agent decides how to show and edit it.
+
+**Attachments.** A file is kept in the model as a data URL, because the project is
+saved in `localStorage`. `addAttachment` refuses a file over `MAX_ATTACHMENT_BYTES`
+(300 KB) with a plain sentence. Read the file in the screen with `FileReader`'s
+`readAsDataURL` and pass the result as `dataUrl`.
+
+**A module used in several places.** A box with `repeatsId` set is one more appearance
+of that module. Read its name, library mark and specification from
+`originalModule(model, id)`. It has nothing below it. A structure chart has no stored
+positions: draw it as a tree from `modulesOf`.
 
 An attribute is a data element that an entity owns, not a kind of its own. A CRUD cell
 is an entry in a process's `crud` list: `uses` holds any of the letters C, R, U and D,
@@ -266,6 +345,61 @@ Commands added for the prototype:
 
 Delete a use case, an entity or a relationship with `deleteElement`.
 
+The `create` commands `addProcess`, `addDataStore`, `addFlow`, `defineData` (for a data
+element), `addEntity` and `addAttribute` (when it makes a new element) also take
+`systemRelated?: boolean`.
+
+Commands of the second release. The type `Release2Command` is the union of these, and
+`Command` is `CoreCommand | Release2Command`. A patch replaces each field it gives and
+leaves the others alone.
+
+| `type` | Arguments | What it does | `created` |
+| --- | --- | --- | --- |
+| `renameProject` | `name` | Renames the project. Refused when the name is empty | |
+| `setPhysical` | `id`, and any of `implementation`, `physicalName`, `human`, `systemRelated`, `fieldName`, `defaultValue`, `averageWidth`, `tableName`, `copies`, `foreignKey` | Sets the physical fields of one element. Give only fields its kind has (see the kinds table): any other is refused. Refused for `systemRelated` on process 0, and for `foreignKey` on a relationship that is many-to-many or not decided | |
+| `setStorage` | `entityId`, and any of `initialRecords`, `growthPerMonth`, `growthPerYear`, `recordSize` | Sets a table's storage figures. `null` clears one. Each must be 0 or more, and `initialRecords` whole | |
+| `setStorageSettings` | `overheadRate?`, `months?` | Sets the project's two storage figures. `null` clears one | |
+| `updateSystemRequest` | `patch: { sponsor?, businessNeed?, businessRequirements?, businessValue?, specialIssues? }`, and `id?`, `origin?` for the first call | Makes the system request if the project has none, then applies the patch. A value may leave out `tangible`, `amount` and `estimates` | the system request, the first time |
+| `updateFeasibility` | `technical?` (any factors, each `{ assessment?, reasons? }`), `organizational?` (any factors, each text), `economic?` (any field of `Economic`), and `id?`, `origin?` for the first call | Makes the feasibility analysis if the project has none, then applies what is given. A cash line may leave out everything but `name`. Every line is fitted to `years + 1` amounts, so changing `years` pads or cuts them. Refused when a benefit's `valueIndex` points at no value | the analysis, the first time |
+| `addRequirement` | `name`, and any field of `updateRequirement`'s `patch` | Makes a requirement, last in the outline. `requirementKind` defaults to `'functional'` | requirement |
+| `updateRequirement` | `id`, `patch: { requirementKind?, functionalType?, group?, userGroup?, nonfunctionalType?, subtype?, priority?, traceIds? }` | Changes a requirement. The fields that do not belong to its kind are cleared, and a nonfunctional one with no type becomes `'operational'`. Use `rename` for the sentence. Refused when a trace is not a use case or a process | |
+| `reorderRequirements` | `ids: Id[]` | Puts the requirements in this order. Every requirement must be listed once | |
+| `setNoneExpected` | `nonfunctionalType`, `noneExpected: boolean` | Marks a nonfunctional type as "none expected", or clears the mark | |
+| `addAlternativeMatrix` | `name`, and `alternatives?`, `criteria?`, `cells?`, `recommendation?` | Makes a matrix. The cells are fitted to the criteria and alternatives, and missing ones start empty | matrix |
+| `updateAlternativeMatrix` | `id`, and `alternatives?`, `criteria?`, `cells?`, `recommendation?` | Replaces what is given and fits the cells again. Add a criterion or an alternative by giving a longer list. To reorder, give the list and the `cells` together | |
+| `removeAlternative`, `removeCriterion` | `id`, `index` | Removes one column or one row, with its cells | |
+| `addTest` | `name`, and any field of `updateTest`'s `patch` | Makes a test. `ordinal` defaults to the next number and `stage` to `'unit'` | test |
+| `updateTest` | `id`, `patch` (any field of a test but its name and description) | Changes a test. Refused when two tests would share an ID, or when it names a module, requirement or interface that does not exist | |
+| `addInterfaceDiagram` | `name` | Makes an empty interface structure diagram | diagram |
+| `addInterface` | `diagramId`, `name`, `number?`, `processIds?`, `x?`, `y?` | Makes an interface and its position. `number` defaults to the lowest whole number not in use, so the first is `'0'` | interface |
+| `updateInterface` | `id`, `number?`, `processIds?` | Changes the number or the processes. Refused when the number is empty or another interface on the diagram has it | |
+| `moveInterface` | `interfaceId`, `x`, `y` | Moves an interface on its diagram | |
+| `addNavigationLink` | `diagramId`, `aId`, `bId` | Links two interfaces. Refused for one interface linked to itself, and for two that are already linked | link |
+| `addBinderSection` | `name`, `phase?`, `layout?`, `body?` | Makes a section. With `layout` (a key of `BINDER_LAYOUTS`) it starts with that layout's text and phase, and takes its title when `name` is empty. The layout `'migration-plan'` also gives it an empty conversion strategy | section |
+| `updateBinderSection` | `id`, `phase?`, `body?` | Changes the phase or the text. Use `rename` for the title | |
+| `reorderBinderSections` | `ids: Id[]` | Puts the sections in this order. Every section must be listed once | |
+| `addAttachment` | `sectionId`, `name`, `dataUrl`, `mimeType?`, `attachmentId?` | Attaches a file. Refused when it is over 300 KB, or when `dataUrl` is not a data URL | |
+| `removeAttachment` | `sectionId`, `attachmentId` | Removes an attached file | |
+| `setConversion` | `sectionId`, and any of `style`, `location`, `modules`, `reasons` | Sets the conversion strategy. `null` clears a choice. Refused on a section that is not a migration plan | |
+| `addStructureChart` | `name`, `moduleName?` (default: the chart's name), `moduleId?`, `ordinal?` (default 1), `processId?` | Makes a chart and its top module. `id` names the chart | chart, top module |
+| `addModule` | `parentModuleId`, `name`, and any of `ordinal`, `conditional`, `repeated`, `library`, `repeatsId`, `processId` | Makes a module below another. `ordinal` defaults to the next number. Refused below a box that repeats another module | module |
+| `updateModule` | `id`, `patch: { parentModuleId?, ordinal?, conditional?, repeated?, library?, repeatsId?, processId? }` | Changes a module, or moves it under another. The top module's `ordinal` may be changed, so that a chart can carry its process's number. Refused when it would break an invariant of section 11.3 | |
+| `setProgramSpec` | `moduleId`, `patch: { purpose?, programmer?, dateDue?, language?, events?, ioNotes?, pseudocode?, other? }` | Sets the program specification. `ioNotes` replaces the whole list, and a row with empty notes is dropped. Refused on a box that repeats another module | |
+| `addCouple` | `moduleId`, `direction`, `coupleKind`, then for a data couple `dataId` or `dataName`, and for a control couple `name?` | Adds a couple to the line above a module. With `dataName` it carries the definition of that name, or a new data element. Refused on a top module | couple, then the new element if one was made |
+| `updateCouple` | `id`, `direction?`, `coupleKind?`, `dataId?` or `dataName?` | Changes a couple. Making it a control couple drops its data. Use `rename` for a control couple's name | the new element, if one was made |
+
+`deleteElement` deletes any of the new kinds. What goes with it:
+
+- A structure chart takes its modules. A module takes the modules below it, the boxes
+  that repeat it, and its couples. The top module is refused: delete the chart.
+- An interface structure diagram takes its interfaces and links. An interface takes its
+  links.
+- A test that named a deleted requirement, module or interface keeps its name as text.
+- A deleted process or use case is dropped from every `traceIds` and `processIds`, and
+  from the `processId` of a module.
+- A data definition that a couple carries is refused unless `cascade` is true, as for a
+  flow.
+
 ### Queries
 
 All are pure functions of the model, in `src/model/queries.ts`.
@@ -312,6 +446,93 @@ All are pure functions of the model, in `src/model/queries.ts`.
 | `fullIdentifier(model, entityId)` | The ids of an entity's identifier attributes, its own and inherited |
 | `isDependent(model, entityId)` | Whether the entity is the child in an identifying relationship (drawn with a double border) |
 
+Queries of the second release, in `src/model/queries2.ts`:
+
+| Function | Returns |
+| --- | --- |
+| `systemRequest(model)`, `feasibility(model)` | The one form, or `undefined` while the project has none |
+| `requirementsInOrder(model)` | Every requirement, in outline order |
+| `requirementsOutline(model)` | `{ user, functional, nonfunctional }`. `user` is `{ requirement, number }[]`, numbered `U1`, `U2`. `functional` is the groups, each `{ number, name, userGroup, requirements }`, numbered `1`, `2` with requirements `1.1`, `1.2`. Groups under one `userGroup` are next to each other. `nonfunctional` is always the four types, each `{ type, number, noneExpected, requirements }`, numbered from `1` again |
+| `requirementNumber(model, id)` | `'1.2'`, `'U1'` |
+| `requirementsFor(model, useCaseId)` | The requirements traced to a use case, directly or through its process |
+| `processesBelow(model, processId)` | The ids of a process and every process below it |
+| `testsInOrder(model)` | Every test, in ID order |
+| `interfacesOn(model, diagramId)`, `linksOn(model, diagramId)` | The interfaces and links of one interface structure diagram |
+| `interfaceReach(model, diagramId)` | `{ menu, distance, below }`: interface 0, how many links each interface is from it (an unreachable one is not in the map), and `below(id)`, the linked interfaces one step further away |
+| `PHASES` | The four phases, in order |
+| `binderSections(model, phase?)` | The sections in order, all or those of one phase |
+| `modulesOf(model, chartId)` | `{ module, depth, number }[]`: the chart as a tree in reading order, the top module first |
+| `moduleChildren(model, moduleId)` | The modules directly below one, in number order |
+| `chartOfModule(model, moduleId)` | The chart a module is on |
+| `moduleNumber(model, moduleId)` | `'1'`, `'1.2'`, `'1.2.1'` |
+| `originalModule(model, moduleId)` | The module a box stands for: the one it repeats, or itself |
+| `fanOut(model, moduleId)`, `fanIn(model, moduleId)` | The modules directly below; one plus the boxes that repeat it |
+| `couplesOf(model, moduleId)` | The couples on the line above a module |
+| `coupleLabel(model, couple)` | The name of its data, or its own name for a control couple |
+| `programIo(model, moduleId)` | `{ inputs, outputs }`, each a list of `{ couple, name, type, otherModuleId, otherLabel, notes }`, listed from the chart as section 11.4 says. `type` is the data type, `'Structure'`, or `'Flag'` |
+| `tableFields(model, entityId)` | The fields of a table in physical mode: `{ dataId, element, name, pk, fk, copy, fromEntityId, relationshipId }[]`. Its own attributes, then the primary key fields of each parent whose foreign key has been placed (tagged `pk` too in an identifying relationship), then its copies. `name` is the field name, or the logical name while there is none |
+| `storageEstimate(model)` | `{ overheadRate, months, tables, initialVolume, finalVolume }`. Each table is `{ entity, name, fields, typedSize, growthBy, recordSize, totalRecordSize, initialVolume, growth, finalRecords, finalVolume }` |
+| `modelForMode(model, mode)` | The model as a mode shows it. See "Logical and physical" |
+| `isSystemRelated(element)` | Whether an element is marked system-related |
+| `routeOf(model, id)` | `{ route, where }` for any element: the answer `search` gives |
+
+`elementLabel` and `KIND_WORDS` cover the new kinds: `'1.2 The system will…'` for a
+requirement, `'T-1 Free times…'` for a test, `'1.1 Book Appointment'` for an interface,
+`'1.1.2 Book Slot'` for a module, the data name or flag name for a couple.
+
+Fixed lists, in `src/model/forms.ts` and `src/model/binder.ts`:
+
+| Name | What it holds |
+| --- | --- |
+| `TECHNICAL_FACTORS`, `ORGANIZATIONAL_FACTORS`, `FACTOR_WORDS` | The four and the five feasibility factors, and their words |
+| `NONFUNCTIONAL_TYPES`, `NONFUNCTIONAL_SUBTYPES` | The four types, and the fifteen sub-types by type |
+| `TEST_STAGES`, `TEST_TYPES` | The four stages, and the types of test by stage |
+| `BINDER_LAYOUTS` | The fourteen starting layouts of section 10.7, each `{ key, title, phase, chapter, body }`. `MIGRATION_PLAN` is the key `'migration-plan'` |
+| `CONVERSION_OPTIONS` | For `style`, `location` and `modules`: every option, each `{ title, meaning, risk, cost, time, explanation }`, where the three levels are `'low'`, `'medium'` or `'high'` |
+| `conversionEffects(strategy)` | The same entries for the choices made so far, each with `choice` and `option`. Show them beside the student's reasons. Nothing is marked wrong |
+| `MAX_ATTACHMENT_BYTES`, `INTERFACE_SIZE` | 307,200; `{ width: 150, height: 90 }` |
+
+### Calculations
+
+Pure functions in `src/model/calc.ts`, tested against hand-worked figures in
+`calc.test.ts`. None reads the model.
+
+| Function | Returns |
+| --- | --- |
+| `expectedValue(estimates)`, `probabilityTotal(estimates)` | Each amount multiplied by its probability, added up; the probabilities added up |
+| `isQuantityLine(line)` | Whether the tool fills the line in: `quantity` and `unitAmount` are both set |
+| `lineAmounts(line, years, section)` | The amounts of one line, year 0 first. `section` is `'benefits'`, `'developmentCosts'` or `'operationalCosts'` |
+| `presentValue(value, rate, year)` | The value divided by (1 + rate) to the power of the year |
+| `cashFlow(economic)` | Every worked-out figure: `yearLabels`, `lines` (each line's amounts, by section), and for each column `benefits`, `developmentCosts`, `operationalCosts`, `costs`, `net`, `cumulative`, `pvBenefits`, `pvCosts`; `totals`; and `roi` (a percentage), `breakEvenYear`, `breakEven` and `npv`, each `null` when the formula gives nothing |
+| `checkMeasures(economic)` | `{ roi, breakEven, npv }`, each `{ typed, expected, status, allowance, typedText, expectedText, working }`. `status` is `'empty'`, `'match'`, `'mismatch'`, `'none'` (a break-even point typed when there is none) or `'unknown'`. `working` is the formula step by step with the table's figures. Pass `status` to `CheckedFigure` |
+| `matrixScores(matrix)` | `{ weighted, totals, weightTotal }`: each score multiplied by its weight, the total for each alternative, and the weights added up |
+| `recordSizeOf(widths)` | The widths added up |
+| `growthRecords(input, months)` | The records added over the months |
+| `tableVolume(recordSize, overheadRate, input, months)` | `{ recordSize, totalRecordSize, initialVolume, growth, finalRecords, finalVolume }` |
+| `formatNumber(n, digits?)`, `formatPercent(n, digits?)` | `'21,763'`, `'36.4%'` |
+
+A typed measure passes within 0.1 of a percentage point for return on investment, 0.01
+of a year for the break-even point, and one unit of money for each column of the table
+for net present value.
+
+### Logical and physical
+
+A physical model is not a copy (section 11.1). The store holds the mode, `'logical'` or
+`'physical'`, as session state. The top bar has the switch.
+
+- `useMode()` gives the mode. `setMode(mode)` changes it. `ModeSwitch` is the switch.
+- `useViewModel()` gives the model as the mode shows it. In physical mode that is the
+  model. In logical mode it is `modelForMode(model, 'logical')`: everything marked
+  `systemRelated` is left out, with the flows at a removed process or store, the flows
+  that carry removed data, the processes and diagrams below a removed process, and a
+  data structure whose parts are all left out. It is a model like any other, so every
+  query works on it. **Draw and list from `useViewModel()`.** Keep `useModel()` for what
+  must see everything.
+- The findings are worked out for the current mode, on that mode's model.
+- A screen for physical work (the physical names, the table and field names, the
+  storage size estimate) should say so when the mode is logical and offer `ModeSwitch`,
+  because its rules run in physical mode only.
+
 `search(model, { text, kind?, diagramId?, only? })` looks for `text`, ignoring case, in
 each element's name, aliases, description and notes. A process's `processDescription`
 counts as a description. An empty `text` matches everything, so the other options can
@@ -334,6 +555,10 @@ element, such as `/dictionary/d-phone`, `/diagram/dg-1`, `/use-cases/uc-1` or
 "Level 0". A flow has no name of its own, so a search by text finds the data it carries
 and not the flow. The results come in creation order.
 
+A search by text also looks in the longer text of the new kinds: the fields of the
+system request, a binder section's body and file names, a module's purpose and
+pseudocode, a test's objective and results, and a matrix's recommendation.
+
 Also exported: `apply`, `applyAll(model, commands)` (throws if one is refused),
 `checkInvariants(model)`, `emptyModel()`, `NODE_SIZE`, `normalizeModel(value)` (turns
 parsed JSON into a model, filling in fields an older file lacks, and throws an `Error`
@@ -342,8 +567,13 @@ origin set to `'starter'`).
 
 ## The rules (`src/rules/`)
 
-`runRules(model)` returns every finding. The store runs it after each change, so a
-screen reads findings from the store and never calls it.
+`runRules(model, mode = 'logical')` returns every finding for one mode. The store runs
+it after each change and when the mode changes, so a screen reads findings from the
+store and never calls it.
+
+In logical mode the rules run on `modelForMode(model, 'logical')`, and the rules marked
+`physicalOnly` (PD, PDM and VOL) do not run. In physical mode they run on the whole
+model.
 
 Two project settings change what a student sees, and neither changes a rule.
 
@@ -361,8 +591,9 @@ interface Finding {
   ruleId: string;             // 'BAL-01'
   severity: 'error' | 'warning';
   elementIds: Id[];           // the elements involved, most relevant first
-  diagramId: Id | null;       // the diagram it belongs to
-  area: 'diagram' | 'dictionary' | 'dataModel';   // where it is counted
+  diagramId: Id | null;       // the data flow diagram it belongs to
+  homeId: Id | null;          // the matrix, interface structure diagram, structure chart or test it belongs to
+  area: FindingArea;          // where it is counted
   values: Record<string, unknown>;                // the named values that filled the message
   message: string;            // ready to show
   why: string;                // ready to show
@@ -371,8 +602,28 @@ interface Finding {
 ```
 
 Each finding is counted in exactly one place. A finding with a `diagramId` belongs to
-that diagram. A finding about a data definition has `area: 'dictionary'`. A data model
-finding has `area: 'dataModel'`. Both of those have `diagramId: null`.
+that diagram and has `area: 'diagram'`. Every other finding has `diagramId: null` and
+one of these areas, listed in `FINDING_AREAS` in the order the navigator shows them:
+
+| `area` | Rules | `homeId` |
+| --- | --- | --- |
+| `systemRequest` | SR | `null` |
+| `feasibility` | FA | `null` |
+| `requirements` | RQ | `null` |
+| `diagram` | DFD and BAL, and PD in physical mode | `null`: `diagramId` says which diagram |
+| `dictionary` | DFD-01, DFD-02, DFD-13 and DD, about a data definition | `null` |
+| `dataModel` | ERD and DM, and PDM in physical mode | `null` |
+| `alternatives` | AM | The matrix |
+| `interface` | ISD | The interface structure diagram. `null` for ISD-04 |
+| `structure` | SC and PS-01 | The structure chart. `null` for SC-07 |
+| `storage` | VOL, in physical mode | `null` |
+| `testPlan` | TP | The test for TP-01. `null` for TP-02 |
+
+`AREA_WORDS` gives the words for each area. `findingPlace(finding)` gives
+`{ to, text }`: the route where a finding is counted and words for a link to it, such
+as `{ to: '/feasibility', text: 'Open feasibility analysis' }`. A PS-01 finding leads
+to `/programs/:moduleId`. `ProblemCard` shows that link whenever the card is not
+already on that page.
 
 What `elementIds` holds, for the rules a screen is most likely to mark:
 
@@ -408,9 +659,12 @@ interface BalanceValues {
 ```
 
 Other exports: `RULES` (a record by rule id) and `RULE_LIST` (an array), each entry
-`{ id, severity, when, message, why, fix, provisional? }`, for the help page;
-`countFindings(findings)` gives `{ errors, warnings }`;
-`findingsForDiagram(findings, diagramId)`.
+`{ id, severity, when, message, why, fix, provisional?, physicalOnly? }`, for the help
+page; `countFindings(findings)` gives `{ errors, warnings }`;
+`findingsForDiagram(findings, diagramId)`, `findingsForArea(findings, area)` and
+`findingsForHome(findings, homeId)`; `physicalDfdStarted(model)`,
+`physicalDataModelStarted(model)` and `storageStarted(model)`, which say whether each
+set of physical rules is running.
 
 The rules are all 22 of section 5 of the specification, with its wording. Nine more are
 provisional: ERD-01 to ERD-05, ERD-10, ERD-11, DM-01 and DM-02. The specification lists
@@ -426,13 +680,80 @@ the project has at least one entity.
 ERD-05 (many-to-many) is reported only when both ends are decided as "many", never for
 an undecided end.
 
+### The rules of the second release
+
+All 36 are in the catalogue with `provisional: true`, because the specification lists
+them and leaves their wording and severity open. `engine2.ts` holds them, and
+`release2.test.ts` shows each one firing and not firing.
+
+| Family | Rules | Runs when | Severity |
+| --- | --- | --- | --- |
+| SR | SR-01 to SR-03 | The project has a system request | SR-01 is a warning. SR-02 and SR-03 are errors |
+| FA | FA-01 to FA-05 | The project has a feasibility analysis | FA-02, FA-03 and FA-04 are errors. FA-01 and FA-05 are warnings |
+| RQ | RQ-01 to RQ-03 | RQ-01 always. RQ-02 and RQ-03 only when the project has a requirement | Warnings |
+| AM | AM-01 to AM-03 | For each matrix | AM-01 and AM-02 are errors. AM-03 is a warning |
+| TP | TP-01, TP-02 | TP-01 for each test. TP-02 only when the project has a test | Warnings |
+| ISD | ISD-01 to ISD-04 | ISD-03 only when the level 0 diagram has processes. ISD-04 only when the project has an interface structure diagram | ISD-01 and ISD-02 are errors. The others are warnings |
+| SC | SC-01 to SC-07 | SC-07 only when the project has a structure chart | SC-01 and SC-05 are errors. The others are warnings |
+| PS | PS-01 | For each module that does not repeat another | Warning |
+| PD | PD-01 to PD-03 | Physical mode, once any physical field of the data flow diagrams is filled in | Warnings |
+| PDM | PDM-01 to PDM-04 | Physical mode, once any physical field of the data model is filled in | PDM-04 is an error. The others are warnings |
+| VOL | VOL-01 | Physical mode, once any storage figure is typed | Warning |
+
+What `elementIds` and `values` hold, where a screen is likely to use them:
+
+| Rule | One finding for | `elementIds` | `values` |
+| --- | --- | --- | --- |
+| SR-01 | Each empty field | The system request | `field`: the field in words |
+| SR-02, SR-03 | Each value with estimates | The system request | `index` (into `businessValue`), `text`. SR-02: `total`. SR-03: `typed`, `expected`, `working` |
+| FA-01 | Each of the two parts | The analysis | `part` (`'technical'` or `'organizational'`), `factors` (words), `missing` (the factor keys) |
+| FA-02, FA-03, FA-04 | The measure | The analysis | `typed` (text), `expected` (number or `null`), `steps: string[]`, `working` (the steps joined). The same working is in the finding's `fix` |
+| FA-05 | Each linked benefit | The analysis, the system request | `index` (into `benefits`), `name`, `amount`, `value`, `text` |
+| RQ-01, TP-02 | Each requirement | The requirement | `number`, `name` |
+| RQ-02 | Each use case | The use case | `name` |
+| RQ-03 | Each type | None | `type` |
+| AM-02, AM-03 | Each matrix | The matrix | `count`, and the cells as `{ criterion, alternative }[]`: `cells` for AM-02, `where` for AM-03 |
+| TP-01 | Each test | The test | `number`, `fields` (what is missing) |
+| ISD-02, ISD-03 | Each interface | The interface | `name`, `number` |
+| ISD-04, SC-07 | Each process | The process | `name` |
+| SC-01, SC-02 | Each module or control couple | The module, or the couple then its module | |
+| SC-05, SC-06 | Each name; each repeated module | The modules | `name`, and `count` for SC-06 |
+| PS-01 | Each module | The module | `fields` (`'purpose'`, `'pseudocode'`) |
+| PD-02 | Each data store or flow | The store, or the flow then its data | `name` |
+| PDM-01, VOL-01 | Each table | The entity, then the fields that lack something | `missing` (words) |
+| PDM-03 | Each relationship | The relationship, then its two entities | `first`, `second`, `child` |
+| PDM-04 | Each repeated name | The tables, or the table then the fields | `name` |
+
+Choices made here, where the specification leaves a point open:
+
+- **What a missing measure means.** FA-02 to FA-04 say nothing while the measure has
+  not been typed. `CheckedFigure` shows "Not typed yet".
+- **SR-03** allows a difference of one unit of money, and is reported when the amount
+  is empty.
+- **FA-01** is one finding for each part, naming the factors that are missing.
+- **FA-05** compares the benefit's amount in year 1 with the value's amount, and allows
+  a difference of one unit of money.
+- **RQ-02** counts a requirement traced to the use case's process as traced to the use
+  case.
+- **AM-02 and AM-03** are one finding for each matrix, with a count.
+- **ISD-03.** "Below" means linked and one step further from interface 0, because a link
+  has no direction. An interface that cannot be reached is left to ISD-02.
+- **SC-05** looks across every chart of the project.
+- **The physical rules wait until the work is started,** so that switching to physical
+  mode on a logical model does not report every process, flow and table at once.
+- **PDM-02 takes the place of ERD-04 in physical mode.** In both modes a system-related
+  identifier counts as an identifier, as section 11.5 says.
+- **PD-03** is one finding for the project, counted on the top diagram.
+- **PDM-01 and VOL-01** are one finding for each table, naming what is missing.
+
 `explain(model, finding)` returns the text for the "AI explanation" box. **No AI model
 is called anywhere in the prototype.** The text is put together from the finding's own
 values. It shows where an AI explanation would sit and how it would be marked.
 
 ## The store (`src/store/`)
 
-One store holds the model, the findings, the undo and redo history, and the selection.
+One store holds the model, the mode, the findings, the undo and redo history, and the
+selection. The mode starts as `'logical'` on every visit and is not saved.
 Every change is saved to `localStorage` at once, under the key
 `diagramble.prototype.project.v2`. A project saved under the older key is ignored.
 
@@ -458,20 +779,25 @@ Functions, which can be called from anywhere:
 | `loadProjectFile(text)` | Replaces the project with the one in the text of a downloaded project file and clears the history. Returns `{ ok: true }`, or `{ ok: false, error }` with a plain sentence when the text is not a project file, in which case nothing changes. A file from before the new fields existed is opened with them filled in |
 | `projectAsStarterFile()` | The current project as the text of a project file, with every origin set to `'starter'`. The project itself is not changed |
 | `checkNow()` | Shows the findings when they are held back |
+| `setMode(mode)` | Shows the model as `'logical'` or `'physical'` and works the findings out again for that mode. It does not change the model, so it is not an undo step and does not hide findings that are being shown |
 | `selectElements(ids)` | Selects elements. It also selects the first finding that names the first of them, if there is one |
 | `selectFinding(findingId \| null)` | Selects a finding and, with it, the elements the finding names |
 | `clearSelection()` | Selects nothing |
 | `clearError()` | Hides the strip that shows a refused command |
-| `getModel()`, `getFindings()`, `getFindingsVisible()` | The current values, for code outside a component. `getFindings()` gives every finding even while they are hidden |
+| `getModel()`, `getMode()`, `getFindings()`, `getFindingsVisible()` | The current values, for code outside a component. `getFindings()` gives every finding of the current mode even while they are hidden |
 
 Hooks:
 
 | Hook | Returns |
 | --- | --- |
-| `useModel()` | The model |
-| `useFindings()` | Every finding, errors first. Empty while the findings are hidden, as are the next three |
+| `useModel()` | The whole model |
+| `useMode()` | `'logical'` or `'physical'` |
+| `useViewModel()` | The model as the mode shows it. See "Logical and physical" |
+| `useFindings()` | Every finding of the current mode, errors first. Empty while the findings are hidden, as are the next five |
 | `useFindingsVisible()` | Whether the findings are being shown |
 | `useDiagramFindings(diagramId)` | The findings that belong to one diagram |
+| `useAreaFindings(area)` | The findings counted in one area, such as `'feasibility'` |
+| `useHomeFindings(homeId)` | The findings that belong to one matrix, interface structure diagram, structure chart or test |
 | `useElementFindings(elementId)` | The findings that name one element |
 | `useCounts()` | `{ errors, warnings }` for the whole project |
 | `useHistory()` | `{ canUndo, canRedo, undo, redo }` |
@@ -551,6 +877,13 @@ symbol. There are no pills: a count is a plain monospaced number.
 | `placeholder` | Muted italic text with padding |
 | `entry-fields`, `entry-fields-compact`, `entry-aliases`, `entry-alias`, `entry-alias-name` | Used by `EntryFields` |
 | `nav-above`, `nav-above-note` | Used by the navigator for a diagram above the project |
+| `nav-section`, `nav-group-toggle`, `nav-group-arrow`, `nav-item`, `nav-subgroup` | Used by the navigator's groups |
+| `visually-hidden` | Text for screen readers only |
+| `is-numeric` | On a `th` or `td` of a `table`: right-aligned and monospaced, for numbers |
+| `number-field`, `number-field-box`, `number-field-input`, `number-field-unit`, `number-field-bare` | Used by `NumberField` |
+| `cell-text` | Used by `CellText` |
+| `editable-rows`, `editable-rows-table`, `editable-rows-controls` | Used by `EditableRows` |
+| `checked-figure`, `checked-figure-status` | Used by `CheckedFigure` |
 
 The stylesheet also sets React Flow's own variables (`--xy-…`) on `.react-flow`, so
 that its background, lines, labels and controls follow the paper colours in both modes.
@@ -571,17 +904,30 @@ A screen that uses React Flow imports its stylesheet in its own folder:
 | `ListColumn` | `width: number`, `label: string`, `children`, `style?` | A fixed-width column on the left, such as the list of definitions. It scrolls |
 
 The top bar shows the project name, "Saved" with the real time of the last save, the
-light and dark switch, the project's live error and warning counts (a link to
-`/problems`), and "Export PDF" (a link to `/export`). While the findings are hidden, the
-words "Problems hidden" and a "Check now" button take the place of the counts.
+"Logical" and "Physical" switch, the light and dark switch, the project's live error and
+warning counts for the current mode (a link to `/problems`), and "Export PDF" (a link to
+`/export`). While the findings are hidden, the words "Problems hidden" and a "Check now"
+button take the place of the counts.
 
-The navigator has these rows: "Use cases" with a count, the heading "Diagrams", one row
-for each diagram as a tree with its error and warning counts or an OK mark, "Data
-dictionary" with a count, "Data model" with its counts, "CRUD matrix", "Search",
-"Project", "Problems" with the total, and "Help: symbols and rules" at the bottom. The
-counts are live. A diagram above the top diagram is shown in muted text with the words
-"above the project" and no marks. While the findings are hidden, no marks are shown and
-the "Problems" row says "hidden".
+The navigator groups the parts of the project under the textbook's four phases, then
+the binder, then the rows for the whole project. Every count is live.
+
+| Group | Rows |
+| --- | --- |
+| Planning | "System request" and "Feasibility analysis", each with its marks |
+| Analysis | "Requirements definition" with its marks and a count, "Use cases" with a count, the small heading "Diagrams" and one row for each diagram as a tree with its marks, "Data dictionary" with its marks and a count, "Data model" with its marks, "CRUD matrix" |
+| Design | "Alternative matrix", "Interface structure", "Structure charts", "Program specifications" and "Storage size estimate", each with its marks. When the project has more than one interface structure diagram or structure chart, each gets a row of its own below |
+| Implementation | "Test plan" with its marks and a count |
+| Binder | "Contents" with the number of sections, then one row for each section, with the number of files attached to it |
+| (no heading) | "Search", "Project", "Problems" with the total, and "Help: symbols and rules" at the bottom |
+
+A group's heading is a button that closes and opens it. The choice is kept in
+`localStorage` under `diagramble.prototype.nav.closed`. While a group is closed, its
+heading shows the marks of everything inside it, so that no problem is hidden. The
+diagrams, the dictionary count and the data model marks follow the mode: a
+system-related diagram or definition is listed in physical mode only. A diagram above
+the top diagram is shown in muted text with the words "above the project" and no marks.
+While the findings are hidden, no marks are shown and the "Problems" row says "hidden".
 
 ## Shared components (`src/components/`)
 
@@ -602,6 +948,21 @@ the "Problems" row says "hidden".
 | `SectionHeading` | `children`, `count?: number` | A heading with a count, such as "Problems 1" |
 | `EntryFields` | `elementId: Id`, `compact?: boolean` | Shows and edits the fields every entry shares: the aliases (a small list with "Remove" beside each and a box to add one), the notes, and for a process the process description. Each edit is saved when its field loses focus, as one undo step, through `setAliases`, `setNotes` and `setProcessDescription`. An empty field has the "missing" look. It needs nothing from the screen around it: drop it into a panel or a page. `compact` gives shorter text areas and tighter spacing, for a narrow panel. It shows nothing when the element does not exist |
 
+The form controls, in `src/components/forms.tsx`. They were added because three or more
+of the new screens need each one.
+
+| Component | Props | What it is |
+| --- | --- | --- |
+| `NumberField` | `label`, `value: number \| null`, `onCommit(value)`, `unit?: 'money' \| 'percent' \| 'plain'`, `suffix?`, `hint?`, `placeholder?`, `readOnly?`, `hideLabel?`, `size?` (characters, default 10) | A box for one number, right-aligned and monospaced. It keeps its own draft and calls `onCommit` when it loses focus, or on Enter, with the number or `null` when cleared. It is not called when nothing changed. Commas, spaces, "$" and "%" are ignored. Text that is not a number is not reported: the box turns to the error colour and says what to type. `'money'` groups the digits and `'percent'` shows "%" after the box |
+| `SelectField` | `label`, `value`, `options: { value, label }[]`, `onChange(value)`, `hint?`, `hideLabel?`, `disabled?` | A labelled list to choose one option from |
+| `CellText` | `label`, `value`, `onCommit(value)`, `placeholder?`, `rows?` | A text box for a table cell, with no visible label. It reports the text when it loses focus, if it changed |
+| `EditableRows` | `label`, `rows: T[]`, `columns: { key, heading, width?, numeric?, render(row, index, set) }[]`, `onChange(rows)`, `newRow?()`, `addLabel?`, `emptyText?`, `fixedOrder?`, `fixedRows?`, `footer?`, `hideHeadings?` | A table of rows with "Up", "Down" and "Remove" beside each and an add button below. It holds no state: any edit, add, removal or move calls `onChange` with the whole new list, so dispatch one command from it. In `render`, call `set(row)` with the changed row. `footer` takes `<tr>` rows for totals. A list of plain text is one column with `hideHeadings` |
+| `CheckedFigure` | Every `NumberField` prop but `hint`, and `status: 'empty' \| 'match' \| 'mismatch' \| 'none' \| 'unknown'`, `note?` | A figure the student types, with a mark beside it: the OK mark for a match, the error mark for a mismatch, and the "missing" look when nothing is typed. It never shows the right answer: the finding's card shows the working. While the findings are held back it shows no verdict. `status` is `checkMeasures(...).roi.status`, or for an expected value work it out with `expectedValue` |
+| `ModeSwitch` | `small?` | The "Logical" and "Physical" switch, wired to the store |
+
+Also exported: `numberText(value, unit)` and `parseNumber(text)`, which `NumberField`
+uses.
+
 The marks follow section 1.2 of the briefs. Each mark means one thing. Use the error and
 warning marks only for findings, the OK mark only where the rules ran and found nothing,
 and the AI mark only around text an AI wrote. The app has no other status labels.
@@ -609,7 +970,8 @@ and the AI mark only around text an AI wrote. The app has no other status labels
 ## The sample data (`src/sample/clinic.ts`)
 
 "Clinic appointments", exactly as section 1.4 of the briefs describes it, plus three use
-cases and a small data model. It is the project the app starts with. It is built with
+cases, a small data model, and content of every kind of the second release
+(`src/sample/clinic2.ts`). It is the project the app starts with. It is built with
 commands. Its ids are stable, so a screen may use them for its starting state:
 
 | What | Id |
@@ -622,8 +984,19 @@ commands. Its ids are stable, so a screen may use them for its starting state:
 | Use cases | `uc-1`, `uc-2`, `uc-3` |
 | Entities | `en-client`, `en-pet`, `en-appointment` |
 | Relationships | `r-client-pet`, `r-pet-appointment` |
+| System request, feasibility analysis | `CLINIC2.systemRequest` (`sr`), `CLINIC2.feasibility` (`fa`) |
+| Requirements | User: `rq-u1`, `rq-u2`. Functional: `CLINIC2.fFreeTimes`, `fBook`, `fConfirm`, `fClientDetails`, `fVisitNotes`, `fDailyList` (`rq-f1` to `rq-f6`). Nonfunctional: `rq-n1` to `rq-n4` |
+| Alternative matrix | `CLINIC2.matrix` (`am-1`) |
+| Tests | `t-1` to `t-5` |
+| Interface structure diagram | `CLINIC2.interfaceDiagram` (`isd-1`) |
+| Interfaces | `CLINIC2.ifMenu`, `ifAppointments`, `ifBook`, `ifConfirm`, `ifFindClient`, `ifVisit`, `ifSchedule` (`if-menu`, `if-appointments`, `if-book`, `if-confirm`, `if-find-client`, `if-visit`, `if-schedule`) |
+| Binder sections | `CLINIC2.binderCharter`, `binderRisk`, `binderInterviews`, `binderMigration` (`b-charter`, `b-risk`, `b-interviews`, `b-migration`). The attachment is `at-diary-sketch` |
+| Structure chart | `CLINIC2.chart` (`sc-1`) |
+| Modules | `CLINIC2.mTop`, `mSchedule`, `mCheck`, `mBook`, `mConfirm`, `mRead`, `mRecord`, `mDaily` (`m-top`, `m-schedule`, `m-check`, `m-book`, `m-confirm`, `m-read`, `m-record`, `m-daily`), and the two boxes that repeat `mRead`: `mReadAgain1`, `mReadAgain2` (`m-read-2`, `m-read-3`) |
+| Couples | `cp-schedule-in`, `cp-schedule-out`, `cp-check-in`, `cp-check-out`, `cp-check-none`, `cp-book-slot`, `cp-book-client`, `cp-book-out`, `cp-confirm-in`, `cp-confirm-out`, `cp-read-in`, `cp-read-out`, `cp-read-end`, `cp-record-in`, `cp-record-out`, `cp-daily-out` |
 
-Flows and occurrences have generated ids. Find them with `flowsOn` and `occurrencesOn`.
+Flows, occurrences and navigation links have generated ids. Find them with `flowsOn`,
+`occurrencesOn` and `linksOn`.
 Never rely on a sample id for anything but a starting state, because the user can delete
 anything and can add items of their own.
 
@@ -649,18 +1022,66 @@ It has a few of the newer fields filled in, so that the screens have something t
 
 Both relationships have all four values decided, and no attribute repeats.
 
-Its findings are exactly these five:
+The second-release content, all invented for this project:
+
+| What | What it holds |
+| --- | --- |
+| System request | Every field filled. Three values: one tangible with three estimates whose expected value, 18,000, is typed correctly; one tangible with a plain amount, 9,000; one intangible |
+| Feasibility analysis | All nine assessments. A cash flow table for 2027 with three more years at 6%: two benefits (one typed, one given as 450 hours at 20 with 5% growth, each linked to a value of the system request), three development costs (one given as 40 hours at 25) and two operational costs. Total benefits 82,372.50 and total costs 47,000. The break-even point, 1.42 years, and the net present value, 28,112, are typed correctly. The return on investment is typed as 42.9%, where the formula gives 75.3% |
+| Requirements definition | Two user requirements. Six functional requirements in three groups under the headings "Front desk" and "Veterinarians", traced to the use cases and processes. Four nonfunctional requirements with sub-types. "Cultural and political" is marked as none expected |
+| Alternative matrix | "How to get the appointment system": three alternatives, five criteria whose weights add up to 100, fifteen scored cells and a recommendation |
+| Test plan | Five tests across the unit, integration and system stages, each pointing at a requirement, a module and interfaces. One has passed and one has open items |
+| Interface structure diagram | "Clinic System interfaces": seven interfaces from "0 Main Menu" down, six links that form a tree and one shortcut across it |
+| Binder | "Project charter" and "Risk assessment" (planning, from their layouts), "Interview notes: front desk" (analysis, no layout, with a small SVG image attached), and "Migration plan" (implementation) with the conversion strategy parallel, pilot and whole-system, and reasons |
+| Physical data flow diagram | An implementation on six of the seven processes. Both external entities are marked as human. The data store and 18 of the 19 flows have physical names |
+| Structure chart | "Clinic System": ten modules, one for each process, with the library module "Read Appointments" drawn in three places, 14 data couples and 2 flags. "Book Slot" has every field of its program specification filled in. The other modules have a purpose, a language and pseudocode |
+| Physical data model | A table name on each entity and a field name, length and "null" on each attribute. The foreign key is placed for Client and Pet. The appointment table repeats "Pet Name" as a copy |
+| Storage figures | An overhead rate of 30% and 24 months. Initial records and growth on each table: by month for Client and Pet, and 12% a year for Appointment. An average width on seven of the eight fields |
+
+Nothing in the sample is system-related, because the first-release tests fix its
+counts of processes, data stores, flows, definitions and entities. To see the logical
+view hide something, add a system-related item by hand.
+
+`buildClinic(options)` takes `mistakes`, `useCases`, `dataModel` and `secondRelease`
+(each default true). The second-release content needs the use cases and the data model.
+With `mistakes: false` the sample has none of its deliberate slips, and its only
+findings are DM-01 twice.
+
+### The sample's findings
+
+In logical mode, the mode the app starts in, there are exactly these eleven: the five of
+the first release and six new ones. The top bar shows 2 errors and 9 warnings.
 
 | Rule | Severity | Counted on | Message |
 | --- | --- | --- | --- |
+| FA-02 | Error | Feasibility analysis | The return on investment you typed, 42.9%, does not match the table. |
 | BAL-01 | Error | 1 Schedule Appointment | 'Appointment Request' enters 'Schedule Appointment' on the parent diagram but does not fully enter this diagram. Missing: Client Details. |
-| BAL-03 | Warning | 1 Schedule Appointment | 'Booking Info' crosses the edge of this diagram but not 'Schedule Appointment' on the parent diagram. |
+| RQ-01 | Warning | Requirements definition | Requirement 1.4 is not traced to a use case or a process. |
 | DFD-13 | Warning | Level 0 | 'Produce Daily Schedule' has no description. |
+| BAL-03 | Warning | 1 Schedule Appointment | 'Booking Info' crosses the edge of this diagram but not 'Schedule Appointment' on the parent diagram. |
 | DM-01 | Warning | Data model | 'Client' is not held in any data store. |
 | DM-01 | Warning | Data model | 'Pet' is not held in any data store. |
+| AM-03 | Warning | Alternative matrix | 'How to get the appointment system' has 1 cell with no supporting information. |
+| ISD-03 | Warning | Interface structure | 'Find Client' has nothing below it and names no process. |
+| PS-01 | Warning | Structure charts | The program specification of 'Send Confirmation' has no pseudocode. |
+| TP-02 | Warning | Test plan | No test addresses requirement 3.1. |
 
-So the top bar shows 1 error and 4 warnings, where the briefs show 1 and 2. The briefs
-were written before the data model was added.
+Physical mode adds exactly these four, for 2 errors and 13 warnings:
+
+| Rule | Severity | Counted on | Message |
+| --- | --- | --- | --- |
+| PD-01 | Warning | Level 0 | 'Record Visit' has no implementation and is not marked as human work. |
+| PD-02 | Warning | 1 Schedule Appointment | The flow 'Available Slot' has no physical name. |
+| PDM-03 | Warning | Data model | The relationship between 'Pet' and 'Appointment' has no foreign key. |
+| VOL-01 | Warning | Storage size estimate | 'Appointment' has no average width for Reason for Visit. |
+
+Both lists are fixed by the tests under "The whole sample" in `release2.test.ts`. The
+five findings of the first-release part alone are fixed by the older tests, which now
+build it with `buildClinic({ secondRelease: false })`.
+
+A browser that already holds a saved project keeps it, because the storage key has not
+changed. The new content appears after "Start again from the sample data" on the
+project page.
 
 To start again from the sample data, call `resetToSample()`, or remove the key
 `diagramble.prototype.project.v2` from the browser's `localStorage`.
@@ -681,6 +1102,9 @@ element has `origin: 'starter'`. `starterById(id)` finds one. Open one with the 
 
 `STARTER_IDS` gives the ids the starters share: `context` (`dg-context`), `level0`
 (`dg-level0`), `p0` and `file` (`en-file`, the entity of "Normalize a file").
+
+No starter holds second-release content yet, so none has a second-release finding, in
+either mode.
 
 The sample is not in `STARTERS`. Load it with `resetToSample()`.
 
@@ -707,15 +1131,48 @@ The sample is not in `STARTERS`. Load it with `resetToSample()`.
   told and no empty undo step is made. The specification does not say.
 - **`length` and `nullable`** sit on the data element from the start. The specification
   defines them in section 11.5 and lets them be filled in from the first release.
+- **The interface structure diagram and the structure chart are kinds of their own,**
+  `interfaceDiagram` and `structureChart`, where the specification makes them kinds of
+  diagram. Every first-release screen takes a `diagram` to be a data flow diagram.
+- **One mode for the whole project.** The specification lets each diagram and the
+  matrix be shown in either mode. The prototype has one switch, because the findings
+  are worked out for one mode at a time.
+- **A structure that holds only system-related data is left out of the logical view.**
+  The specification gives a data structure no mark of its own.
+- **A line given as a quantity and a unit amount starts in year 1** for a benefit or an
+  operational cost, and falls in year 0 alone for a development cost. The specification
+  says "the first year" and no more.
+- **Growth as a yearly percentage is compounded at the end of each whole year,** so a
+  part of a year at the end adds nothing. The specification says only that it compounds
+  once a year.
+- **The net present value allowance is one unit of money for each column,** counting
+  year 0.
+- **"A requirement, or text"** and the two like it on a test are two fields each, an id
+  and a text.
+- **User requirements are numbered U1, U2.** The specification gives them no numbers.
+- **The fifteen sub-types, the types of test and the conversion table** were written
+  from general knowledge of the subject, not copied from the textbook. Check them
+  against Figures 7-5 to 7-8, 11-4 and 12-4.
+- **A binder section's body is plain text** with marks for headings, lists and tables.
+- **No rule reads `repeated` or `events`,** and nothing checks `copies`, as the
+  specification says.
 
-## What the screens now use
+## What is waiting for a screen
 
-Every item that the shared code gained in the second round is used by a screen: the
-entry fields, `carryDown`, the fragment view, values with meanings, part limits, length
-and "null", exception steps, the event-response list, undecided relationship ends,
-repeating attributes, entity rows in the matrix, search, the project settings and the
-starter cases. The export leaves out diagrams above the top diagram unless they are
-ticked.
+Everything the first-release screens were given is in use. The shared code of the
+second release is all waiting: see "What each screen agent builds". Until those screens
+are built:
 
-Known leftovers: no command renames the project, and the refusal text of `carryDown`
-says "carry down" where the buttons say "Bring down new flows".
+- The five new folders and `/storage` show placeholders with their problems beside them.
+- The diagram canvas, the outline, the ERD and the CRUD matrix read `useModel()`, so
+  they show system-related items in both modes and no physical names.
+- The problems page groups the new areas under "Whole project" and offers them a link
+  to the dictionary (`src/screens/project/shared.ts`). The link on each problem card is
+  already right.
+- The help page lists the new rules, because it reads `RULE_LIST`, with no page about
+  the new symbols.
+- The export has none of the compiled documents of section 10.8.
+- No screen calls `renameProject`.
+
+Known leftover from the first release: the refusal text of `carryDown` says "carry
+down" where the buttons say "Bring down new flows".

@@ -35,6 +35,16 @@ function Box({
   );
 }
 
+/** The tick box that makes a new item system-related. Offered in physical mode only. */
+function SystemTick({ checked, onChange }: { checked: boolean; onChange: (checked: boolean) => void }) {
+  return (
+    <label className="workspace-tick" title="For something that exists only because of how the system is built, such as an audit file. It is shown only in physical mode.">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      System-related
+    </label>
+  );
+}
+
 const SYMBOL_WORDS = { process: 'process', dataStore: 'data store', externalEntity: 'external entity' } as const;
 
 /** Asks for the name of a new symbol, and offers the existing ones that are not on this diagram. */
@@ -43,6 +53,7 @@ export function AddSymbolBox({
   top,
   kind,
   existing,
+  offerSystem = false,
   onAdd,
   onPlace,
   onCancel,
@@ -51,13 +62,16 @@ export function AddSymbolBox({
   top: number;
   kind: keyof typeof SYMBOL_WORDS;
   existing: { element: NodeElement; label: string }[];
-  onAdd: (name: string) => void;
+  /** True to offer the "System-related" tick box. */
+  offerSystem?: boolean;
+  onAdd: (name: string, systemRelated: boolean) => void;
   onPlace: (elementId: Id) => void;
   onCancel: () => void;
 }) {
   const [name, setName] = useState('');
+  const [system, setSystem] = useState(false);
   const add = () => {
-    if (name.trim()) onAdd(name.trim());
+    if (name.trim()) onAdd(name.trim(), offerSystem && system);
   };
   return (
     <Box left={left} top={top} title={`New ${SYMBOL_WORDS[kind]}`} onCancel={onCancel}>
@@ -72,6 +86,7 @@ export function AddSymbolBox({
           if (e.key === 'Enter') add();
         }}
       />
+      {offerSystem && <SystemTick checked={system} onChange={setSystem} />}
       <div className="hstack">
         <Button small variant="primary" disabled={!name.trim()} onClick={add}>
           Add
@@ -105,6 +120,7 @@ export function DataBox({
   title,
   initial,
   definitions,
+  offerSystem = false,
   onPick,
   onCancel,
 }: {
@@ -113,10 +129,14 @@ export function DataBox({
   title: string;
   initial: string;
   definitions: DataDefinition[];
-  onPick: (choice: DataChoice) => void;
+  /** True to offer the "System-related" tick box, for a new flow. */
+  offerSystem?: boolean;
+  onPick: (choice: DataChoice, systemRelated: boolean) => void;
   onCancel: () => void;
 }) {
   const [text, setText] = useState(initial);
+  const [system, setSystem] = useState(false);
+  const pick = (choice: DataChoice) => onPick(choice, offerSystem && system);
   const wanted = text.trim().toLowerCase();
   const exact = definitions.find((d) => d.name.toLowerCase() === wanted);
   // Until the student changes the text, show every definition, not only the current one.
@@ -126,7 +146,7 @@ export function DataBox({
     .sort((a, b) => a.name.localeCompare(b.name));
   const submit = () => {
     if (!wanted) return;
-    onPick(exact ? { dataId: exact.id } : { dataName: text.trim() });
+    pick(exact ? { dataId: exact.id } : { dataName: text.trim() });
   };
   return (
     <Box left={left} top={top} title={title} onCancel={onCancel}>
@@ -142,6 +162,7 @@ export function DataBox({
           if (e.key === 'Enter') submit();
         }}
       />
+      {offerSystem && <SystemTick checked={system} onChange={setSystem} />}
       <div className="workspace-box-list">
         {wanted && !exact && (
           <button type="button" className="row workspace-box-row" onClick={submit}>
@@ -149,7 +170,7 @@ export function DataBox({
           </button>
         )}
         {matches.map((d) => (
-          <button key={d.id} type="button" className="row workspace-box-row" onClick={() => onPick({ dataId: d.id })}>
+          <button key={d.id} type="button" className="row workspace-box-row" onClick={() => pick({ dataId: d.id })}>
             {d.name}
             <span className="muted workspace-box-kind">{d.kind === 'dataStructure' ? 'structure' : 'element'}</span>
           </button>

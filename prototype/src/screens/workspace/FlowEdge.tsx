@@ -97,7 +97,13 @@ export function FlowEdge({ data, selected }: EdgeProps<CanvasEdge>) {
             transform: `translate(-50%, ${above ? '-100%' : '-50%'}) translate(${labelX}px, ${above ? labelY - 4 : labelY}px)`,
             maxWidth,
           }}
-          title={data.control ? 'Double-click to rename' : 'Double-click to change the data this flow carries'}
+          title={
+            data.control
+              ? 'Double-click to rename'
+              : data.physical && data.physicalName
+                ? `Carries ${data.label || 'data with no name'}. Double-click to change the data this flow carries`
+                : 'Double-click to change the data this flow carries'
+          }
           onClick={() => selectElements([data.flowId])}
           onDoubleClick={(e) => {
             e.stopPropagation();
@@ -115,7 +121,19 @@ export function FlowEdge({ data, selected }: EdgeProps<CanvasEdge>) {
             />
           ) : (
             <>
-              {data.label ? data.label : <span className="missing">No name</span>}
+              {data.physical && data.physicalName ? (
+                data.physicalName
+              ) : data.label ? (
+                data.label
+              ) : (
+                <span className="missing">No name</span>
+              )}
+              {data.physical && !data.physicalName && <span className="missing workspace-sub">no physical name</span>}
+              {data.physical && data.systemRelated && (
+                <span className="workspace-system" title="System-related: shown only in physical mode">
+                  system
+                </span>
+              )}
               {data.mark && <Mark kind={data.mark} size={14} />}
             </>
           )}

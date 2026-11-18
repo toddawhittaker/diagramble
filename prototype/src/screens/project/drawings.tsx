@@ -20,16 +20,16 @@ import {
   type Side,
 } from '../../model';
 
-const INK = 'var(--ink)';
-const PAPER = 'var(--paper)';
-const MUTED = 'var(--muted)';
+export const INK = 'var(--ink)';
+export const PAPER = 'var(--paper)';
+export const MUTED = 'var(--muted)';
 
 export interface Pt {
   x: number;
   y: number;
 }
 
-interface Box {
+export interface Box {
   x: number;
   y: number;
   width: number;
@@ -70,7 +70,7 @@ function facingSide(from: Box, to: Box): Side {
 }
 
 /** Breaks a name into lines of about `maxChars` characters. */
-function wrap(text: string, maxChars: number): string[] {
+export function wrap(text: string, maxChars: number): string[] {
   const limit = Math.max(6, Math.floor(maxChars));
   const lines: string[] = [];
   let line = '';
@@ -97,7 +97,7 @@ interface LinesProps {
   bold?: boolean;
 }
 
-function Lines({ x, y, lines, anchor = 'middle', size = 13, muted, halo, bold }: LinesProps) {
+export function Lines({ x, y, lines, anchor = 'middle', size = 13, muted, halo, bold }: LinesProps) {
   const lineHeight = size + 3;
   const spans = lines.map((line, i) => (
     <tspan key={i} x={x} y={y + (i - (lines.length - 1) / 2) * lineHeight + size * 0.35}>
@@ -121,7 +121,7 @@ function Lines({ x, y, lines, anchor = 'middle', size = 13, muted, halo, bold }:
 }
 
 /** A straight line with one arrowhead at the end it points to. */
-function Arrow({ from, to, dotted }: { from: Pt; to: Pt; dotted?: boolean }) {
+export function Arrow({ from, to, dotted }: { from: Pt; to: Pt; dotted?: boolean }) {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
   const length = Math.hypot(dx, dy) || 1;
@@ -148,8 +148,10 @@ function Arrow({ from, to, dotted }: { from: Pt; to: Pt; dotted?: boolean }) {
 
 // ---- The three symbols of a data flow diagram ----
 
-function ProcessSymbol({ box, number, name }: { box: Box; number: string; name: string }) {
+function ProcessSymbol({ box, number, name, implementation }: { box: Box; number: string; name: string; implementation?: string }) {
   const band = 24;
+  // In physical mode the last line of the symbol says how the process is carried out.
+  const foot = implementation === undefined ? 0 : 18;
   return (
     <g>
       <rect x={box.x} y={box.y} width={box.width} height={box.height} rx={12} fill={PAPER} stroke={INK} strokeWidth={1.5} />
@@ -159,10 +161,22 @@ function ProcessSymbol({ box, number, name }: { box: Box; number: string; name: 
       </text>
       <Lines
         x={box.x + box.width / 2}
-        y={box.y + band + (box.height - band) / 2}
+        y={box.y + band + (box.height - band - foot) / 2}
         lines={name ? wrap(name, (box.width - 16) / 7) : ['No name']}
         muted={!name}
       />
+      {implementation !== undefined && (
+        <>
+          <line x1={box.x} y1={box.y + box.height - foot} x2={box.x + box.width} y2={box.y + box.height - foot} stroke={INK} strokeWidth={1} />
+          <Lines
+            x={box.x + box.width / 2}
+            y={box.y + box.height - foot / 2}
+            lines={[implementation || 'No implementation']}
+            size={11}
+            muted={!implementation}
+          />
+        </>
+      )}
     </g>
   );
 }
@@ -203,12 +217,42 @@ function ExternalSymbol({ box, name }: { box: Box; name: string }) {
   );
 }
 
-function NodeSymbol({ model, occ }: { model: Model; occ: NodeOccurrence }) {
+function NodeSymbol({ model, occ, physical }: { model: Model; occ: NodeOccurrence; physical?: boolean }) {
   const element = model.elements[occ.elementId];
   if (!element) return null;
-  if (element.kind === 'process') return <ProcessSymbol box={occ} number={processNumber(model, element.id)} name={element.name} />;
-  if (element.kind === 'dataStore') return <StoreSymbol box={occ} label={storeLabel(model, element.id)} name={element.name} />;
-  return <ExternalSymbol box={occ} name={element.name} />;
+  // Work a person does is marked with a dashed outline: the human side of the human-machine boundary.
+  const human = physical && (element.kind === 'process' || element.kind === 'externalEntity') && element.human;
+  const outline = human ? (
+    <rect
+      x={occ.x - 9}
+      y={occ.y - 9}
+      width={occ.width + 18}
+      height={occ.height + 18}
+      fill="none"
+      stroke={INK}
+      strokeWidth={1}
+      strokeDasharray="6 4"
+    />
+  ) : null;
+  let symbol: ReactNode;
+  if (element.kind === 'process')
+    symbol = (
+      <ProcessSymbol
+        box={occ}
+        number={processNumber(model, element.id)}
+        name={element.name}
+        implementation={physical ? (element.human ? element.implementation || 'Done by a person' : element.implementation) : undefined}
+      />
+    );
+  else if (element.kind === 'dataStore')
+    symbol = <StoreSymbol box={occ} label={storeLabel(model, element.id)} name={(physical && element.physicalName) || element.name} />;
+  else symbol = <ExternalSymbol box={occ} name={element.name} />;
+  return (
+    <g>
+      {outline}
+      {symbol}
+    </g>
+  );
 }
 
 // ---- A whole data flow diagram ----
@@ -219,7 +263,7 @@ const STUB = 70;
  * One data flow diagram as a picture: the symbols at their stored places and sizes, and
  * each flow as a straight line between the middles of the sides its route names.
  */
-export function StaticDfd({ model, diagramId }: { model: Model; diagramId: Id }) {
+export function StaticDfd({ model, diagramId, physical }: { model: Model; diagramId: Id; physical?: boolean }) {
   const occs = occurrencesOn(model, diagramId);
   const byId = new Map(occs.map((o) => [o.id, o]));
   const firstOf = (elementId: Id | null) => (elementId ? occs.find((o) => o.elementId === elementId) : undefined);
@@ -260,7 +304,7 @@ export function StaticDfd({ model, diagramId }: { model: Model; diagramId: Id })
 
   for (const flow of flowsOn(model, diagramId)) {
     const route = model.views.routes[flow.id];
-    const data = model.elements[flow.dataId]?.name || 'No data named';
+    const data = (physical && flow.physicalName) || model.elements[flow.dataId]?.name || 'No data named';
     const source = (route?.sourceOccurrenceId ? byId.get(route.sourceOccurrenceId) : undefined) ?? firstOf(flow.sourceId);
     const target = (route?.targetOccurrenceId ? byId.get(route.targetOccurrenceId) : undefined) ?? firstOf(flow.targetId);
 
@@ -311,11 +355,11 @@ export function StaticDfd({ model, diagramId }: { model: Model; diagramId: Id })
       viewBox={`${minX} ${minY} ${width} ${height}`}
       style={{ maxWidth: width }}
       role="img"
-      aria-label={`Data flow diagram: ${elementLabel(model, diagramId)}`}
+      aria-label={`${physical ? 'Physical data flow diagram' : 'Data flow diagram'}: ${elementLabel(model, diagramId)}`}
     >
       {lines}
       {occs.map((occ) => (
-        <NodeSymbol key={occ.id} model={model} occ={occ} />
+        <NodeSymbol key={occ.id} model={model} occ={occ} physical={physical} />
       ))}
       {labels}
     </svg>
@@ -554,7 +598,7 @@ export function CrowsFootEnd({ at, u, min, max }: { at: Pt; u: Pt; min: 0 | 1 | 
 }
 
 /** The point where the line from the middle of a box towards `toward` leaves the box. */
-function borderPoint(box: Box, toward: Pt): Pt {
+export function borderPoint(box: Box, toward: Pt): Pt {
   const cx = box.x + box.width / 2;
   const cy = box.y + box.height / 2;
   const dx = toward.x - cx;
@@ -672,7 +716,7 @@ export function StaticErd({ model }: { model: Model }) {
 
 // ---- Small pictures for the help page ----
 
-function Picture({ width, height, label, children }: { width: number; height: number; label: string; children: ReactNode }) {
+export function Picture({ width, height, label, children }: { width: number; height: number; label: string; children: ReactNode }) {
   return (
     <svg className="project-picture" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label}>
       {children}

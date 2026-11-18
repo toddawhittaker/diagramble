@@ -23,7 +23,55 @@ const KINDS: { kind: ElementKind; title: string }[] = [
   { kind: 'useCase', title: 'Use cases' },
   { kind: 'entity', title: 'Entities' },
   { kind: 'relationship', title: 'Relationships' },
+  { kind: 'systemRequest', title: 'System request' },
+  { kind: 'feasibility', title: 'Feasibility analysis' },
+  { kind: 'requirement', title: 'Requirements' },
+  { kind: 'alternativeMatrix', title: 'Alternative matrices' },
+  { kind: 'interfaceDiagram', title: 'Interface structure diagrams' },
+  { kind: 'interface', title: 'Interfaces' },
+  { kind: 'navigationLink', title: 'Navigation links' },
+  { kind: 'structureChart', title: 'Structure charts' },
+  { kind: 'module', title: 'Modules and program specifications' },
+  { kind: 'couple', title: 'Couples' },
+  { kind: 'test', title: 'Tests' },
+  { kind: 'binderSection', title: 'Binder sections' },
 ];
+
+/**
+ * The longer text of the second release's kinds, which the shared search counts as a
+ * description. The shared function that lists it is not exported, so this repeats it
+ * to show the words that matched.
+ */
+function longText(e: SearchResult['element']): string[] {
+  switch (e.kind) {
+    case 'process':
+      return [e.processDescription];
+    case 'systemRequest':
+      return [e.sponsor, e.businessNeed, e.specialIssues, ...e.businessRequirements, ...e.businessValue.map((v) => v.text)];
+    case 'binderSection':
+      return [e.body, ...e.attachments.map((a) => a.name)];
+    case 'module':
+      return [e.purpose, e.pseudocode, e.other];
+    case 'test':
+      return [e.objective, e.script, e.expectedResults, e.actualResults];
+    case 'alternativeMatrix':
+      return [e.recommendation, ...e.alternatives, ...e.criteria.map((c) => c.name)];
+    default:
+      return [];
+  }
+}
+
+/**
+ * Where a result opens. The shared search sends a module to its structure chart. When
+ * the words were found only in its program specification, that is the page to open.
+ */
+function openAt(result: SearchResult): { route: string; where: string } {
+  const e = result.element;
+  if (e.kind === 'module' && !e.repeatsId && result.matchedIn.length > 0 && !result.matchedIn.includes('name')) {
+    return { route: `/programs/${e.id}`, where: 'Program specifications' };
+  }
+  return { route: result.route, where: result.where };
+}
 
 const FIELD_WORDS: Record<SearchField, string> = {
   name: 'Name',
@@ -66,23 +114,28 @@ function matchedText(result: SearchResult, field: SearchField, words: string): s
     case 'alias':
       return e.aliases.filter(has).join(', ');
     case 'description':
-      // A process's longer description counts as a description.
-      return has(e.description) || e.kind !== 'process' ? e.description : e.processDescription;
+      // A process's longer description counts as a description, and so does the longer text of a form.
+      return has(e.description) ? e.description : (longText(e).find(has) ?? e.description);
     case 'notes':
       return e.notes;
   }
 }
 
 function ResultRow({ result, words }: { result: SearchResult; words: string }) {
+  const place = openAt(result);
   return (
-    <Link to={result.route} className="row project-search-row" onClick={() => selectElements([result.element.id])}>
+    <Link to={place.route} className="row project-search-row" onClick={() => selectElements([result.element.id])}>
       <span className="project-search-label">
         {result.label || <span className="missing">No name yet</span>}
-        <span className="muted project-search-where">{result.where}</span>
+        <span className="muted project-search-where">{place.where}</span>
       </span>
       {result.matchedIn.map((field) => (
         <span key={field} className="project-search-match">
-          <span className="mono muted project-search-field">{FIELD_WORDS[field]}</span>
+          <span className="mono muted project-search-field">
+            {field === 'description' && result.element.kind !== 'process' && !result.element.description.toLowerCase().includes(words)
+              ? 'Text'
+              : FIELD_WORDS[field]}
+          </span>
           <span>
             <Highlight text={matchedText(result, field, words)} words={words} />
           </span>
@@ -119,7 +172,9 @@ export function SearchScreen() {
   );
 
   let empty: string | null = null;
-  if (!asked) empty = 'Type a word to find anything in the project by its name, aliases, description or notes.';
+  if (!asked)
+    empty =
+      'Type a word to find anything in the project by its name, aliases, description or notes. The search also reads the text of the forms, the binder sections, the program specifications and the tests.';
   else if (results.length === 0) {
     const kindWords = kind ? ` among the ${KINDS.find((k) => k.kind === kind)?.title.toLowerCase()}` : '';
     if (words) empty = `Nothing${kindWords} matches “${text.trim()}”.`;
@@ -140,7 +195,7 @@ export function SearchScreen() {
               autoFocus
               value={text}
               onChange={setText}
-              placeholder="Search names, aliases, descriptions and notes"
+              placeholder="Search names, aliases, descriptions, notes and the text of the forms"
             />
             <select
               className="input"

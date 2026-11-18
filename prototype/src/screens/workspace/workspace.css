@@ -489,3 +489,185 @@
 .workspace-canvas .react-flow__edgelabel-renderer {
   z-index: 2000;
 }
+
+/* ---- Logical and physical: the bar above the canvas ---- */
+
+.workspace-mode {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--hairline);
+  background: var(--paper);
+  font-size: 14px;
+}
+
+.workspace-mode-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+}
+
+.workspace-mode-name {
+  font-weight: 700;
+}
+
+.workspace-mode-help {
+  color: var(--muted);
+}
+
+.workspace-tick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.workspace-tick input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
+.workspace-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.workspace-legend-box {
+  width: 18px;
+  height: 12px;
+}
+
+.workspace-legend-human {
+  border: 1.5px dashed var(--ink);
+}
+
+.workspace-legend-software {
+  border: 1px solid var(--ink);
+  background-image: repeating-linear-gradient(135deg, var(--hairline) 0 1.5px, transparent 1.5px 6px);
+}
+
+.workspace-only-physical {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 560px;
+  padding: 20px;
+}
+
+.workspace-only-physical p {
+  margin: 0;
+}
+
+/* ---- Physical detail on the symbols ---- */
+
+/* The last line of a process: what carries it out. */
+.workspace-process-impl {
+  flex: 0 0 auto;
+  padding: 2px 6px 3px;
+  border-top: 1px solid var(--hairline);
+  font-weight: 400;
+  font-size: 12.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workspace-process-band {
+  position: relative;
+}
+
+.workspace-process-system {
+  position: absolute;
+  right: 8px;
+  top: 0;
+}
+
+.workspace-store-name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.workspace-store-sub {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.workspace-entity-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.workspace-sub {
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* The word on an item that is shown only in physical mode. */
+.workspace-system {
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* The human-machine boundary: a dashed line around each symbol where a person does the work. */
+.workspace-canvas .react-flow__node.workspace-human::before {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border: 1.5px dashed var(--ink);
+  pointer-events: none;
+}
+
+.workspace-canvas .react-flow__node.workspace-human-process::before {
+  border-radius: 18px;
+}
+
+/* "Shade the software side": hatching on each process the software carries out. It sits over the fill, so the selection tint still shows. */
+.workspace-shade .workspace-software {
+  background-image: repeating-linear-gradient(135deg, var(--hairline) 0 1.5px, transparent 1.5px 6px);
+}
+
+.workspace-shade .workspace-software:not(.is-selected) .workspace-process-band,
+.workspace-shade .workspace-software:not(.is-selected) .workspace-process-impl {
+  background: var(--paper);
+}
+
+/* ---- The physical fields of the detail strip ---- */
+
+.workspace-physical {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 6px 18px;
+}
+
+.workspace-physical .field {
+  flex: 1 1 260px;
+  max-width: 460px;
+}
+
+.workspace-physical .workspace-tick,
+.workspace-physical > .muted {
+  min-height: 34px;
+}

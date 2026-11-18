@@ -24,10 +24,16 @@ export function normalizeModel(raw: unknown): Model {
       occurrences: isObject(raw.views.occurrences) ? raw.views.occurrences : {},
       routes: isObject(raw.views.routes) ? raw.views.routes : {},
       erd: isObject(raw.views.erd) ? raw.views.erd : {},
+      isd: isObject(raw.views.isd) ? raw.views.isd : {},
     },
     settings: {
       topDiagramId: typeof raw.settings?.topDiagramId === 'string' ? raw.settings.topDiagramId : blank.settings.topDiagramId,
       showFindings: raw.settings?.showFindings === 'onRequest' ? 'onRequest' : 'always',
+    },
+    project: {
+      noneExpected: Array.isArray(raw.project?.noneExpected) ? raw.project.noneExpected : [],
+      overheadRate: typeof raw.project?.overheadRate === 'number' ? raw.project.overheadRate : null,
+      months: typeof raw.project?.months === 'number' ? raw.project.months : null,
     },
   };
   for (const [id, value] of Object.entries(raw.elements as Loose)) {
@@ -37,6 +43,17 @@ export function normalizeModel(raw: unknown): Model {
       case 'process':
         e.processDescription ??= '';
         e.crud ??= [];
+        e.implementation ??= '';
+        e.human ??= false;
+        e.systemRelated ??= false;
+        break;
+      case 'externalEntity':
+        e.human ??= false;
+        break;
+      case 'dataStore':
+      case 'dataFlow':
+        e.physicalName ??= '';
+        e.systemRelated ??= false;
         break;
       case 'dataElement':
         if (Array.isArray(e.allowedValues))
@@ -45,16 +62,28 @@ export function normalizeModel(raw: unknown): Model {
           );
         e.length ??= null;
         e.nullable ??= null;
+        e.systemRelated ??= false;
+        e.fieldName ??= '';
+        e.defaultValue ??= '';
+        e.averageWidth ??= null;
         break;
       case 'useCase':
         e.exceptions = (e.exceptions ?? []).map((x: Loose) => ({ ...x, steps: Array.isArray(x.steps) ? x.steps : [] }));
         break;
       case 'entity':
         e.attributes = (e.attributes ?? []).map((a: Loose) => ({ ...a, repeats: a.repeats === true }));
+        e.systemRelated ??= false;
+        e.tableName ??= '';
+        e.copies ??= [];
+        e.initialRecords ??= null;
+        e.growthPerMonth ??= null;
+        e.growthPerYear ??= null;
+        e.recordSize ??= null;
         break;
       case 'relationship':
         if (!Array.isArray(e.ends) || e.ends.length !== 2) throw new Error(notOne);
         e.ends = e.ends.map((end: Loose) => ({ ...end, min: end.min ?? null, max: end.max ?? null }));
+        e.foreignKey ??= false;
         break;
     }
     model.elements[id] = e as Element;

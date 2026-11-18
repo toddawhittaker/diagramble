@@ -1,5 +1,18 @@
+import { chartOfModule, moduleNumber, requirementNumber } from './queries2';
 import type {
+  AlternativeMatrix,
+  BinderSection,
   ControlFlow,
+  Couple,
+  Feasibility,
+  Interface,
+  InterfaceDiagram,
+  Module,
+  NavigationLink,
+  Requirement,
+  StructureChart,
+  SystemRequest,
+  Test,
   DataDefinition,
   DataElement,
   DataFlow,
@@ -31,6 +44,18 @@ type KindMap = {
   useCase: UseCase;
   entity: Entity;
   relationship: Relationship;
+  systemRequest: SystemRequest;
+  feasibility: Feasibility;
+  requirement: Requirement;
+  alternativeMatrix: AlternativeMatrix;
+  test: Test;
+  interfaceDiagram: InterfaceDiagram;
+  interface: Interface;
+  navigationLink: NavigationLink;
+  binderSection: BinderSection;
+  structureChart: StructureChart;
+  module: Module;
+  couple: Couple;
 };
 
 /** Every element of one kind, in creation order. */
@@ -70,6 +95,18 @@ export const KIND_WORDS: Record<ElementKind, string> = {
   useCase: 'use case',
   entity: 'entity',
   relationship: 'relationship',
+  systemRequest: 'system request',
+  feasibility: 'feasibility analysis',
+  requirement: 'requirement',
+  alternativeMatrix: 'alternative matrix',
+  test: 'test',
+  interfaceDiagram: 'interface structure diagram',
+  interface: 'interface',
+  navigationLink: 'navigation link',
+  binderSection: 'binder section',
+  structureChart: 'structure chart',
+  module: 'module',
+  couple: 'couple',
 };
 
 const KIND_ORDER: Record<string, number> = { externalEntity: 0, process: 1, dataStore: 2 };
@@ -177,6 +214,22 @@ export function elementLabel(model: Model, id: Id | null | undefined): string {
       return `UC-${e.ordinal} ${e.name}`.trim();
     case 'relationship':
       return e.ends.map((end) => model.elements[end.entityId]?.name ?? '?').join(' – ');
+    case 'systemRequest':
+      return 'System request';
+    case 'feasibility':
+      return 'Feasibility analysis';
+    case 'requirement':
+      return `${requirementNumber(model, id)} ${e.name}`.trim();
+    case 'test':
+      return `T-${e.ordinal} ${e.name}`.trim();
+    case 'interface':
+      return `${e.number} ${e.name}`.trim();
+    case 'navigationLink':
+      return [e.aId, e.bId].map((end) => model.elements[end]?.name ?? '?').join(' – ');
+    case 'module':
+      return `${moduleNumber(model, id)} ${(e.repeatsId ? model.elements[e.repeatsId]?.name : e.name) ?? ''}`.trim();
+    case 'couple':
+      return e.coupleKind === 'data' ? (model.elements[e.dataId ?? '']?.name ?? '') : e.name;
     default:
       return e.name;
   }
@@ -655,6 +708,24 @@ function isUnused(model: Model, e: Element): boolean {
   return e.kind !== 'process' || !all(model, 'controlFlow').some((c) => c.targetId === e.id);
 }
 
+/** The longer text of the second release's kinds, which search treats as a description. */
+function moreText(e: Element): string[] {
+  switch (e.kind) {
+    case 'systemRequest':
+      return [e.sponsor, e.businessNeed, e.specialIssues, ...e.businessRequirements, ...e.businessValue.map((v) => v.text)];
+    case 'binderSection':
+      return [e.body, ...e.attachments.map((a) => a.name)];
+    case 'module':
+      return [e.purpose, e.pseudocode, e.other];
+    case 'test':
+      return [e.objective, e.script, e.expectedResults, e.actualResults];
+    case 'alternativeMatrix':
+      return [e.recommendation, ...e.alternatives, ...e.criteria.map((c) => c.name)];
+    default:
+      return [];
+  }
+}
+
 /** Where an element is opened, as a route and in words. */
 function openAt(model: Model, e: Element): { route: string; where: string } {
   const diagram = (id: Id | undefined) => (id ? { route: `/diagram/${id}`, where: diagramTitle(model, id) } : { route: '/', where: '' });
@@ -680,7 +751,40 @@ function openAt(model: Model, e: Element): { route: string; where: string } {
     case 'entity':
     case 'relationship':
       return { route: '/data-model', where: 'Data model' };
+    case 'systemRequest':
+      return { route: '/system-request', where: 'System request' };
+    case 'feasibility':
+      return { route: '/feasibility', where: 'Feasibility analysis' };
+    case 'requirement':
+      return { route: '/requirements', where: 'Requirements definition' };
+    case 'alternativeMatrix':
+      return { route: `/alternatives/${e.id}`, where: 'Alternative matrix' };
+    case 'test':
+      return { route: `/test-plan/${e.id}`, where: 'Test plan' };
+    case 'interfaceDiagram':
+      return { route: `/interfaces/${e.id}`, where: 'Interface structure' };
+    case 'interface':
+    case 'navigationLink':
+      return { route: `/interfaces/${e.diagramId}`, where: model.elements[e.diagramId]?.name || 'Interface structure' };
+    case 'binderSection':
+      return { route: `/binder/${e.id}`, where: 'Binder' };
+    case 'structureChart':
+      return { route: `/structure/${e.id}`, where: 'Structure charts' };
+    case 'module': {
+      const chart = chartOfModule(model, e.id);
+      return { route: chart ? `/structure/${chart.id}` : '/structure', where: chart?.name || 'Structure charts' };
+    }
+    case 'couple': {
+      const chart = chartOfModule(model, e.moduleId);
+      return { route: chart ? `/structure/${chart.id}` : '/structure', where: chart?.name || 'Structure charts' };
+    }
   }
+}
+
+/** The route that opens an element, and the place in words. The same answer `search` gives. */
+export function routeOf(model: Model, id: Id): { route: string; where: string } | undefined {
+  const e = model.elements[id];
+  return e ? openAt(model, e) : undefined;
 }
 
 /**
@@ -711,7 +815,7 @@ export function search(model: Model, options: SearchOptions): SearchResult[] {
     if (text) {
       if (has(e.name)) matchedIn.push('name');
       if (e.aliases.some(has)) matchedIn.push('alias');
-      if (has(e.description) || (e.kind === 'process' && has(e.processDescription))) matchedIn.push('description');
+      if (has(e.description) || (e.kind === 'process' && has(e.processDescription)) || moreText(e).some(has)) matchedIn.push('description');
       if (has(e.notes)) matchedIn.push('notes');
       if (matchedIn.length === 0) continue;
     }

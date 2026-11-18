@@ -52,34 +52,55 @@ function CoverHandles({ canStart, canEnd, title }: { canStart: boolean; canEnd: 
   );
 }
 
+const SYSTEM_TITLE = 'System-related: shown only in physical mode';
+
 export function SymbolView({ id, data, selected }: NodeProps<SymbolNode>) {
   const ui = useCanvasUi();
   const editing = ui.editing === id;
+  /** In physical mode a data store shows its physical name in place of its name, and that is what is edited in place. */
+  const physicalStore = data.physical && data.kind === 'dataStore';
+  const shown = physicalStore && data.physicalName ? data.physicalName : data.name;
 
   const name = editing ? (
     <InlineName
-      value={data.name}
-      label="Name"
+      value={physicalStore ? data.physicalName : data.name}
+      label={physicalStore ? 'Physical name' : 'Name'}
       onDone={(next) => {
         ui.setEditing(null);
-        if (next !== null && next !== '' && next !== data.name) dispatch({ type: 'rename', id: data.elementId, name: next });
+        if (next === null) return;
+        if (physicalStore) {
+          if (next !== data.physicalName) dispatch({ type: 'setPhysical', id: data.elementId, physicalName: next });
+        } else if (next !== '' && next !== data.name) dispatch({ type: 'rename', id: data.elementId, name: next });
       }}
     />
   ) : (
     <span
       className="workspace-symbol-name"
-      title="Double-click to rename"
+      title={
+        physicalStore
+          ? data.physicalName
+            ? `The data store '${data.name}'. Double-click to change its physical name`
+            : 'Double-click to give it a physical name'
+          : 'Double-click to rename'
+      }
       onDoubleClick={(e) => {
         e.stopPropagation();
         ui.setEditing(id);
       }}
     >
-      {data.name ? data.name : <span className="missing">No name</span>}
+      {shown ? shown : <span className="missing">No name</span>}
       {data.mark && <Mark kind={data.mark} size={14} />}
     </span>
   );
 
-  const classes = `workspace-symbol workspace-${data.kind}${selected ? ' is-selected' : ''}`;
+  const system = data.physical && data.systemRelated && (
+    <span className="workspace-system" title={SYSTEM_TITLE}>
+      system
+    </span>
+  );
+  // A process the software carries out. The "Shade the software side" switch shades these.
+  const software = data.physical && data.kind === 'process' && !data.human;
+  const classes = `workspace-symbol workspace-${data.kind}${software ? ' workspace-software' : ''}${selected ? ' is-selected' : ''}`;
   const handles = <CoverHandles canStart={ui.tool === 'dataFlow'} canEnd />;
 
   if (data.kind === 'process')
@@ -91,8 +112,22 @@ export function SymbolView({ id, data, selected }: NodeProps<SymbolNode>) {
           if (data.childDiagramId) ui.openDiagram(data.childDiagramId);
         }}
       >
-        <div className="workspace-process-band mono">{data.tag}</div>
+        <div className="workspace-process-band mono">
+          {data.tag}
+          {system && <span className="workspace-process-system">{system}</span>}
+        </div>
         <div className="workspace-process-name">{name}</div>
+        {data.physical && (
+          <div className="workspace-process-impl" title={data.human ? 'A person does this work' : 'What carries out this process'}>
+            {data.implementation ? (
+              data.implementation
+            ) : data.human ? (
+              'Done by a person'
+            ) : (
+              <span className="missing">No implementation yet</span>
+            )}
+          </div>
+        )}
         {handles}
       </div>
     );
@@ -101,14 +136,25 @@ export function SymbolView({ id, data, selected }: NodeProps<SymbolNode>) {
     return (
       <div className={classes}>
         <div className="workspace-store-tag mono">{data.tag}</div>
-        <div className="workspace-store-name">{name}</div>
+        <div className="workspace-store-name">
+          {name}
+          {data.physical && (!data.physicalName || system) && !editing && (
+            <div className="workspace-store-sub">
+              {!data.physicalName && <span className="missing workspace-sub">no physical name</span>}
+              {system}
+            </div>
+          )}
+        </div>
         {handles}
       </div>
     );
 
   return (
     <div className={classes}>
-      {name}
+      <div className="workspace-entity-body">
+        {name}
+        {data.physical && data.human && <div className="workspace-sub muted">a person</div>}
+      </div>
       {handles}
     </div>
   );

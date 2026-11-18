@@ -1,11 +1,14 @@
 // The frame every screen shares: docs/mockups/BRIEFS.md section 1.1.
 
-import { Fragment, type CSSProperties, type ReactNode } from 'react';
+import { Fragment, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router';
 import { Button, Switch } from '../components/controls';
+import { ModeSwitch } from '../components/forms';
 import { Count, FindingMarks, Mark } from '../components/Mark';
 import { all, dataDefinitions, diagramPath, diagramsInOrder, diagramTitle, isAboveProject } from '../model/queries';
+import { binderSections, feasibility, systemRequest } from '../model/queries2';
 import type { Id } from '../model/types';
+import type { Finding, FindingArea } from '../rules/engine';
 import {
   checkNow,
   clearError,
@@ -16,6 +19,7 @@ import {
   useLastError,
   useModel,
   useSavedAt,
+  useViewModel,
 } from '../store/store';
 import { setTheme, useTheme } from '../theme/theme';
 
@@ -40,6 +44,7 @@ export function TopBar() {
       <span className="topbar-project">{model.name}</span>
       <span className="grow" />
       <span className="topbar-saved">{savedText(savedAt)}</span>
+      <ModeSwitch small />
       <Switch
         small
         label="Colour mode"
@@ -80,50 +85,152 @@ function navClass(extra: string) {
   return ({ isActive }: { isActive: boolean }) => `nav-row ${extra}${isActive ? ' is-selected' : ''}`;
 }
 
-/** The sidebar on the left: the parts of the project in a fixed order, with live problem counts. */
+const NAV_KEY = 'diagramble.prototype.nav.closed';
+
+function loadClosed(): string[] {
+  try {
+    const raw = typeof localStorage === 'undefined' ? null : localStorage.getItem(NAV_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((x) => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+interface NavGroupProps {
+  id: string;
+  title: string;
+  closed: string[];
+  onToggle: (id: string) => void;
+  /** The findings counted anywhere in the group. Their marks are shown on the heading while the group is closed. */
+  findings: Finding[];
+  children: ReactNode;
+}
+
+/** One group of the navigator, such as a phase. Its heading opens and closes it. */
+function NavGroup({ id, title, closed, onToggle, findings, children }: NavGroupProps) {
+  const open = !closed.includes(id);
+  return (
+    <div className="nav-section">
+      <button type="button" className="nav-group nav-group-toggle" aria-expanded={open} onClick={() => onToggle(id)}>
+        <span className="nav-group-arrow" aria-hidden="true">
+          {open ? '−' : '+'}
+        </span>
+        <span className="nav-label">{title}</span>
+        {!open && <FindingMarks findings={findings} />}
+      </button>
+      {open && children}
+    </div>
+  );
+}
+
+/**
+ * The sidebar on the left: the parts of the project under the textbook's four phases,
+ * then the binder, then the rows for the whole project. The counts are live.
+ */
 export function Navigator() {
   const model = useModel();
+  const view = useViewModel();
   const findings = useFindings();
   const visible = useFindingsVisible();
-  const diagrams = diagramsInOrder(model);
-  const dictionary = findings.filter((f) => f.area === 'dictionary');
-  const dataModel = findings.filter((f) => f.area === 'dataModel');
+  const [closed, setClosed] = useState<string[]>(loadClosed);
+  const toggle = (id: string) => {
+    const next = closed.includes(id) ? closed.filter((x) => x !== id) : [...closed, id];
+    setClosed(next);
+    try {
+      localStorage.setItem(NAV_KEY, JSON.stringify(next));
+    } catch {
+      // The choice is then kept for this visit only.
+    }
+  };
+  const diagrams = diagramsInOrder(view);
+  const inArea = (...areas: FindingArea[]) => findings.filter((f) => areas.includes(f.area));
+  const group = { closed, onToggle: toggle };
+  const sections = binderSections(model);
+  const interfaceDiagrams = all(model, 'interfaceDiagram');
+  const charts = all(model, 'structureChart');
+  const row = (to: string, label: string, marks: ReactNode = null, count: number | null = null, end = false) => (
+    <NavLink className={navClass('nav-item')} to={to} end={end}>
+      <span className="nav-label">{label}</span>
+      {marks}
+      {count !== null && <Count n={count} />}
+    </NavLink>
+  );
   return (
     <nav className="navigator" aria-label="Parts of the project">
-      <NavLink className={navClass('nav-top')} to="/use-cases">
-        <span className="nav-label">Use cases</span>
-        <Count n={all(model, 'useCase').length} />
-      </NavLink>
-      <div className="nav-group">Diagrams</div>
-      {diagrams.map((row) => {
-        const above = isAboveProject(model, row.diagram.id);
-        return (
-          <NavLink
-            key={row.diagram.id}
-            className={navClass(above ? 'nav-diagram nav-above' : 'nav-diagram')}
-            to={`/diagram/${row.diagram.id}`}
-            style={{ paddingLeft: 21 + row.depth * 10 }}
-          >
-            <span className="nav-label" title={row.title}>
-              {row.title}
-              {above && <span className="nav-above-note">above the project</span>}
+      <NavGroup id="planning" title="Planning" findings={inArea('systemRequest', 'feasibility')} {...group}>
+        {row('/system-request', 'System request', <FindingMarks findings={inArea('systemRequest')} showOk={!!systemRequest(model)} />)}
+        {row('/feasibility', 'Feasibility analysis', <FindingMarks findings={inArea('feasibility')} showOk={!!feasibility(model)} />)}
+      </NavGroup>
+
+      <NavGroup id="analysis" title="Analysis" findings={inArea('requirements', 'diagram', 'dictionary', 'dataModel')} {...group}>
+        {row('/requirements', 'Requirements definition', <FindingMarks findings={inArea('requirements')} />, all(model, 'requirement').length)}
+        {row('/use-cases', 'Use cases', null, all(model, 'useCase').length)}
+        <div className="nav-subgroup">Diagrams</div>
+        {diagrams.map((d) => {
+          const above = isAboveProject(view, d.diagram.id);
+          return (
+            <NavLink
+              key={d.diagram.id}
+              className={navClass(above ? 'nav-diagram nav-above' : 'nav-diagram')}
+              to={`/diagram/${d.diagram.id}`}
+              style={{ paddingLeft: 21 + d.depth * 10 }}
+            >
+              <span className="nav-label" title={d.title}>
+                {d.title}
+                {above && <span className="nav-above-note">above the project</span>}
+              </span>
+              {!above && <FindingMarks findings={findings.filter((f) => f.diagramId === d.diagram.id)} showOk />}
+            </NavLink>
+          );
+        })}
+        {row('/dictionary', 'Data dictionary', <FindingMarks findings={inArea('dictionary')} />, dataDefinitions(view).length)}
+        {row('/data-model', 'Data model', <FindingMarks findings={inArea('dataModel')} showOk={all(view, 'entity').length > 0} />)}
+        {row('/crud', 'CRUD matrix')}
+      </NavGroup>
+
+      <NavGroup id="design" title="Design" findings={inArea('alternatives', 'interface', 'structure', 'storage')} {...group}>
+        {row('/alternatives', 'Alternative matrix', <FindingMarks findings={inArea('alternatives')} showOk={all(model, 'alternativeMatrix').length > 0} />)}
+        {row('/interfaces', 'Interface structure', <FindingMarks findings={inArea('interface')} showOk={interfaceDiagrams.length > 0} />, null, interfaceDiagrams.length > 1)}
+        {interfaceDiagrams.length > 1 &&
+          interfaceDiagrams.map((d) => (
+            <NavLink key={d.id} className={navClass('nav-diagram')} to={`/interfaces/${d.id}`} style={{ paddingLeft: 31 }}>
+              <span className="nav-label" title={d.name}>
+                {d.name || 'Untitled diagram'}
+              </span>
+              <FindingMarks findings={findings.filter((f) => f.homeId === d.id)} showOk />
+            </NavLink>
+          ))}
+        {row('/structure', 'Structure charts', <FindingMarks findings={inArea('structure').filter((f) => f.ruleId !== 'PS-01')} showOk={charts.length > 0} />, null, charts.length > 1)}
+        {charts.length > 1 &&
+          charts.map((c) => (
+            <NavLink key={c.id} className={navClass('nav-diagram')} to={`/structure/${c.id}`} style={{ paddingLeft: 31 }}>
+              <span className="nav-label" title={c.name}>
+                {c.name || 'Untitled chart'}
+              </span>
+              <FindingMarks findings={findings.filter((f) => f.homeId === c.id && f.ruleId !== 'PS-01')} showOk />
+            </NavLink>
+          ))}
+        {row('/programs', 'Program specifications', <FindingMarks findings={findings.filter((f) => f.ruleId === 'PS-01')} />)}
+        {row('/storage', 'Storage size estimate', <FindingMarks findings={inArea('storage')} />)}
+      </NavGroup>
+
+      <NavGroup id="implementation" title="Implementation" findings={inArea('testPlan')} {...group}>
+        {row('/test-plan', 'Test plan', <FindingMarks findings={inArea('testPlan')} />, all(model, 'test').length)}
+      </NavGroup>
+
+      <NavGroup id="binder" title="Binder" findings={[]} {...group}>
+        {row('/binder', 'Contents', null, sections.length, true)}
+        {sections.map((s) => (
+          <NavLink key={s.id} className={navClass('nav-diagram')} to={`/binder/${s.id}`} style={{ paddingLeft: 31 }}>
+            <span className="nav-label" title={s.name}>
+              {s.name}
             </span>
-            {!above && <FindingMarks findings={findings.filter((f) => f.diagramId === row.diagram.id)} showOk />}
+            {s.attachments.length > 0 && <span className="muted mono">{s.attachments.length === 1 ? '1 file' : `${s.attachments.length} files`}</span>}
           </NavLink>
-        );
-      })}
-      <NavLink className={navClass('nav-top')} to="/dictionary" style={{ marginTop: 8 }}>
-        <span className="nav-label">Data dictionary</span>
-        <FindingMarks findings={dictionary} />
-        <Count n={dataDefinitions(model).length} />
-      </NavLink>
-      <NavLink className={navClass('nav-top')} to="/data-model">
-        <span className="nav-label">Data model</span>
-        <FindingMarks findings={dataModel} showOk={all(model, 'entity').length > 0} />
-      </NavLink>
-      <NavLink className={navClass('nav-top')} to="/crud">
-        <span className="nav-label">CRUD matrix</span>
-      </NavLink>
+        ))}
+      </NavGroup>
+
       <NavLink className={navClass('nav-top')} to="/search">
         <span className="nav-label">Search</span>
       </NavLink>

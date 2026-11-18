@@ -1,0 +1,434 @@
+/* The structure chart and the program specifications. Every class begins with "structure-". */
+
+/* ---- The chart: tool strip and canvas ---- */
+
+.structure-work {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.structure-tools {
+  flex: 0 0 72px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--hairline);
+  background: var(--paper);
+}
+
+.structure-tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.15;
+  cursor: pointer;
+}
+
+.structure-tool:disabled {
+  color: var(--disabled);
+  cursor: default;
+}
+
+.structure-tool svg {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.structure-canvas {
+  flex: 1 1 auto;
+  min-width: 0;
+  position: relative;
+}
+
+.structure-canvas .react-flow__node {
+  cursor: pointer;
+}
+
+.structure-hint {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 5;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.structure-addbox {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 6;
+  width: 360px;
+  max-width: calc(100% - 24px);
+  padding: 12px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.structure-addbox-title {
+  font-weight: 600;
+}
+
+.structure-zoom {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+}
+
+.structure-zoom button {
+  min-width: 30px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.structure-zoom button:hover {
+  background: var(--side-paper);
+}
+
+.structure-zoom-value {
+  min-width: 52px;
+  padding: 0 6px;
+  border-left: 1px solid var(--hairline);
+  border-right: 1px solid var(--hairline);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 28px;
+}
+
+.structure-zoom-fit {
+  border-left: 1px solid var(--hairline) !important;
+}
+
+.structure-key {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.structure-key svg {
+  stroke: var(--ink);
+  stroke-width: 1.25;
+  fill: none;
+  margin-left: 6px;
+}
+
+/* ---- A module box ---- */
+
+.structure-module {
+  position: relative;
+  width: 156px;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding: 4px 8px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: center;
+  overflow: hidden;
+}
+
+/* A library module has a vertical bar inside each side. */
+.structure-module-library {
+  padding: 4px 14px;
+}
+
+.structure-module-library::before,
+.structure-module-library::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--ink);
+}
+
+.structure-module-library::before {
+  left: 8px;
+}
+
+.structure-module-library::after {
+  right: 8px;
+}
+
+.structure-module-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.structure-module-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  max-height: 34px;
+  overflow: hidden;
+}
+
+/* ---- The call lines and the couples ---- */
+
+.structure-lines {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  fill: none;
+  pointer-events: none;
+}
+
+.structure-call {
+  fill: none;
+  pointer-events: none;
+}
+
+.structure-diamond {
+  fill: var(--paper);
+  pointer-events: none;
+}
+
+.structure-hit {
+  fill: transparent;
+  stroke: transparent;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.structure-hit-line {
+  fill: none;
+  stroke-width: 14;
+  pointer-events: stroke;
+}
+
+.structure-loop {
+  stroke: var(--ink);
+  stroke-width: 1.25;
+  fill: none;
+}
+
+.structure-couple {
+  stroke-width: 1.25;
+  fill: none;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.structure-couple-label {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: max-content;
+  max-width: 124px;
+  padding: 0 3px;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  line-height: 14px;
+  text-align: left;
+  transform: translate(0, -50%);
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.structure-couple-label-left {
+  text-align: right;
+  transform: translate(-100%, -50%);
+}
+
+.structure-couple-name {
+  max-width: 100px;
+  max-height: 28px;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+/* ---- The details panel ---- */
+
+.structure-kind {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.structure-note {
+  padding: 8px 10px;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+}
+
+.structure-divider {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  margin: 4px 0;
+}
+
+.structure-confirm {
+  padding: 10px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.structure-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.structure-check input {
+  margin-top: 4px;
+  accent-color: var(--ink);
+}
+
+.structure-facts td {
+  padding: 4px 8px 4px 0;
+}
+
+.structure-couples {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+}
+
+.structure-couples li {
+  border-bottom: 1px solid var(--hairline);
+}
+
+.structure-couples .row {
+  text-align: left;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.structure-couple-icon {
+  flex: 0 0 auto;
+  stroke: var(--ink);
+  stroke-width: 1.25;
+  fill: none;
+}
+
+.structure-newchart {
+  padding-top: 4px;
+}
+
+.structure-chart-select {
+  width: auto;
+  max-width: 240px;
+}
+
+.structure-blank {
+  max-width: 560px;
+}
+
+/* ---- The program specification ---- */
+
+.structure-list-chart {
+  display: block;
+  padding: 12px 12px 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.structure-list-chart:hover {
+  text-decoration: underline;
+}
+
+.structure-list-row {
+  text-decoration: none;
+  color: var(--ink);
+  text-align: left;
+}
+
+.structure-list-number {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.structure-spec {
+  max-width: 860px;
+  border: 1px solid var(--ink);
+}
+
+.structure-spec-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+}
+
+.structure-spec-title {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.structure-spec-row {
+  padding: 12px 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+.structure-spec-three {
+  display: grid;
+  grid-template-columns: 1fr 180px 1fr;
+  gap: 16px;
+}
+
+.structure-spec-empty {
+  padding: 4px 0 8px;
+}
+
+.structure-io td {
+  vertical-align: middle;
+}
+
+.structure-io th:first-child {
+  width: 30%;
+}
+
+.structure-io-notes {
+  width: 34%;
+}
+
+.structure-mono-input {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-x: auto;
+  tab-size: 2;
+}

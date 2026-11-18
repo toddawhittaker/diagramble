@@ -1,8 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { diagramTitle, parentDiagram } from '../model/queries';
 import type { Id } from '../model/types';
-import { isBalanceFinding, type Finding } from '../rules/engine';
+import { findingPlace, isBalanceFinding, type Finding } from '../rules/engine';
 import { explain } from '../rules/explain';
 import { checkNow, selectFinding, useDiagramFindings, useFindings, useFindingsVisible, useModel, useSelection } from '../store/store';
 import { Button, Tabs } from './controls';
@@ -43,6 +43,7 @@ export interface ProblemCardProps {
 export function ProblemCard({ finding, open, onToggle, selected, currentDiagramId }: ProblemCardProps) {
   const model = useModel();
   const [explained, setExplained] = useState(false);
+  const { pathname } = useLocation();
   const here = finding.diagramId !== null && finding.diagramId === currentDiagramId;
   const parent = finding.diagramId ? parentDiagram(model, finding.diagramId) : undefined;
   const isBalancing = finding.ruleId.startsWith('BAL-');
@@ -54,6 +55,11 @@ export function ProblemCard({ finding, open, onToggle, selected, currentDiagramI
   else if (finding.area === 'dataModel' && currentDiagramId) link = { to: '/data-model', text: 'Open data model' };
   else if (finding.area === 'dictionary' && currentDiagramId)
     link = { to: `/dictionary/${finding.elementIds[0]}`, text: 'Open in data dictionary' };
+  // A finding about a form, an interface diagram or a structure chart, shown somewhere else.
+  else if (!finding.diagramId && finding.area !== 'dataModel' && finding.area !== 'dictionary' && finding.area !== 'diagram') {
+    const place = findingPlace(finding);
+    if (place.to !== pathname && !pathname.startsWith(`${place.to}/`)) link = place;
+  }
 
   return (
     <div className={`problem-card${open ? ' is-open' : ''}${selected ? ' is-selected' : ''}`}>

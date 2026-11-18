@@ -1,17 +1,27 @@
 // The sample project "Clinic appointments": docs/mockups/BRIEFS.md section 1.4,
 // which is case B of docs/SPEC.md section 6.2 with two student mistakes, plus use
-// cases and a small data model. It is built with commands only.
+// cases and a small data model. `clinic2.ts` adds the content of the second release.
+// It is built with commands only.
 
 import { apply } from '../model/apply';
 import type { Command } from '../model/commands';
 import { occurrencesOn } from '../model/queries';
 import { emptyModel, type Id, type Model, type Side } from '../model/types';
+import { addSecondRelease } from './clinic2';
+
+export { CLINIC2 } from './clinic2';
 
 export interface ClinicOptions {
   /** The two student mistakes: the "Booking Info" flow, and no description on process 3. */
   mistakes?: boolean;
   useCases?: boolean;
   dataModel?: boolean;
+  /**
+   * The content of the second release: forms, interface diagram, binder, physical details,
+   * structure chart and storage figures. It needs the use cases and the data model, and is
+   * left out without them. `mistakes` also decides whether it holds its deliberate slips.
+   */
+  secondRelease?: boolean;
 }
 
 /** Stable ids, so that screens and tests can point at the sample's items. */
@@ -37,7 +47,7 @@ export function dataIdOf(name: string): Id {
 }
 
 export function buildClinic(options: ClinicOptions = {}): Model {
-  const { mistakes = true, useCases = true, dataModel = true } = options;
+  const { mistakes = true, useCases = true, dataModel = true, secondRelease = true } = options;
   let m = emptyModel();
   const run = (c: Command) => {
     const r = apply(m, c);
@@ -434,6 +444,8 @@ export function buildClinic(options: ClinicOptions = {}): Model {
     crud(CLINIC.p2, 'RU', ['Reason for Visit']);
     crud(CLINIC.p3, 'R', ['Appointment Number', 'Preferred Date', 'Pet Name', 'Client Name']);
   }
+
+  if (secondRelease && useCases && dataModel) addSecondRelease(run, () => m, CLINIC, dataIdOf, mistakes);
 
   return m;
 }

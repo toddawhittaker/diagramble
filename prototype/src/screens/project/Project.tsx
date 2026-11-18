@@ -1,11 +1,22 @@
 // The project page: what the project holds, its two settings, and starting, opening
 // and saving a project. Route: /project
 
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { Button } from '../../components';
+import { Button, TextField } from '../../components';
 import { PageHeader, UndoRedo, WorkArea } from '../../frame';
-import { all, contextDiagram, dataDefinitions, diagramsInOrder, topDiagram, type Id, type Model } from '../../model';
+import {
+  all,
+  binderSections,
+  contextDiagram,
+  dataDefinitions,
+  diagramsInOrder,
+  feasibility,
+  systemRequest,
+  topDiagram,
+  type Id,
+  type Model,
+} from '../../model';
 import { STARTERS } from '../../sample/starters';
 import { dispatch, getModel, loadProjectFile, loadStarter, projectAsStarterFile, resetToSample, useModel } from '../../store';
 import { downloadModel, downloadText, fileName } from './files';
@@ -16,6 +27,55 @@ type Pending =
   | { kind: 'starter'; id: string; title: string }
   | { kind: 'file'; name: string; text: string }
   | { kind: 'sample' };
+
+/** The counts of the second release: the forms, the design diagrams and the binder. */
+function newCountsOf(model: Model): { word: string; n: number | string }[] {
+  const sections = binderSections(model);
+  const modules = all(model, 'module');
+  return [
+    { word: 'System request', n: systemRequest(model) ? 'Started' : 'Not started' },
+    { word: 'Feasibility analysis', n: feasibility(model) ? 'Started' : 'Not started' },
+    { word: 'Requirements', n: all(model, 'requirement').length },
+    { word: 'Alternative matrices', n: all(model, 'alternativeMatrix').length },
+    { word: 'Interface structure diagrams', n: all(model, 'interfaceDiagram').length },
+    { word: 'Interfaces', n: all(model, 'interface').length },
+    { word: 'Navigation links', n: all(model, 'navigationLink').length },
+    { word: 'Structure charts', n: all(model, 'structureChart').length },
+    { word: 'Modules', n: modules.filter((m) => !m.repeatsId).length },
+    { word: 'Modules drawn again', n: modules.filter((m) => m.repeatsId).length },
+    { word: 'Couples', n: all(model, 'couple').length },
+    { word: 'Tests', n: all(model, 'test').length },
+    { word: 'Binder sections', n: sections.length },
+    { word: 'Attached files', n: sections.reduce((sum, s) => sum + s.attachments.length, 0) },
+  ];
+}
+
+/** The project's name, changed with the shared command. An empty name is refused and the box goes back. */
+function NameField({ name }: { name: string }) {
+  const [draft, setDraft] = useState(name);
+  // A project opened from a file or a starter, an undo or a redo changes the name from outside.
+  useEffect(() => setDraft(name), [name]);
+  const commit = (value: string) => {
+    const next = value.trim();
+    if (next === name) {
+      setDraft(name);
+      return;
+    }
+    const result = dispatch({ type: 'renameProject', name: next });
+    if (!result.ok) setDraft(name);
+  };
+  return (
+    <div className="project-rename">
+      <TextField
+        label="Name"
+        value={draft}
+        onChange={setDraft}
+        onCommit={commit}
+        hint="Shown in the top bar and on the title page of an export. It is saved when you leave the box or press Enter."
+      />
+    </div>
+  );
+}
 
 function countsOf(model: Model): { word: string; n: number }[] {
   return [
@@ -150,27 +210,42 @@ export function ProjectScreen() {
       <div className="work-body scroll pad">
         <div className="project-column">
           <Section title="This project">
-            <div className="field">
-              <span className="field-label">Name</span>
-              <span className="title project-name">{model.name || <span className="missing">No name yet</span>}</span>
-            </div>
-            <p>A project holds one scenario: one business case and every diagram, definition and form that belongs to it.</p>
-            <table className="table project-counts">
-              <thead>
-                <tr>
-                  <th>It holds</th>
-                  <th>How many</th>
-                </tr>
-              </thead>
-              <tbody>
-                {countsOf(model).map((row) => (
-                  <tr key={row.word}>
-                    <td>{row.word}</td>
-                    <td className="count">{row.n}</td>
+            <NameField name={model.name} />
+            <p>A project holds one scenario: one business case and every diagram, definition, form and binder section that belongs to it.</p>
+            <div className="project-count-tables">
+              <table className="table project-counts">
+                <thead>
+                  <tr>
+                    <th>Diagrams and data</th>
+                    <th>How many</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {countsOf(model).map((row) => (
+                    <tr key={row.word}>
+                      <td>{row.word}</td>
+                      <td className="count">{row.n}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <table className="table project-counts">
+                <thead>
+                  <tr>
+                    <th>Forms, design and binder</th>
+                    <th>How many</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {newCountsOf(model).map((row) => (
+                    <tr key={row.word}>
+                      <td>{row.word}</td>
+                      <td className={typeof row.n === 'number' ? 'count' : 'muted'}>{row.n}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </Section>
 
           <Section title="Top diagram">
@@ -219,7 +294,8 @@ export function ProjectScreen() {
 
           <Section title="Start a new project">
             <p>
-              A starter case is a project to begin from. Opening one puts a fresh copy in place of the current project.{' '}
+              A starter case is a project to begin from. Opening one puts a fresh copy in place of the current project. The
+              starter cases hold diagrams and data only, so their forms and binder start empty.{' '}
               <Link to="/help">Help</Link> says more about projects and starter cases.
             </p>
             <div className="project-starters">
@@ -240,7 +316,10 @@ export function ProjectScreen() {
                   <div className="project-starter-title">Clinic appointments</div>
                   <div className="muted">
                     The sample project this app first opens with: three diagrams, a data dictionary, use cases and a small
-                    data model.
+                    data model. It now also holds the forms and design work that come later in a project: a system request, a
+                    feasibility analysis, requirements, an alternative matrix, an interface structure diagram, a structure chart
+                    with program specifications, a test plan, four binder sections, and the physical names, tables and storage
+                    figures that physical mode shows.
                   </div>
                 </div>
                 <Button small onClick={() => ask({ kind: 'sample' })}>

@@ -463,3 +463,233 @@
   padding: 20px;
   color: var(--muted);
 }
+
+/* ---- Physical mode: a table on the diagram ---- */
+
+.datamodel-entity-system {
+  padding: 1px 10px;
+  border-bottom: 1px solid var(--ink);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-align: center;
+}
+
+.datamodel-field {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.datamodel-field-tags {
+  flex: 0 0 38px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.datamodel-field-name {
+  flex: 1 1 auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.datamodel-field-type {
+  padding-left: 14px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.datamodel-field-copy .datamodel-field-name {
+  color: var(--muted);
+}
+
+/* A field named by the selected problem. */
+.datamodel-field-named {
+  background: var(--select-tint);
+}
+
+/* ---- Physical mode: the right panel ---- */
+
+.datamodel-prow {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.datamodel-prow-line {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.datamodel-prow-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-wrap: anywhere;
+}
+
+.datamodel-prow-about {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.datamodel-field-editor {
+  margin: 8px 0 6px 44px;
+  padding: 10px;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+}
+
+.datamodel-fk-state {
+  padding: 8px 10px;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+}
+
+.datamodel-fk-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--hairline);
+}
+
+.datamodel-fk-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.datamodel-fk-status {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.datamodel-crud-system {
+  display: inline-block;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* ---- The storage size estimate ---- */
+
+.datamodel-storage-settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.datamodel-storage-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--hairline);
+}
+
+.datamodel-storage-scroll {
+  overflow-x: auto;
+}
+
+.datamodel-storage-table td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.datamodel-storage-name {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-family: var(--font-mono);
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.datamodel-storage-sub {
+  display: block;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+}
+
+.datamodel-storage-growth {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.datamodel-storage-growth select.input {
+  width: auto;
+}
+
+.datamodel-storage-table tfoot td {
+  border-top: 1px solid var(--ink);
+  border-bottom: 0;
+  font-weight: 700;
+}
+
+.datamodel-storage-working td {
+  white-space: normal;
+  background: var(--side-paper);
+}
+
+.datamodel-storage-working ol {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.datamodel-storage-working .mono {
+  font-size: 13px;
+}
+
+.datamodel-widths td {
+  vertical-align: middle;
+}
+
+.datamodel-widths tfoot td {
+  border-top: 1px solid var(--ink);
+  border-bottom: 0;
+  font-weight: 700;
+}
+
+.datamodel-storage-table th,
+.datamodel-storage-table td {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.datamodel-storage-table td:first-child .btn {
+  display: block;
+  padding: 0;
+  font-size: 13px;
+}
+
+.datamodel-storage-working .mono {
+  overflow-wrap: anywhere;
+}

@@ -1,0 +1,438 @@
+/* The binder screen. Every colour comes from a theme variable. */
+
+/* ---- The list on the left ---- */
+
+.binder-contents-row {
+  font-weight: 600;
+}
+
+.binder-group {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 14px 12px 6px;
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 17px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.binder-row-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.binder-row-files {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.binder-list-note {
+  padding: 8px 12px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.binder-add-button {
+  padding: 8px 12px;
+}
+
+.binder-add {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 12px;
+  padding: 10px;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+}
+
+/* ---- The open section ---- */
+
+.binder-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 980px;
+}
+
+.binder-title-input {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.binder-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.binder-tools-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.binder-phase {
+  flex: 0 0 200px;
+}
+
+.binder-order {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.binder-delete {
+  margin-left: auto;
+}
+
+.binder-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--ink);
+}
+
+.binder-note {
+  margin: 0;
+}
+
+.binder-part {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+}
+
+.binder-part > .section-heading,
+.binder-part-head > .section-heading {
+  margin: 0;
+}
+
+.binder-part-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ---- The text, as it reads ---- */
+
+.binder-body {
+  max-width: 760px;
+  line-height: 1.5;
+}
+
+.binder-body > :first-child {
+  margin-top: 0;
+}
+
+.binder-body p {
+  margin: 0 0 12px;
+}
+
+.binder-body-h1,
+.binder-body-h2,
+.binder-body-h3 {
+  margin: 20px 0 8px;
+  font-family: var(--font-title);
+  font-weight: 600;
+}
+
+.binder-body-h1 {
+  font-size: 20px;
+}
+
+.binder-body-h2 {
+  font-size: 17px;
+}
+
+.binder-body-h3 {
+  font-size: 15px;
+}
+
+.binder-body ul,
+.binder-body ol {
+  margin: 0 0 12px;
+  padding-left: 26px;
+}
+
+.binder-body li {
+  margin-bottom: 4px;
+}
+
+.binder-body-table {
+  margin: 0 0 14px;
+  border-top: 1px solid var(--hairline);
+}
+
+.binder-body-table td {
+  height: 34px;
+}
+
+/* ---- The text, as it is typed ---- */
+
+.binder-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.binder-edit-box {
+  flex: 1 1 420px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.binder-textarea {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.binder-key {
+  flex: 0 1 260px;
+  padding: 10px 12px;
+  border: 1px solid var(--hairline);
+  font-size: 14px;
+}
+
+.binder-key dl {
+  margin: 8px 0;
+}
+
+.binder-key dt {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.binder-key dd {
+  margin: 2px 0 0;
+  color: var(--muted);
+}
+
+.binder-key p {
+  margin: 0;
+}
+
+/* ---- The conversion strategy ---- */
+
+.binder-conversion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.binder-choices {
+  flex: 1 1 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.binder-choice {
+  margin: 0;
+  padding: 8px 12px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 0;
+}
+
+.binder-choice legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.binder-choice-about {
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.binder-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.binder-option input {
+  flex: 0 0 auto;
+  margin: 4px 0 0;
+  accent-color: var(--ink);
+}
+
+.binder-option-title {
+  display: block;
+  font-weight: 600;
+}
+
+.binder-option-meaning {
+  display: block;
+  font-size: 14px;
+}
+
+.binder-effects {
+  flex: 1 1 360px;
+  min-width: 0;
+}
+
+.binder-effects p {
+  margin: 8px 0 0;
+}
+
+.binder-effect-title {
+  font-weight: 600;
+}
+
+.binder-effect-why {
+  margin-top: 2px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ---- Attached files ---- */
+
+.binder-files td {
+  vertical-align: middle;
+}
+
+.binder-thumb-cell {
+  width: 112px;
+}
+
+.binder-thumb {
+  display: block;
+  width: 96px;
+  height: 64px;
+  object-fit: contain;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+}
+
+.binder-file-name {
+  overflow-wrap: anywhere;
+}
+
+.binder-large {
+  display: block;
+  max-width: 100%;
+  margin-top: 8px;
+  border: 1px solid var(--hairline);
+}
+
+.binder-mime {
+  font-size: 12px;
+}
+
+.binder-file-tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.binder-attach {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.binder-attach .field {
+  flex: 1 1 320px;
+}
+
+.binder-file-input {
+  color: var(--ink);
+  font: inherit;
+}
+
+.binder-refused {
+  flex: 1 1 320px;
+}
+
+.binder-refused p {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--ink);
+}
+
+/* ---- The table of contents ---- */
+
+.binder-contents {
+  max-width: 760px;
+}
+
+.binder-intro {
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.binder-toc-phase {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+}
+
+.binder-toc-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0 0 10px;
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.binder-toc-list {
+  margin: 4px 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.binder-toc-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.binder-toc-number {
+  flex: 0 0 34px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.binder-toc-heading .binder-toc-number {
+  flex-basis: auto;
+  font-size: 15px;
+}
+
+.binder-toc-note {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.binder-toc-empty {
+  margin: 4px 0 14px;
+}

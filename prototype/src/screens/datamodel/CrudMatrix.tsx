@@ -5,14 +5,16 @@
 
 import { useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router';
-import { all, diagramOfProcess, leafProcesses, processNumber, type Entity, type Id, type Process } from '../../model';
-import { dispatch, selectElements, useModel } from '../../store';
+import { all, diagramOfProcess, get, leafProcesses, processNumber, type Entity, type Id, type Process } from '../../model';
+import { dispatch, selectElements, useMode, useViewModel } from '../../store';
 import { Button, Missing } from '../../components';
+import { tableLabel } from './shared';
 
 const LETTERS = ['C', 'R', 'U', 'D'] as const;
 type Letter = (typeof LETTERS)[number];
 
-type Row = { kind: 'entity'; entity: Entity } | { kind: 'attribute'; entity: Entity; dataId: Id; name: string };
+/** `name` is what the row is called in the current mode. `logical` is the attribute's own name, and `unnamed` is true for a field with no field name yet. */
+type Row = { kind: 'entity'; entity: Entity } | { kind: 'attribute'; entity: Entity; dataId: Id; name: string; logical: string; unnamed: boolean; system: boolean };
 
 function usesOf(process: Process, dataId: Id): string {
   return process.crud.find((c) => c.dataId === dataId)?.uses ?? '';
@@ -34,7 +36,10 @@ function listOf(names: string[]): string {
 }
 
 export function CrudMatrix() {
-  const model = useModel();
+  // The model as the mode shows it. In physical mode that includes the system-related
+  // processes, tables and fields. The cells are the same ones in both modes.
+  const model = useViewModel();
+  const physical = useMode() === 'physical';
   const table = useRef<HTMLTableElement>(null);
   const [active, setActive] = useState<string | null>(null);
 
@@ -44,10 +49,18 @@ export function CrudMatrix() {
     () =>
       all(model, 'entity').flatMap((entity) => [
         { kind: 'entity', entity } as Row,
-        ...entity.attributes.map((a): Row => ({ kind: 'attribute', entity, dataId: a.dataId, name: model.elements[a.dataId]?.name ?? '' })),
+        ...entity.attributes.map((a): Row => {
+          const element = get(model, a.dataId, 'dataElement');
+          const logical = element?.name ?? '';
+          const fieldName = element?.fieldName.trim() ?? '';
+          return { kind: 'attribute', entity, dataId: a.dataId, name: physical ? fieldName || logical : logical, logical, unnamed: physical && !fieldName, system: physical && !!element?.systemRelated };
+        }),
       ]),
-    [model],
+    [model, physical],
   );
+
+  /** What an entity is called in the current mode. */
+  const entityName = (entity: Entity) => (physical ? tableLabel(entity) : entity.name);
 
   if (entities.length === 0)
     return (
@@ -119,7 +132,7 @@ export function CrudMatrix() {
   // ---- The summary under the table ----
   const anyCell = entities.some((en) => cellIds(en).some((id) => processes.some((p) => usesOf(p, id) !== '')));
   const entityNever = (letter: Letter) =>
-    entities.filter((en) => !cellIds(en).some((id) => processes.some((p) => usesOf(p, id).includes(letter)))).map((en) => en.name);
+    entities.filter((en) => !cellIds(en).some((id) => processes.some((p) => usesOf(p, id).includes(letter)))).map(entityName);
   const anyBare = entities.some((en) => en.attributes.length === 0);
   // Cells filled in under an entity before it had attributes. They are kept, but no row shows them.
   const leftOver = entities
@@ -135,7 +148,7 @@ export function CrudMatrix() {
           <thead>
             <tr>
               <th className="datamodel-crud-corner" scope="col">
-                Entity and attribute
+                {physical ? 'Table and field' : 'Entity and attribute'}
               </th>
               {processes.map((p) => {
                 const diagram = diagramOfProcess(model, p.id);
@@ -145,6 +158,7 @@ export function CrudMatrix() {
                       <span className="datamodel-crud-number">{processNumber(model, p.id)}</span>
                       {p.name}
                     </Link>
+                    {physical && p.systemRelated && <span className="datamodel-crud-system">system-related</span>}
                   </th>
                 );
               })}
@@ -157,17 +171,29 @@ export function CrudMatrix() {
                   {row.kind === 'entity' ? (
                     <>
                       <Link to="/data-model" onClick={() => selectElements([row.entity.id])}>
-                        {row.entity.name || 'Entity with no name'}
+                        {physical ? (
+                          <span className={row.entity.tableName.trim() ? 'mono' : 'missing'} title={`The table for the entity ${row.entity.name}`}>
+                            {tableLabel(row.entity)}
+                          </span>
+                        ) : (
+                          row.entity.name || 'Entity with no name'
+                        )}
                       </Link>
+                      {physical && row.entity.systemRelated && <span className="datamodel-crud-system"> system-related</span>}
                       {row.entity.attributes.length === 0 && (
                         <>
                           {' '}
-                          <Missing>No attributes yet</Missing>
+                          <Missing>{physical ? 'No fields yet' : 'No attributes yet'}</Missing>
                         </>
                       )}
                     </>
                   ) : (
-                    <Link to={`/dictionary/${row.dataId}`}>{row.name}</Link>
+                    <>
+                      <Link to={`/dictionary/${row.dataId}`} title={physical ? `The field for the attribute ${row.logical}` : undefined}>
+                        {physical ? <span className={row.unnamed ? 'missing' : 'mono'}>{row.name}</span> : row.name}
+                      </Link>
+                      {row.system && <span className="datamodel-crud-system"> system-related</span>}
+                    </>
                   )}
                 </th>
                 {processes.map((p, c) => {
@@ -175,7 +201,7 @@ export function CrudMatrix() {
                   const letters = lettersAt(row, p);
                   // An entity's row sums up its attributes. With no attributes, the row holds the entity's own cells.
                   const sum = row.kind === 'entity' && row.entity.attributes.length > 0;
-                  const what = row.kind === 'attribute' ? row.name : sum ? `every attribute of ${row.entity.name}` : `${row.entity.name}, which has no attributes yet`;
+                  const what = row.kind === 'attribute' ? row.name : sum ? `every attribute of ${entityName(row.entity)}` : `${entityName(row.entity)}, which has no attributes yet`;
                   return (
                     <td key={p.id}>
                       <div
@@ -219,14 +245,14 @@ export function CrudMatrix() {
           <p>The matrix is empty.</p>
         ) : (
           <>
-            <p>{neverCreated.length > 0 ? `Never created by any process: ${listOf(neverCreated)}.` : 'Every entity is created by some process.'}</p>
-            <p>{neverRead.length > 0 ? `Never read by any process: ${listOf(neverRead)}.` : 'Every entity is read by some process.'}</p>
+            <p>{neverCreated.length > 0 ? `Never created by any process: ${listOf(neverCreated)}.` : `Every ${physical ? 'table' : 'entity'} is created by some process.`}</p>
+            <p>{neverRead.length > 0 ? `Never read by any process: ${listOf(neverRead)}.` : `Every ${physical ? 'table' : 'entity'} is read by some process.`}</p>
           </>
         )}
         {leftOver.map(({ entity, process, uses }) => (
           <p key={`${entity.id}:${process.id}`} className="datamodel-crud-note">
             <span>
-              '{entity.name}' still has a cell of its own from before it had attributes: {uses} in {processNumber(model, process.id)}{' '}
+              '{entityName(entity)}' still has a cell of its own from before it had attributes: {uses} in {processNumber(model, process.id)}{' '}
               {process.name}. Fill it in again under the attributes, then remove it.
             </span>
             <Button small onClick={() => dispatch({ type: 'setCrud', processId: process.id, dataId: entity.id, uses: '' })}>
@@ -234,6 +260,11 @@ export function CrudMatrix() {
             </Button>
           </p>
         ))}
+        <p className="muted">
+          {physical
+            ? 'This is the matrix of the physical model. It shows table and field names and includes the system-related processes, tables and fields. The cells are the same ones the logical matrix shows. A name that is underlined is a table or field with no physical name yet.'
+            : 'This is the matrix of the logical model. Anything marked as system-related is left out. Its cells are kept, and the physical matrix shows them.'}
+        </p>
         <p className="muted">
           This is information only. The rules that check the matrix are not built yet, so nothing here is marked as an error or a warning.
         </p>

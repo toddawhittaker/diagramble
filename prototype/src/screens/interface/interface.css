@@ -1,0 +1,296 @@
+/* The interface structure diagram and the test plan. Every class begins with "interface-". */
+
+/* ---- The diagram: tool strip and canvas ---- */
+
+.interface-work {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.interface-tools {
+  flex: 0 0 72px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--hairline);
+  background: var(--paper);
+}
+
+.interface-tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.interface-tool svg {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.interface-canvas {
+  flex: 1 1 auto;
+  min-width: 0;
+  position: relative;
+}
+
+.interface-canvas-interface .react-flow__pane,
+.interface-canvas-link .interface-box {
+  cursor: crosshair;
+}
+
+.interface-hint {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 5;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.interface-name-box {
+  position: absolute;
+  z-index: 6;
+  width: 180px;
+}
+
+.interface-zoom {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+}
+
+.interface-zoom button {
+  min-width: 30px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.interface-zoom button:hover {
+  background: var(--side-paper);
+}
+
+.interface-zoom-value {
+  min-width: 52px;
+  padding: 0 6px;
+  border-left: 1px solid var(--hairline);
+  border-right: 1px solid var(--hairline);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 28px;
+}
+
+.interface-zoom-fit {
+  border-left: 1px solid var(--hairline) !important;
+}
+
+/* ---- An interface box, in three parts ---- */
+
+.interface-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14px;
+  text-align: center;
+}
+
+.interface-box-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 2px 6px;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.interface-box-name {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.interface-box-processes {
+  padding: 2px 6px;
+  border-top: 1px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* The handles cover the whole box. They react only while the "Link" tool is chosen. */
+.interface-box .interface-handle {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  opacity: 0;
+}
+
+.interface-box .interface-handle-off {
+  pointer-events: none !important;
+}
+
+/* ---- The right panel ---- */
+
+.interface-kind {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.interface-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+}
+
+.interface-list-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.interface-list-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: flex-start;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.interface-divider {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  margin: 4px 0;
+}
+
+.interface-confirm {
+  padding: 10px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.interface-diagram-choice {
+  width: auto;
+  max-width: 260px;
+}
+
+.interface-empty {
+  max-width: 640px;
+}
+
+/* ---- The test plan: the list ---- */
+
+.interface-stage {
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 6px;
+}
+
+.interface-stage-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 12px 4px;
+}
+
+.interface-stage-heading .count {
+  margin-left: 4px;
+  color: var(--muted);
+}
+
+.interface-stage-none {
+  padding: 2px 12px 6px;
+  font-style: italic;
+}
+
+.interface-test-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.interface-test-result {
+  flex: 0 0 auto;
+  font-size: 12px;
+}
+
+/* ---- The test plan: the form ---- */
+
+.interface-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 860px;
+}
+
+.interface-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.interface-form-row-wide-first {
+  grid-template-columns: 3fr 1fr;
+}
+
+.interface-form-row-three {
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+}
+
+/* One test case: the interface and the data field side by side, the value below. */
+.interface-case {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px 12px;
+}
+
+.interface-case-value {
+  grid-column: 1 / -1;
+}
+
+.interface-coverage th:first-child,
+.interface-coverage td:first-child {
+  padding-left: 0;
+}
+
+.interface-coverage td:last-child {
+  white-space: nowrap;
+  padding-right: 0;
+}

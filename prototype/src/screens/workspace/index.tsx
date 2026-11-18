@@ -18,7 +18,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './workspace.css';
-import { Button, EntryFields, ProblemsPanel, TextField } from '../../components';
+import { Button, EntryFields, ModeSwitch, ProblemsPanel, TextField } from '../../components';
 import { DiagramHeader, PageHeader, RightPanel, WorkArea } from '../../frame';
 import {
   KIND_WORDS,
@@ -26,6 +26,7 @@ import {
   childDiagram,
   dataDefinitions,
   elementLabel,
+  flowsOn,
   get,
   getFragment,
   isAboveProject,
@@ -36,12 +37,23 @@ import {
   type Id,
   type Model,
 } from '../../model';
-import { clearSelection, dispatch, getModel, selectElements, useFindings, useModel, useSelection } from '../../store';
+import {
+  clearSelection,
+  dispatch,
+  getModel,
+  selectElements,
+  useFindings,
+  useMode,
+  useModel,
+  useSelection,
+  useViewModel,
+} from '../../store';
 import { useTheme } from '../../theme/theme';
 import { AddSymbolBox, ControlBox, DataBox, TOOLS, ToolIcon, type DataChoice } from './boxes';
 import { FlowEdge } from './FlowEdge';
 import { buildCanvas, type CanvasEdge, type CanvasNode } from './layout';
 import { EndView, SymbolView } from './nodes';
+import { ModeBar, PhysicalFields } from './physical';
 import { CanvasUiContext, type CanvasUi, type Tool } from './ui';
 
 const nodeTypes: NodeTypes = { symbol: SymbolView, end: EndView };
@@ -61,12 +73,29 @@ type OpenBox =
 
 export function WorkspaceScreen() {
   const { diagramId = '' } = useParams();
-  const model = useModel();
-  if (!get(model, diagramId, 'diagram'))
+  const whole = useModel();
+  // The model as the mode shows it: in logical mode it has no system-related items.
+  const model = useViewModel();
+  /** Whether the software side is shaded in physical mode. Kept here so that it stays on from one diagram to the next. */
+  const [shade, setShade] = useState(false);
+  if (!get(whole, diagramId, 'diagram'))
     return (
       <WorkArea>
         <PageHeader breadcrumb={['Diagrams']} title="No such diagram" />
         <div className="work-body placeholder">This project has no diagram with that address.</div>
+      </WorkArea>
+    );
+  if (!get(model, diagramId, 'diagram'))
+    return (
+      <WorkArea>
+        <DiagramHeader diagramId={diagramId} view="canvas" />
+        <div className="work-body workspace-only-physical">
+          <p>
+            This diagram expands a system-related process, so it is part of the physical model only. The logical model leaves it
+            out. Switch to Physical to see it.
+          </p>
+          <ModeSwitch />
+        </div>
       </WorkArea>
     );
   return (
@@ -76,7 +105,7 @@ export function WorkspaceScreen() {
         <div className="work-body workspace-body">
           {/* The key makes a fresh canvas, fitted to its diagram, each time the route changes. */}
           <ReactFlowProvider key={diagramId}>
-            <Workspace diagramId={diagramId} />
+            <Workspace diagramId={diagramId} shade={shade} onShade={setShade} />
           </ReactFlowProvider>
         </div>
       </WorkArea>
@@ -97,8 +126,11 @@ function selectedHere(model: Model, diagramId: Id, ids: Id[]): Id[] {
   });
 }
 
-function Workspace({ diagramId }: { diagramId: Id }) {
-  const model = useModel();
+function Workspace({ diagramId, shade, onShade }: { diagramId: Id; shade: boolean; onShade: (shade: boolean) => void }) {
+  const whole = useModel();
+  const model = useViewModel();
+  const mode = useMode();
+  const physical = mode === 'physical';
   const findings = useFindings();
   const selection = useSelection();
   const theme = useTheme();
@@ -119,9 +151,17 @@ function Workspace({ diagramId }: { diagramId: Id }) {
 
   const selectedSet = useMemo(() => new Set(selection.elementIds), [selection.elementIds]);
   const built = useMemo(
-    () => buildCanvas(model, findings, diagramId, selectedSet, live),
-    [model, findings, diagramId, selectedSet, live],
+    () => buildCanvas(model, findings, diagramId, selectedSet, live, physical),
+    [model, findings, diagramId, selectedSet, live, physical],
   );
+  /** How many system-related symbols and flows of this diagram the logical mode leaves out. */
+  const hidden = useMemo(() => {
+    if (whole === model) return 0;
+    const gone = (id: Id) => !model.elements[id];
+    return (
+      occurrencesOn(whole, diagramId).filter((o) => gone(o.elementId)).length + flowsOn(whole, diagramId).filter((f) => gone(f.id)).length
+    );
+  }, [whole, model, diagramId]);
   const fragment = useMemo(() => {
     const found = fragmentOf ? getFragment(model, fragmentOf) : undefined;
     return found && found.diagramId === diagramId ? found : undefined;
@@ -134,7 +174,7 @@ function Workspace({ diagramId }: { diagramId: Id }) {
     for (const e of built.edges) if (keptFlows.has(e.id)) keptNodes.add(e.source).add(e.target);
     for (const n of built.nodes) if (n.type === 'symbol' && n.data.elementId === fragment.process.id) keptNodes.add(n.id);
     return {
-      nodes: built.nodes.map((n): CanvasNode => (keptNodes.has(n.id) ? n : { ...n, className: 'workspace-dim' })),
+      nodes: built.nodes.map((n): CanvasNode => (keptNodes.has(n.id) ? n : { ...n, className: `${n.className ?? ''} workspace-dim` })),
       edges: built.edges.map((e): CanvasEdge => (keptFlows.has(e.id) ? e : { ...e, className: 'workspace-dim' })),
       dimmedFlows: new Set(built.edges.filter((e) => !keptFlows.has(e.id)).map((e) => e.id)),
     };
@@ -306,11 +346,14 @@ function Workspace({ diagramId }: { diagramId: Id }) {
 
   // ---- What the boxes do ----
 
-  const addSymbol = (b: Extract<OpenBox, { type: 'add' }>, name: string) => {
+  const addSymbol = (b: Extract<OpenBox, { type: 'add' }>, name: string, systemRelated: boolean) => {
     const size = { process: [170, 96], dataStore: [200, 56], externalEntity: [120, 90] }[b.kind];
     const at = { x: Math.round(b.x - size[0] / 2), y: Math.round(b.y - size[1] / 2) };
-    const type = b.kind === 'process' ? 'addProcess' : b.kind === 'dataStore' ? 'addDataStore' : 'addExternalEntity';
-    const r = dispatch({ type, diagramId, name, ...at });
+    // An external entity cannot be system-related (section 11.1 of the specification).
+    const r =
+      b.kind === 'externalEntity'
+        ? dispatch({ type: 'addExternalEntity', diagramId, name, ...at })
+        : dispatch({ type: b.kind === 'process' ? 'addProcess' : 'addDataStore', diagramId, name, ...at, systemRelated });
     if (!r.ok) return;
     setPickedOcc(r.created[1] ?? null);
     selectElements([r.created[0]]);
@@ -332,7 +375,7 @@ function Workspace({ diagramId }: { diagramId: Id }) {
     closeBox();
   };
 
-  const addFlow = (b: Extract<OpenBox, { type: 'flow' }>, choice: DataChoice) => {
+  const addFlow = (b: Extract<OpenBox, { type: 'flow' }>, choice: DataChoice, systemRelated: boolean) => {
     const s = model.views.occurrences[b.sourceOcc];
     const t = model.views.occurrences[b.targetOcc];
     if (!s || !t) return closeBox();
@@ -343,6 +386,7 @@ function Workspace({ diagramId }: { diagramId: Id }) {
       targetId: t.elementId,
       sourceOccurrenceId: s.id,
       targetOccurrenceId: t.id,
+      systemRelated,
       ...choice,
     });
     if (!r.ok) return;
@@ -378,6 +422,7 @@ function Workspace({ diagramId }: { diagramId: Id }) {
       </div>
 
       <div className="workspace-column">
+        <ModeBar mode={mode} shade={shade} onShade={onShade} hidden={hidden} />
         {isAboveProject(model, diagramId) && (
           <div className="workspace-notice">
             This diagram is above the project, so nothing on it is checked. <Link to="/project">Open the Project page</Link>
@@ -385,7 +430,7 @@ function Workspace({ diagramId }: { diagramId: Id }) {
         )}
         <div
           ref={canvasRef}
-          className={`workspace-canvas${adding ? ' workspace-adding' : ''}${tool === 'dataFlow' ? ' workspace-connecting' : ''}`}
+          className={`workspace-canvas${adding ? ' workspace-adding' : ''}${tool === 'dataFlow' ? ' workspace-connecting' : ''}${physical && shade ? ' workspace-shade' : ''}`}
           tabIndex={-1}
           onKeyDown={onKeyDown}
         >
@@ -446,7 +491,8 @@ function Workspace({ diagramId }: { diagramId: Id }) {
               top={box.top}
               kind={box.kind}
               existing={existingFor(box.kind)}
-              onAdd={(name) => addSymbol(box, name)}
+              offerSystem={physical && box.kind !== 'externalEntity'}
+              onAdd={(name, systemRelated) => addSymbol(box, name, systemRelated)}
               onPlace={(id) => placeSymbol(box, id)}
               onCancel={closeBox}
             />
@@ -458,7 +504,8 @@ function Workspace({ diagramId }: { diagramId: Id }) {
               title="What data does this flow carry?"
               initial=""
               definitions={dataDefinitions(model)}
-              onPick={(choice) => addFlow(box, choice)}
+              offerSystem={physical}
+              onPick={(choice, systemRelated) => addFlow(box, choice, systemRelated)}
               onCancel={closeBox}
             />
           )}
@@ -498,6 +545,7 @@ function Workspace({ diagramId }: { diagramId: Id }) {
 
         <DetailStrip
           model={model}
+          physical={physical}
           diagramId={diagramId}
           ids={here}
           confirming={confirming !== null}
@@ -570,6 +618,7 @@ function Description({ id, value }: { id: Id; value: string }) {
 /** The strip under the canvas: the selected item's name, description and actions. */
 function DetailStrip({
   model,
+  physical,
   diagramId,
   ids,
   confirming,
@@ -582,6 +631,8 @@ function DetailStrip({
   onBringDown,
 }: {
   model: Model;
+  /** True in physical mode: the strip then shows the physical fields of the selected item. */
+  physical: boolean;
   diagramId: Id;
   ids: Id[];
   confirming: boolean;
@@ -652,6 +703,7 @@ function DetailStrip({
         )}
       </div>
       {single && <Description key={single.id} id={single.id} value={single.description} />}
+      {single && physical && <PhysicalFields key={`physical-${single.id}`} element={single} />}
       {single && more && (
         <div className="workspace-entry">
           <EntryFields key={single.id} elementId={single.id} compact />

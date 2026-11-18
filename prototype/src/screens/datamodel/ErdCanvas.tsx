@@ -26,8 +26,9 @@ import {
   type OnNodesChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { all, fullIdentifier, get, isDependent, type Id, type Model, type Relationship, type RelationshipEnd } from '../../model';
-import { clearSelection, dispatch, selectElements, useElementFindings, useIsSelected, useModel, useSelection } from '../../store';
+import { all, fullIdentifier, get, isDependent, tableFields, type Entity, type Id, type Model, type Relationship, type RelationshipEnd, type TableField } from '../../model';
+import { clearSelection, dispatch, selectElements, useElementFindings, useIsSelected, useMode, useSelection, useViewModel } from '../../store';
+import { typeAndLength } from './shared';
 import { FindingMarks, Missing } from '../../components';
 import { useTheme } from '../../theme/theme';
 
@@ -37,8 +38,58 @@ const ToolContext = createContext<Tool>('select');
 
 // ---- An entity box ----
 
+/**
+ * The inside of a table, as section 11.5 draws it: the primary key fields above the dashed
+ * line, PK and FK as small tags in front of the field name, and the type and length after it.
+ */
+function TableBody({ model, entity, namedIds }: { model: Model; entity: Entity; namedIds: Id[] }) {
+  const fields = tableFields(model, entity.id);
+  const keys = fields.filter((f) => f.pk);
+  const rest = fields.filter((f) => !f.pk);
+  const from = (f: TableField) => (f.fromEntityId ? model.elements[f.fromEntityId]?.name || 'another table' : 'another table');
+  const row = (f: TableField, index: number) => {
+    const tags = [f.pk && 'PK', f.fk && 'FK'].filter(Boolean).join(' ');
+    const title = f.fk
+      ? `Foreign key: the primary key of ${from(f)}`
+      : f.copy
+        ? `A copy of a field of ${from(f)}, kept here for speed`
+        : f.element.systemRelated
+          ? `${f.element.name}: a system-related field`
+          : f.element.name;
+    return (
+      <li
+        key={`${f.dataId}:${index}`}
+        title={title}
+        className={`datamodel-field${f.copy ? ' datamodel-field-copy' : ''}${!f.fk && !f.copy && namedIds.includes(f.dataId) ? ' datamodel-field-named' : ''}`}
+      >
+        <span className="datamodel-field-tags">{tags}</span>
+        <span className="datamodel-field-name">{f.element.fieldName.trim() ? f.name : <Missing>{f.element.name}</Missing>}</span>
+        <span className="datamodel-field-type">{typeAndLength(f.element)}</span>
+      </li>
+    );
+  };
+  return (
+    <>
+      {entity.systemRelated && <div className="datamodel-entity-system">system-related</div>}
+      {keys.length > 0 && <ul className="datamodel-entity-list">{keys.map(row)}</ul>}
+      {(rest.length > 0 || keys.length === 0) && (
+        <ul className="datamodel-entity-list">
+          {rest.map(row)}
+          {fields.length === 0 && (
+            <li>
+              <Missing>No fields yet</Missing>
+            </li>
+          )}
+        </ul>
+      )}
+    </>
+  );
+}
+
 function EntityNode({ id }: NodeProps) {
-  const model = useModel();
+  const model = useViewModel();
+  const physical = useMode() === 'physical';
+  const selection = useSelection();
   const selected = useIsSelected(id);
   const findings = useElementFindings(id);
   const tool = useContext(ToolContext);
@@ -57,11 +108,12 @@ function EntityNode({ id }: NodeProps) {
 
   return (
     <div className={`datamodel-entity${isDependent(model, id) ? ' datamodel-entity-dependent' : ''}${selected ? ' is-selected' : ''}`}>
-      <div className="datamodel-entity-name">
-        {entity.name || <Missing>No name yet</Missing>}
+      <div className="datamodel-entity-name" title={physical ? `The table for the entity ${entity.name}` : undefined}>
+        {physical ? entity.tableName.trim() || <Missing>{entity.name || 'No table name yet'}</Missing> : entity.name || <Missing>No name yet</Missing>}
         <FindingMarks findings={findings} counts={false} />
       </div>
-      {hasIdentifiers && (
+      {physical && <TableBody model={model} entity={entity} namedIds={selection.elementIds} />}
+      {!physical && hasIdentifiers && (
         <ul className="datamodel-entity-list">
           {ownIds.map((dataId) => (
             <li key={dataId}>
@@ -77,7 +129,7 @@ function EntityNode({ id }: NodeProps) {
           ))}
         </ul>
       )}
-      {(others.length > 0 || !hasIdentifiers) && (
+      {!physical && (others.length > 0 || !hasIdentifiers) && (
         <ul className="datamodel-entity-list">
           {others.map((a) => (
             <li key={a.dataId}>
@@ -284,7 +336,7 @@ function labelTransform(at: EndPoint, which: 0 | 1): string {
 }
 
 function RelationshipEdge({ id }: EdgeProps) {
-  const model = useModel();
+  const model = useViewModel();
   const selected = useIsSelected(id);
   const findings = useElementFindings(id);
   const nodes = useNodes();
@@ -396,7 +448,9 @@ function buildNodes(model: Model, selectedIds: Id[], previous: Node[]): Node[] {
 }
 
 function Canvas() {
-  const model = useModel();
+  const model = useViewModel();
+  const physical = useMode() === 'physical';
+  const thing = physical ? 'table' : 'entity';
   const selection = useSelection();
   const theme = useTheme();
   const flow = useReactFlow();
@@ -467,11 +521,11 @@ function Canvas() {
 
   const hint =
     nodes.length === 0 && tool !== 'entity'
-      ? 'No entities yet. Choose "Entity" in the tool strip, then click on the paper to add one.'
+      ? `No ${physical ? 'tables' : 'entities'} yet. Choose "${physical ? 'Table' : 'Entity'}" in the tool strip, then click on the paper to add one.`
       : tool === 'entity'
-        ? 'Click on the paper where the new entity should go, then type its name.'
+        ? `Click on the paper where the new ${thing} should go, then type its name.`
         : tool === 'relationship'
-          ? 'Drag from one entity to another. How many of each there can be is left undecided, shown as question marks, until you choose it in the details.'
+          ? `Drag from one ${thing} to another. How many of each there can be is left undecided, shown as question marks, until you choose it in the details.`
           : null;
 
   return (
@@ -488,7 +542,7 @@ function Canvas() {
             <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
               {t.icon}
             </svg>
-            {t.label}
+            {t.id === 'entity' && physical ? 'Table' : t.label}
           </button>
         ))}
       </div>
@@ -533,8 +587,8 @@ function Canvas() {
           <input
             className="input datamodel-name-box"
             style={{ left: naming.left, top: naming.top }}
-            aria-label="Name of the new entity"
-            placeholder="Entity name"
+            aria-label={`Name of the new ${thing}`}
+            placeholder={physical ? 'Name of the entity' : 'Entity name'}
             autoFocus
             onKeyDown={(e) => {
               if (e.key === 'Enter') finishNaming(e.currentTarget.value);

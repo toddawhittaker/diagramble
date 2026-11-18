@@ -1,0 +1,463 @@
+/* The requirements definition and the alternative matrix. Every colour comes from a theme variable. */
+
+/* ---- Shared by both screens ---- */
+
+.requirements-draft {
+  field-sizing: content;
+}
+
+textarea.requirements-draft {
+  resize: none;
+}
+
+/* Text edited in place: no border until the pointer or the keyboard reaches it. */
+.requirements-quiet {
+  border-color: transparent;
+  background: transparent;
+}
+
+.requirements-quiet:hover {
+  border-color: var(--hairline);
+}
+
+.requirements-tools {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.requirements-tools .btn {
+  padding: 0;
+  font-weight: 400;
+}
+
+.requirements-confirm {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  white-space: normal;
+}
+
+.requirements-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 640px;
+}
+
+.requirements-empty .hstack {
+  flex-wrap: wrap;
+}
+
+/* ---- The requirements outline ---- */
+
+.requirements-outline {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 900px;
+}
+
+.requirements-filter-note {
+  padding: 8px 10px;
+  border: 1px solid var(--hairline);
+}
+
+.requirements-part {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.requirements-part > .section-heading {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.requirements-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.requirements-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  padding: 0 8px 0 0;
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.requirements-heading .input {
+  flex: 1 1 auto;
+  width: auto;
+  font-family: var(--font-title);
+  font-weight: 600;
+}
+
+.requirements-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.requirements-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.requirements-group-head > .input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.requirements-type-name {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 7px 9px;
+  font-family: var(--font-body);
+  font-size: inherit;
+  font-weight: 700;
+}
+
+.requirements-under {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.requirements-under .input {
+  width: 130px;
+  min-height: 28px;
+  padding: 2px 6px;
+}
+
+.requirements-number {
+  flex: 0 0 44px;
+  color: var(--muted);
+}
+
+.requirements-rows {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.requirements-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 8px 8px;
+  border-bottom: 1px solid var(--hairline);
+  cursor: default;
+}
+
+.requirements-row > .requirements-number {
+  padding-top: 8px;
+}
+
+.requirements-row > .requirements-tools,
+.requirements-row-marks {
+  padding-top: 5px;
+}
+
+.requirements-row-marks:empty {
+  display: none;
+}
+
+.requirements-row-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.requirements-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  padding-left: 9px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.requirements-meta a {
+  color: var(--ink);
+}
+
+.requirements-add {
+  padding: 8px 0 4px 60px;
+}
+
+.requirements-none {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  padding: 8px 0 8px 60px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.requirements-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.requirements-check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
+.requirements-add-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 460px;
+  padding: 10px;
+  border: 1px solid var(--hairline);
+}
+
+/* ---- The details in the right panel ---- */
+
+.requirements-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.requirements-priority {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.requirements-priority > .field:first-child {
+  flex: 1 1 auto;
+}
+
+.requirements-traces {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+}
+
+.requirements-traces li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* ---- The list of matrices ---- */
+
+.requirements-list-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 12px 6px;
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 17px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.requirements-list-row {
+  align-items: flex-start;
+  color: inherit;
+  text-decoration: none;
+}
+
+.requirements-list-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.requirements-list-foot {
+  padding: 12px;
+}
+
+/* ---- The matrix ---- */
+
+.requirements-matrix-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.requirements-matrix-page > .field,
+.requirements-matrix-help,
+.requirements-matrix-words {
+  max-width: 760px;
+}
+
+.requirements-matrix-help {
+  margin: 0;
+}
+
+.requirements-matrix-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--hairline);
+}
+
+.requirements-matrix {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* The criteria stay in view while the alternatives scroll sideways. */
+.requirements-matrix th.requirements-matrix-criterion {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--paper);
+}
+
+.requirements-matrix thead .requirements-tools {
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.requirements-matrix th,
+.requirements-matrix td {
+  padding: 8px;
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  font-weight: 400;
+  text-align: left;
+  vertical-align: top;
+}
+
+.requirements-matrix tr > :last-child {
+  border-right: 0;
+}
+
+.requirements-matrix tfoot th,
+.requirements-matrix tfoot td {
+  border-top: 1px solid var(--ink);
+  border-bottom: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.requirements-matrix thead th {
+  vertical-align: bottom;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.requirements-matrix thead .input {
+  display: block;
+  margin: 2px 0 4px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.requirements-matrix-criterion {
+  width: 220px;
+  min-width: 220px;
+}
+
+.requirements-matrix tbody .requirements-matrix-criterion .input {
+  font-weight: 600;
+}
+
+.requirements-matrix-criterion .field {
+  margin: 4px 0;
+}
+
+.requirements-matrix-criterion select.input {
+  width: auto;
+  min-height: 28px;
+  padding: 2px 6px;
+  font-weight: 400;
+}
+
+.requirements-matrix-weight {
+  width: 76px;
+  text-align: right;
+}
+
+.requirements-matrix td.requirements-matrix-weight,
+.requirements-matrix td.requirements-matrix-total {
+  text-align: right;
+}
+
+.requirements-matrix-alt,
+.requirements-matrix-cell {
+  min-width: 230px;
+}
+
+.requirements-matrix-add {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.requirements-matrix-group th {
+  padding: 6px 8px;
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.requirements-matrix-score {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.requirements-matrix-words {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.requirements-matrix-words p {
+  margin: 0;
+}
+
+.requirements-matrix-words p:last-child {
+  font-weight: 700;
+}
+
+/* The words of a full-width row stay in view while the alternatives scroll sideways. */
+.requirements-matrix-stay {
+  position: sticky;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.requirements-matrix thead .btn {
+  font-family: var(--font-body);
+}

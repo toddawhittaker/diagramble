@@ -23,7 +23,8 @@ the detail lives. Product decisions, design and rules go in `docs/`, not here.
 ## Build and test
 
 The only code so far is a throwaway clickable prototype in `prototype/`. It runs in the
-browser with sample data and has no backend. `prototype/README.md` describes its parts.
+browser with sample data and has no backend. It covers the first-release and
+second-release screens of the specification. `prototype/README.md` describes its parts.
 
 ```
 cd prototype

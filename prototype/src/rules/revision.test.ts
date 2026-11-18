@@ -182,7 +182,8 @@ describe('ERD-10 and ERD-11', () => {
 });
 
 describe('search', () => {
-  const m = sampleModel();
+  // The first-release part of the sample, so that the results stay the short lists below.
+  const m = buildClinic({ secondRelease: false });
 
   it('finds by name, alias, description and notes', () => {
     expect(search(m, { text: 'veterinarian' }).map((r) => r.element.id)).toContain(CLINIC.vet);
@@ -258,8 +259,9 @@ describe('getFragment and eventResponseList', () => {
 });
 
 describe('The sample and the starters', () => {
-  it('the sample keeps exactly its five findings', () => {
-    expect(ruleIds(sampleModel())).toEqual(['BAL-01', 'BAL-03', 'DFD-13', 'DM-01', 'DM-01']);
+  it('the first-release part of the sample keeps exactly its five findings', () => {
+    // The whole sample's findings are pinned in release2.test.ts.
+    expect(ruleIds(buildClinic({ secondRelease: false }))).toEqual(['BAL-01', 'BAL-03', 'DFD-13', 'DM-01', 'DM-01']);
   });
 
   it('the sample shows the new entry fields', () => {

@@ -28,6 +28,15 @@ export type SymbolData = {
   tag: string;
   mark: MarkLevel;
   childDiagramId: Id | null;
+  /** True in physical mode. The fields below are drawn only then. */
+  physical: boolean;
+  /** What carries out a process, such as "Python". Empty for the other kinds. */
+  implementation: string;
+  /** A process or an external entity where a person does the work. */
+  human: boolean;
+  /** A data store's physical name. Empty for the other kinds. */
+  physicalName: string;
+  systemRelated: boolean;
 };
 
 /** A flow end that is not a symbol on this diagram. */
@@ -43,6 +52,10 @@ export type FlowData = {
   flowId: Id;
   control: boolean;
   label: string;
+  /** True in physical mode, for a data flow. A control flow has no physical detail. */
+  physical: boolean;
+  physicalName: string;
+  systemRelated: boolean;
   mark: MarkLevel;
   sx: number;
   sy: number;
@@ -137,6 +150,8 @@ interface Line {
   id: Id;
   control: boolean;
   label: string;
+  physicalName: string;
+  systemRelated: boolean;
   s: EndPlan;
   t: EndPlan;
   order: number;
@@ -153,6 +168,8 @@ export function buildCanvas(
   selected: ReadonlySet<Id>,
   /** Positions of symbols being dragged, by occurrence id. They win over the model. */
   live: Record<Id, Pt>,
+  /** True in physical mode: the symbols then carry their implementation detail. */
+  physical = false,
 ): { nodes: CanvasNode[]; edges: CanvasEdge[] } {
   const nodes: CanvasNode[] = [];
   const boxes = new Map<Id, Box>();
@@ -160,7 +177,8 @@ export function buildCanvas(
 
   for (const o of occurrencesOn(model, diagramId)) {
     const el = model.elements[o.elementId];
-    if (!isNode(el)) continue;
+    if (!el || !isNode(el)) continue;
+    const human = el.kind !== 'dataStore' && el.human;
     const pos = live[o.id] ?? { x: o.x, y: o.y };
     boxes.set(o.id, { x: pos.x, y: pos.y, w: o.width, h: o.height });
     if (!firstOf.has(el.id)) firstOf.set(el.id, o.id);
@@ -172,6 +190,8 @@ export function buildCanvas(
       height: o.height,
       measured: { width: o.width, height: o.height },
       selected: selected.has(el.id),
+      // The dashed line of the human-machine boundary goes around the node, outside the symbol.
+      className: physical && human ? `workspace-human workspace-human-${el.kind}` : undefined,
       data: {
         kind: el.kind,
         elementId: el.id,
@@ -179,6 +199,11 @@ export function buildCanvas(
         tag: nodeTag(model, el.id),
         mark: worstFor(findings, el.id),
         childDiagramId: el.kind === 'process' ? (childDiagram(model, el.id)?.id ?? null) : null,
+        physical,
+        implementation: el.kind === 'process' ? el.implementation.trim() : '',
+        human,
+        physicalName: el.kind === 'dataStore' ? el.physicalName.trim() : '',
+        systemRelated: el.kind !== 'externalEntity' && el.systemRelated,
       },
     });
   }
@@ -215,6 +240,8 @@ export function buildCanvas(
       id: f.id,
       control: false,
       label: elementLabel(model, f.id),
+      physicalName: f.physicalName.trim(),
+      systemRelated: f.systemRelated,
       s: { occId: sOcc, side: sSide, point: zero, ...endText('source', f.sourceId) },
       t: { occId: tOcc, side: tSide, point: zero, ...endText('target', f.targetId) },
       order: lines.length,
@@ -227,6 +254,8 @@ export function buildCanvas(
       id: c.id,
       control: true,
       label: c.name,
+      physicalName: '',
+      systemRelated: false,
       s: { occId: null, side: 'bottom', point: zero, variant: 'origin', text: '' },
       t: { occId: tOcc, side: route?.targetSide ?? 'top', point: zero, ...endText('target', c.targetId) },
       order: lines.length,
@@ -317,6 +346,9 @@ export function buildCanvas(
         flowId: line.id,
         control: line.control,
         label: line.label,
+        physical: physical && !line.control,
+        physicalName: line.physicalName,
+        systemRelated: line.systemRelated,
         mark: worstFor(findings, line.id),
         sx: line.s.point.x,
         sy: line.s.point.y,
