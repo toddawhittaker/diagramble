@@ -10,20 +10,26 @@
   --select: #1f5fa8; /* the selected item, and nothing else */
   --select-tint: #dce8f5;
   --error: #b3261e;
-  --warning: #b87a00;
+  --warning: #a86f00; /* darkened from #b87a00 so the mark reaches 3:1 on every tint */
   --ok: #2f6b3a;
   --ai: #5a3ea8; /* text written by AI, and nothing else */
   --disabled: #a8a294;
   --on-error: #ffffff; /* the exclamation mark inside the error mark */
-  --on-warning: #1e2a38; /* the exclamation mark inside the warning mark */
+  --on-warning: #ffffff; /* the exclamation mark inside the warning mark */
   --on-ink: #f7f3ea; /* text on the primary button */
+  /* Chip backgrounds: a pale wash of the colour of the mark inside. Never used on their own. */
+  --error-tint: #f5deda;
+  --warning-tint: #f3e6c8;
+  --ok-tint: #dce8dc;
+  --ai-tint: #e5dff2;
+  --count-tint: #e6e0d3;
 
   --font-title: 'Source Serif 4', Georgia, serif;
   --font-body: 'Source Sans 3', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
   --topbar-h: 48px;
-  --nav-w: 216px;
+  --nav-w: 240px;
   --header-h: 72px;
   --panel-w: 390px;
 
@@ -46,6 +52,11 @@
   --on-error: #1a1917;
   --on-warning: #1a1917;
   --on-ink: #1a1917;
+  --error-tint: #3b2220;
+  --warning-tint: #372c16;
+  --ok-tint: #1f3125;
+  --ai-tint: #2a2440;
+  --count-tint: #2f2c27;
 
   color-scheme: dark;
 }
@@ -157,10 +168,14 @@ textarea {
 }
 
 .topbar-product {
-  font-family: var(--font-title);
-  font-weight: 600;
-  font-size: 20px;
+  display: flex;
+  align-items: center;
+  color: var(--ink);
   text-decoration: none;
+}
+
+.wordmark {
+  display: block;
 }
 
 .topbar-project {
@@ -205,7 +220,7 @@ textarea {
 .nav-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-height: 36px;
   padding: 6px 12px 6px 9px;
   border-left: 3px solid transparent;
@@ -242,12 +257,12 @@ textarea {
 
 .nav-row.nav-diagram .nav-label {
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   line-height: 1.2;
 }
 
 .nav-row.nav-diagram .marks {
-  gap: 6px;
+  gap: 4px;
 }
 
 .nav-row.nav-diagram .mark {
@@ -525,11 +540,76 @@ textarea {
 
 /* ---- Counts and marks ---- */
 
-/* A count is a plain monospaced number. There are no pills. */
+/* A count is a monospaced number. Inside a sentence it stays plain. Standing on its own,
+   or with a mark, it sits in a chip: a rounded wash of the mark's colour. The mark keeps
+   its colour and the number and word stay in ink, so the text always reads at 11:1. */
 .count {
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 400;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 11px;
+  background: var(--count-tint);
+  color: var(--ink);
+  line-height: 1;
+}
+
+.mark.chip {
+  padding: 0 8px 0 5px;
+}
+
+/* A mark alone in a chip is a circle. */
+.mark.chip:not(:has(.count, .mark-word)) {
+  width: 22px;
+  padding: 0;
+  justify-content: center;
+}
+
+.chip.mark-error {
+  background: var(--error-tint);
+}
+
+.chip.mark-warning {
+  background: var(--warning-tint);
+}
+
+.chip.mark-ok {
+  background: var(--ok-tint);
+}
+
+.chip.mark-ai {
+  background: var(--ai-tint);
+}
+
+/* The navigator is narrow, so its chips are tighter and sit closer together. */
+.nav-row .chip {
+  height: 20px;
+  padding: 0 6px;
+}
+
+.nav-row .mark.chip {
+  padding: 0 6px 0 4px;
+  gap: 3px;
+}
+
+.nav-row .mark.chip:not(:has(.count, .mark-word)) {
+  width: 20px;
+  padding: 0;
+}
+
+.nav-row .marks {
+  gap: 4px;
+}
+
+/* On a selected item the tints would vanish into the selection blue, so the chip turns paper. */
+.is-selected .chip {
+  background: var(--paper);
 }
 
 .mark {
@@ -546,25 +626,26 @@ textarea {
   display: block;
 }
 
+/* The word after a mark is ink. Its colour comes from the mark. */
 .mark-word {
   font-weight: 700;
 }
 
-.mark-error .mark-word {
-  color: var(--error);
-}
+/* Windows high-contrast mode drops the tints. Give each chip an outline and draw the
+   marks in the system's text colour, so the shapes still carry the meaning. */
+@media (forced-colors: active) {
+  .chip {
+    border: 1px solid CanvasText;
+  }
 
-.mark-warning .mark-word {
-  color: var(--warning);
-}
-
-.mark-ok {
-  color: var(--ok);
-}
-
-.mark-ai {
-  color: var(--ai);
-  font-weight: 700;
+  .mark {
+    --error: CanvasText;
+    --warning: CanvasText;
+    --ok: CanvasText;
+    --ai: CanvasText;
+    --on-error: Canvas;
+    --on-warning: Canvas;
+  }
 }
 
 .marks {

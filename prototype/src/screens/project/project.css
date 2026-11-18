@@ -224,13 +224,18 @@
   --select: #1f5fa8;
   --select-tint: #dce8f5;
   --error: #b3261e;
-  --warning: #b87a00;
+  --warning: #a86f00;
   --ok: #2f6b3a;
   --ai: #5a3ea8;
   --disabled: #a8a294;
   --on-error: #ffffff;
-  --on-warning: #1e2a38;
+  --on-warning: #ffffff;
   --on-ink: #f7f3ea;
+  --error-tint: #f5deda;
+  --warning-tint: #f3e6c8;
+  --ok-tint: #dce8dc;
+  --ai-tint: #e5dff2;
+  --count-tint: #e6e0d3;
   color-scheme: light;
   color: var(--ink);
 

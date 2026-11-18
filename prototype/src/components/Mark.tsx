@@ -49,17 +49,19 @@ export interface MarkProps {
   word?: boolean;
   /** A mark followed by a number means that many findings. */
   count?: number;
-  /** Pixel size of the glyph. Default 16. */
+  /** Pixel size of the glyph. Default 14, to fit inside a chip. */
   size?: number;
   /** Text for screen readers and the tooltip. Defaults to the kind and count. */
   label?: string;
+  /** Draw the mark without its chip, as on the diagram canvas. Default false. */
+  bare?: boolean;
 }
 
 /** One mark: error, warning, OK or AI. */
-export function Mark({ kind, word, count, size = 16, label }: MarkProps) {
+export function Mark({ kind, word, count, size = 14, label, bare = false }: MarkProps) {
   const text = label ?? (count === undefined ? WORDS[kind] : `${count} ${WORDS[kind].toLowerCase()}${count === 1 ? '' : 's'}`);
   return (
-    <span className={`mark mark-${kind}`} role="img" aria-label={text} title={text}>
+    <span className={`mark mark-${kind}${bare ? '' : ' chip'}`} role="img" aria-label={text} title={text}>
       <Glyph kind={kind} size={size} />
       {(word || kind === 'ai') && <span className="mark-word">{WORDS[kind]}</span>}
       {count !== undefined && <span className="count">{count}</span>}
@@ -93,7 +95,7 @@ export function Missing({ children }: { children: ReactNode }) {
   return <span className="missing">{children}</span>;
 }
 
-/** A plain monospaced number. */
+/** A number standing on its own, such as the count on a tab, in a chip. Inside a sentence, use a plain `<span className="count">`. */
 export function Count({ n }: { n: number | string }) {
-  return <span className="count">{n}</span>;
+  return <span className="count chip">{n}</span>;
 }

@@ -89,7 +89,7 @@ export function SymbolView({ id, data, selected }: NodeProps<SymbolNode>) {
       }}
     >
       {shown ? shown : <span className="missing">No name</span>}
-      {data.mark && <Mark kind={data.mark} size={14} />}
+      {data.mark && <Mark kind={data.mark} size={14} bare />}
     </span>
   );
 

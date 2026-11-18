@@ -29,10 +29,30 @@ like the textbook.
 | Hairline | `#C9C1B2` | `#3D3933` | Dividers, borders, the canvas grid |
 | Selection blue | `#1F5FA8`, tint `#DCE8F5` | `#7FB2EA`, tint `#1F3044` | The selected item |
 | Error red | `#B3261E` | `#F0776C` | An error |
-| Warning amber | `#B87A00` | `#E3AC3F` | A warning |
+| Warning amber | `#A86F00` | `#E3AC3F` | A warning |
 | OK green | `#2F6B3A` | `#7CC08B` | No problems |
 | AI violet | `#5A3EA8` | `#AD95F2` | Written by AI |
 | Disabled grey | `#A8A294` | `#5E5A51` | A control that cannot be used |
+| Chip tints | error `#F5DEDA`, warning `#F3E6C8`, OK `#DCE8DC`, AI `#E5DFF2`, count `#E6E0D3` | error `#3B2220`, warning `#372C16`, OK `#1F3125`, AI `#2A2440`, count `#2F2C27` | The background of a chip, a pale wash of the colour of the mark inside it |
+
+**Chips, added on 18 November 2026.** The author asked for rounded chips like those in
+IBM Carbon and GitHub Primer. A mark with a number or a word, and a number standing on
+its own (on a tab or in the navigator), sits in a rounded chip filled with the tint of
+its mark. The mark keeps its colour. The number and the word are in ink, so they read
+at about 11 to 1 on every tint. A number inside a sentence stays a plain monospaced
+number, and the marks on the diagram canvas have no chip. On a selected item the chip is
+paper-coloured, because the tints would vanish into the selection blue. In Windows
+high-contrast mode the chips get an outline and the marks are drawn in the system's
+text colour.
+
+**Contrast, checked on 18 November 2026 against WCAG 2.2 level AA.** The light warning
+amber was `#B87A00`, which reached only 2.9 to 1 on its tint and on the selected row,
+below the 3 to 1 a meaningful graphic needs. It is now `#A86F00`, at least 3.4 to 1 on
+paper, side paper, its tint and the selected row. The exclamation mark inside the light
+warning mark is now white (4.3 to 1); in dark mode it stays dark. Every other mark is at
+least 4.8 to 1 on its tint in both modes.
+
+To make room for the chips, the navigator is 240 pixels wide instead of 216.
 
 Two points differ from the picture of style A:
 

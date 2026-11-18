@@ -134,7 +134,7 @@ export function FlowEdge({ data, selected }: EdgeProps<CanvasEdge>) {
                   system
                 </span>
               )}
-              {data.mark && <Mark kind={data.mark} size={14} />}
+              {data.mark && <Mark kind={data.mark} size={14} bare />}
             </>
           )}
         </div>

@@ -35,7 +35,7 @@ offline. There is no other UI library. Styling is plain CSS with CSS variables.
 | `src/store/` | The one store: model, findings, undo and redo, saving, selection, and the hooks |
 | `src/theme/` | The CSS variables and class names, and the light and dark switch |
 | `src/frame/` | The top bar, the navigator and the page layout pieces |
-| `src/components/` | The marks, controls, problem card, problems panel, entry fields and form controls |
+| `src/components/` | The wordmark, the marks, controls, problem card, problems panel, entry fields and form controls |
 | `src/screens/` | One folder per screen agent |
 | `src/App.tsx` | The routes |
 
@@ -842,15 +842,19 @@ switch in the top bar. The choice is kept in `localStorage`. The mode is set as
 | `--ai` | Text written by AI, and nothing else |
 | `--disabled` | A control that cannot be used |
 | `--on-error`, `--on-warning` | The exclamation mark inside the error and the warning mark |
+| `--error-tint`, `--warning-tint`, `--ok-tint`, `--ai-tint`, `--count-tint` | The background of a chip, a pale wash of its mark's colour |
 | `--on-ink` | Text on the primary button |
 | `--font-title` | Source Serif 4, for titles (use weight 600) |
 | `--font-body` | Source Sans 3, for body text (weights 400, 600 and 700, and 400 italic) |
 | `--font-mono` | IBM Plex Mono, for numbers and rule codes (weights 400 and 500) |
-| `--topbar-h`, `--nav-w`, `--header-h`, `--panel-w` | 48px, 216px, 72px, 390px |
+| `--topbar-h`, `--nav-w`, `--header-h`, `--panel-w` | 48px, 240px, 72px, 390px |
 
 The look, from `docs/mockups/STYLES.md`: one sheet of paper, regions divided by 1-pixel
 hairlines, no shadows, no filled blocks, and every corner square except the process
-symbol. There are no pills: a count is a plain monospaced number.
+symbol. A mark with a number or a word, and a number standing on its own, sits in a rounded
+chip tinted with its mark's colour (`.chip`, from the `Mark` and `Count` components). A
+number inside a sentence stays a plain `<span className="count">`, and marks on the
+canvas use `<Mark bare />`.
 
 ### Class names
 
