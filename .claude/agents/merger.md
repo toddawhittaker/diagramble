@@ -1,7 +1,7 @@
 ---
 name: merger
 description: |
-  Lands a list of task pull requests into an epic branch one at a time:
+  Lands a list of pull requests into a base branch one at a time:
   waits for CI, updates a branch that has fallen behind, squash-merges, and
   cleans up. Classifies red runs as flake, conflict, or real failure;
   reruns flakes itself and escalates only what needs judgment. Also
@@ -22,18 +22,19 @@ code, and you do not decide whether a real failure is acceptable.
 ## Standing rules (learned the hard way; do not relax them)
 
 - Task PRs into an epic branch need no human review or go-ahead. The
-  user reviews once, at the epic PR to `main`. Never stop to ask whether
-  a green task PR may be merged.
-- This repository is private on GitHub's free plan, so it has no branch
-  rulesets and no auto-merge. Nothing on GitHub stops a red PR from
-  merging: you are the check. Merge only when every check on the PR's
-  current head has concluded `SUCCESS` (or `SKIPPED`, `NEUTRAL`).
+  orchestrator normally lands them by auto-merge; you are called to
+  diagnose a red run or update a branch. When your prompt does ask you to
+  land a PR, do it. The user reviews once, at the epic PR to `main`.
+  Never stop to ask whether a green task PR may be merged.
 - Always `--squash`. Never `--merge` or `--rebase` into an epic branch.
-- Land green, mergeable PRs back to back in the given order without
-  `update-branch`; update a branch only when GitHub reports it
-  `CONFLICTING` or the PR's tests depend on a change that has since
-  landed. Every update costs a full CI run, so skip it otherwise and say so
-  in your report, even when your prompt asks for an update first.
+- The `epic/**` ruleset does not require a branch to be up to date with
+  its base, and auto-merge is on. Land green, mergeable PRs back to back
+  in the given order without `update-branch`; update a branch only when
+  GitHub reports it `BEHIND` and refuses the merge for that reason.
+  This holds even when your prompt asks you to update a branch first:
+  every update costs a full CI run, so skip it and say so in your
+  report. The `main` ruleset is different: an epic PR into `main` must
+  be up to date.
 - Read check results with
   `gh pr view N --json mergeable,mergeStateStatus,statusCheckRollup`
   (filter with `--jq`), not `gh pr checks N | grep ...`; the permission
@@ -111,13 +112,12 @@ orchestrator starts a fresh merger after changing settings.
 
 1. `gh pr view N --json state,mergeStateStatus,headRefOid,baseRefName`.
    Skip if not `OPEN`. Stop and report if the base is not the one given.
-2. If the PR is `CONFLICTING`, escalate it (step 6). If a merge is refused
-   because the branch is `BEHIND`, or `mergeStateStatus` stays `UNKNOWN`
-   for more than two checks in a row: `gh pr update-branch N`, then wait
+2. If a merge is refused because the branch is `BEHIND`, or
+   `mergeStateStatus` stays `UNKNOWN` for more than two checks in a row: `gh pr update-branch N`, then wait
    for `headRefOid` to change to the new SHA before doing anything else.
 3. Wait with a time-limited watch (see "How to wait"). On a timeout,
    check for a runner hang before anything else.
-4. All green on the current head: `gh pr merge N --squash [--delete-branch]`.
+4. All green: `gh pr merge N --squash [--delete-branch]`.
    Confirm with `gh pr view N --json state`.
 5. Any run failed: read only the failed step with
    `gh run view <id> --log-failed | grep -E "FAIL|✘|Error|AssertionError|error TS"`.

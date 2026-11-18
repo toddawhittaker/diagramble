@@ -50,15 +50,18 @@ work it closes.
    and rule on anything it did outside its file list. Before pushing any
    edit of your own, run `node scripts/check-comment-history.mjs` and
    `python3 scripts/check-docs-links.py`.
-8. **Land through merger.** The repository is private on GitHub's free
-   plan, so it has no auto-merge and no rulesets, and nothing on GitHub
-   stops a red PR from merging. Once a task PR passes step 7, hand it to a
-   merger agent, which squash-merges it when its CI is green, reruns
-   flakes and escalates the rest. Give one merger the PRs in the order they
-   pass, and start a fresh merger if one is blocked. A task PR into the
-   epic has no human review; the user reviews once, at the epic level.
-   Never merge a PR into main; the user merges main. Main-into-epic and
-   epic-into-main use merge commits.
+8. **Land by auto-merge.** The repository allows auto-merge. Once a task
+   PR passes step 7, run `gh pr merge <n> --auto --squash --delete-branch`.
+   GitHub merges it when its CI is green. The epic rulesets do not require
+   a branch to be up to date, so green PRs land in parallel. A task PR
+   into the epic has no human review; the user reviews once, at the epic
+   level. Never use auto-merge on a PR into main; the user merges main.
+   Main-into-epic and epic-into-main use merge commits.
+
+   Hand a PR to merger only to diagnose a red run (flake, conflict or
+   real failure; it reruns flakes and escalates the rest) or to update a
+   branch that has fallen behind with conflicts. Do not use a shell loop
+   in the main session.
 
    Keep one background watcher running for the whole epic (Monitor, a
    60-second poll, re-armed when it expires). It reports every failing

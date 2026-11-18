@@ -64,7 +64,7 @@ It does the work itself only for a one-line lookup or edit. Agents live in
 | code-reviewer | Read-only review for correctness, then YAGNI/KISS/DRY/SOLID quality. |
 | a11y-reviewer | Read-only accessibility review of screens to WCAG 2.2 AA. |
 | ui-designer | Building or polishing screens to the Drafting Paper style: semantic markup, container-driven layout, performance first. Review-only on request. |
-| merger | Landing green task PRs into an epic, diagnosing a red run (flake, conflict, real failure), and updating a branch that fell behind with conflicts. Cheap. |
+| merger | Diagnosing a red task PR run (flake, conflict, real failure) and updating a branch that fell behind with conflicts. Cheap. |
 
 Orchestration rules:
 
@@ -112,9 +112,6 @@ Orchestration rules:
   stop.
 - Running an epic (task PRs and how they land, which reviewers run, the
   fold, the epic PR) follows the `epic-run` skill.
-- The repository is private on GitHub's free plan: no rulesets and no
-  auto-merge. The merger agent is the check that a task PR is green before
-  it lands, and nobody pushes to `main` or an epic branch directly.
 
 ## Design defaults
 

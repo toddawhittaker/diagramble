@@ -41,21 +41,22 @@ copyright and reading the book). An agent's worktree has no `sources/`.
   also changes only through a pull request.
 - Work happens on short-lived task branches cut from the epic branch, named
   `task/<n>-<short-name>`. A task branch is merged into its epic by pull
-  request, squash merge, once its CI is green; no person reviews a task pull
-  request.
+  request, squash merge. The orchestrator turns on GitHub auto-merge for
+  it once checked, so it lands and its branch is deleted when its CI is
+  green; no person reviews a task pull request.
 - When an epic's work and its epic-level review are done (see "Pull
   requests" below), the epic branch is merged into `main` by pull request,
   merge commit, so the epic's history is kept.
 - To sync changes from `main` into an epic branch, create a short-lived
   branch from the epic, merge `main` into it, and open a pull request back
-  into the epic branch.
+  into the epic branch. The branch ruleset requires a PR for every push to
+  `epic/**`, so a direct merge is not allowed.
 - Branches are deleted on merge.
 
-The repository is private on GitHub's free plan, which offers neither branch
-rulesets nor auto-merge for private repositories. These rules are therefore
-kept by the workflow, not enforced by GitHub: the merger agent checks that
-every check is green before it merges, and nobody pushes to `main` or an
-epic branch directly.
+Two rulesets enforce this. `main` and `epic/**` take changes only by pull
+request, with the three CI checks green (Secret scan, Docs and comments,
+Prototype). A pull request into `main` must also be up to date with it; one
+into an epic branch need not be.
 
 ## Epic plans
 
@@ -114,15 +115,19 @@ source file over 800 lines. The prototype runs it as `npm run lint`.
 
 Every pull request cites the SPEC.md sections it serves and says how it was
 verified. The template asks for both. CI must be green.
+An epic pull request must be up to date with `main` before it is merged;
+`gh pr update-branch <number>` does that. Task pull requests into an
+epic branch need not be up to date, because each update costs a full CI
+run. They are updated only when GitHub refuses a merge because the
+branch is behind.
 
 There are two kinds of pull request, merged by different people at
 different times:
 
 - A task pull request, from a task branch into its epic branch, is merged
-  (squash) by the merger agent as soon as its CI is green, after the
+  by GitHub auto-merge (squash) as soon as its CI is green, after the
   orchestrator has checked it. No one reviews it by hand; review happens
-  once, later, over the whole epic. Task pull requests need not be up to
-  date with their epic, because each update costs a full CI run.
+  once, later, over the whole epic.
 - An epic pull request, from an epic branch into `main`, is opened only
   after every task pull request for that epic has landed, code-reviewer,
   security-reviewer (when the epic touches the server, accounts, saving,
@@ -132,13 +137,14 @@ different times:
   or explicitly deferred, and the checks are green locally. Only the user
   merges an epic pull request into `main`.
 
-The merger agent reruns CI up to twice when a failure looks like a flake: a
-test unrelated to the change failing on a timing-shaped error that also
-passed on an earlier run. A failure that touches the changed files, or
+The merger agent is called only when a task pull request's run is red, or
+when its branch has fallen behind with conflicts. It reruns the CI up to
+twice when a failure looks like a flake: a test unrelated to the change
+failing on a timing-shaped error that also passed on an earlier run. A failure that touches the changed files, or
 repeats after a rerun, is escalated to the orchestrator rather than retried
 again; the merger agent never edits code to make a check pass.
 `.claude/settings.json` grants agents permission to run `gh pr merge` and
-read-only `gh` calls, which is what lets the merger land task pull requests
+read-only `gh` calls, which is what lets the orchestrator turn on auto-merge
 without asking each time.
 
 ## CI
@@ -153,8 +159,8 @@ request's run on the older commit. Its jobs:
 - **Prototype**: `npm ci`, then typecheck, lint, the test suite and the
   build, in `prototype/`.
 
-Private repositories on the free plan have a monthly allowance of Actions
-minutes, so jobs stay small and every job has a time limit.
+Every job has a time limit, so a hung runner cannot hold a pull request for
+hours.
 
 ## Secret scanning
 
