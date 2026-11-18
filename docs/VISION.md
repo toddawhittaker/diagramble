@@ -6,7 +6,7 @@ Exported from the [working document](https://claude.ai/artifact/V3iHstjFm3RjyJhZ
 
 Decisions made after this was written are recorded in the [core specification](SPEC.md), section 1. Where the two differ, the specification wins.
 
-Revised on 17 November 2026 to fit the course textbook: Dennis, Wixom and Roth, *Systems Analysis and Design*, 8th edition. Section 16 says what the textbook changed. Revised again the same day after two Visible Analyst tutorials were read: section 3 was rewritten from them, and the feature lists in sections 7 and 10 gained what they showed was missing. This file is now ahead of the working document.
+Revised on 17 November 2026 to fit the course textbook: Dennis, Wixom and Roth, *Systems Analysis and Design*, 8th edition. Section 16 says what the textbook changed. Revised again the same day after two Visible Analyst tutorials were read: section 3 was rewritten from them, and the feature lists in sections 7 and 10 gained what they showed was missing. This file is now ahead of the working document. Revised on 18 November 2026 for the license: the project is source-available under the Business Source License 1.1, not open source, and sections 1, 5, 6, 9, 13 and 14 were changed to match.
 
 ## 1. Executive summary
 
@@ -25,7 +25,7 @@ CASE means Computer-Aided Software Engineering. DFD means data flow diagram. ERD
 5. **Unguarded AI harms learning, and AI grading is not reliable enough to run alone.** In one field experiment, students who practiced with plain GPT-4 scored 17% lower on a later unassisted exam than students who never had it. A guarded tutor largely removed that harm.
 6. **Nothing open source is a ready foundation.** Permissive libraries cover the canvas, layout and export. The semantic model, the rule engine and the data dictionary must be purpose-built.
 7. **Accessibility is a legal requirement and a design advantage.** Public universities must meet the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA by April 2027 or April 2028. When diagrams are views of a model, an outline view of the same model is a natural keyboard and screen-reader path.
-8. **The project is open source and not a business.** Its lasting value is the rule library, the explanations and the teaching content, which anyone can reuse and improve. The open questions are who hosts it and who maintains it.
+8. **The project is source-available, and it is not built as a business.** It is under the Business Source License 1.1: free for non-profit schools and for anyone's own study and teaching, with a paid license for for-profit use. Each version becomes open source, under the AGPL, four years after it is released. Its lasting value is the rule library, the explanations and the teaching content. The open questions are who hosts it beyond the first deployment and who maintains it.
 9. **The first course sets the conventions.** The tool is built for a course that uses Dennis, Wixom and Roth and covers chapters 1 to 12. That book builds DFDs from use case forms, so the forms are in the first release. Its design chapters add physical models and structure charts, which follow in the second. The deliverables of the other chapters are served in the second release by checked forms, one more diagram and a project binder, and everything exports to PDF.
 
 ### Strongest recommendation
@@ -115,7 +115,7 @@ Each cell reflects vendor documentation read on 17 November 2026 unless marked. 
 
 Preserve the repository, decomposition, balancing and the data-to-process checks. Redesign how feedback is delivered. Abandon code generation and most of the extra diagram types. Structure charts stay, because the course textbook teaches them.
 
-The detail below comes from four documents. Two were read first: the [Operation Manual for version 7.6](https://www2.rivier.edu/faculty/vriabov/VA-7-6-manual.pdf) (copyright 2002) and the vendor's [Entity Relationship and Data Flow Tutorial](https://resources.visiblesystemscorp.com/hubfs/VA%20Tutorial%20ERD%20and%20Dataflows.pdf) (copyright 2008 to 2020). Two more were read later on 17 November 2026: the 287-page "Visible Analyst Tutorial, Zachman Framework Edition" (copyright 2009) and the 35-page "Enterprise Framework 360 Degree View" tutorial (copyright 2008 to 2020), which reprints the framework chapter of the first. Page numbers below are PDF pages of the 2009 tutorial. Where a statement rests on the 2002 manual alone, the table says so. The notes from the two later tutorials are in `sources/notes/visible-analyst-gap-report.md`.
+The detail below comes from four documents. Two were read first: the [Operation Manual for version 7.6](https://www2.rivier.edu/faculty/vriabov/VA-7-6-manual.pdf) (copyright 2002) and the vendor's [Entity Relationship and Data Flow Tutorial](https://resources.visiblesystemscorp.com/hubfs/VA%20Tutorial%20ERD%20and%20Dataflows.pdf) (copyright 2008 to 2020). Two more were read later on 17 November 2026: the 287-page "Visible Analyst Tutorial, Zachman Framework Edition" (copyright 2009) and the 35-page "Enterprise Framework 360 Degree View" tutorial (copyright 2008 to 2020), which reprints the framework chapter of the first. Page numbers below are PDF pages of the 2009 tutorial. Where a statement rests on the 2002 manual alone, the table says so. The notes from the two later tutorials are in `sources/notes/visible-analyst-gap-report.md`, kept outside the repository.
 
 ### Current status
 
@@ -322,11 +322,11 @@ Two Canvas details are uncertain and need a sandbox prototype early. How SpeedGr
 
 - **Student records.** United States universities share student records with vendors under a "school official" arrangement that needs a written agreement and limits use of the data. The exact regulatory text was not verified in this research.
 - **Security review.** Campuses usually ask for the [Higher Education Community Vendor Assessment Toolkit](https://www.educause.edu/higher-education-community-vendor-assessment-toolkit) questionnaire, and for larger purchases an independent security audit report.
-- **Running cost.** The tool is free, but running it is not. Someone must host the server, and AI features cost money per request. Visible Analyst's own student token is $49 for six months. That token is the cost this project removes.
+- **Running cost.** The tool is free for colleges, but running it is not. Someone must host the server, and AI features cost money per request. Visible Analyst's own student token is $49 for six months. That token is the cost this project removes.
 
 ## 6. Proposed product vision
 
-Diagramble is a browser-based modeling environment that understands what students draw, checks it as they work, and explains what is wrong. It is open source, and it is positioned as model-aware, validation-driven and education-first.
+Diagramble is a browser-based modeling environment that understands what students draw, checks it as they work, and explains what is wrong. Its source is public under the Business Source License 1.1. It is free for non-profit schools and for individuals, and a for-profit that makes money from it pays for a license. It is positioned as model-aware, validation-driven and education-first.
 
 ### Target users
 
@@ -373,10 +373,10 @@ Diagramble is a browser-based modeling environment that understands what student
 
 ### What makes the project last
 
-An open-source project does not need defensibility. It needs reasons for people to adopt it, contribute to it and keep it running.
+The license protects against a for-profit taking the tool and selling it, so the project does not need to defend itself in the market. It still needs reasons for people to adopt it, contribute to it and keep it running.
 
 - **The rule library and its explanations.** This is the most reusable part. Publish each rule with a precise definition, tests and wording tried on students, so others can cite and extend it.
-- **Shared cases and assignments.** Instructors can contribute content without writing code.
+- **Shared cases and assignments.** Instructors can contribute content without writing code. Code contributions need a contributor license agreement, so that commercial licenses can still be sold.
 - **An open file format.** Student work is never locked in, and other tools can read it.
 - **Easy self-hosting.** A department should be able to run it as one package.
 - **More than one maintainer.** The research found several abandoned open-source modeling tools, such as Dia and ArgoUML. A second maintainer matters more than any feature.
@@ -389,7 +389,7 @@ Price is no longer the contest, since both are free. The contest is habit and ef
 
 - Free drawing tools are familiar and collaborative, and Lucidchart already offers Canvas assignments.
 - If an instructor only wants pictures in a report, draw.io is enough and always will be.
-- Open source helps with adoption. There are no license tokens, no purchase to approve, and the code can be inspected.
+- Free use for colleges helps with adoption. There are no license tokens, no purchase to approve, and the code can be inspected.
 
 ### Who should it serve first?
 
@@ -397,7 +397,7 @@ Price is no longer the contest, since both are free. The contest is habit and ef
 | --- | --- | --- |
 | A. One course, your own | Fastest. Every choice has a real user behind it | It may fit one textbook and one instructor too closely |
 | B. Systems analysis and design courses in general, with professional use later if contributors want it | Still focused. Decisions such as symbol styles and rule profiles stay general enough for other instructors | More cases and conventions to support |
-| C. A general open-source CASE tool from the start | The widest audience | No focus. It repeats the breadth that made the older tools heavy |
+| C. A general CASE tool from the start | The widest audience | No focus. It repeats the breadth that made the older tools heavy |
 
 **Decision: option A first, with the way left open to option B.** The tool is built for one course and its textbook: Dennis, Wixom and Roth, 8th edition. Section 16 lists the conventions this fixes. Where a convention is only a severity or a wording, it lives in the rule profile, so another course could change it later without changing the engine. Option C spends effort on notations that free tools already serve.
 
@@ -621,7 +621,7 @@ They undermine it when they replace the student's attempt at graded work, and th
 
 Reuse permissive libraries for the canvas, layout, interface widgets and export. Build the semantic model, the rule engine, the dictionary and the accessible outline editor. No open-source DFD or ERD modeling component with real semantics was found.
 
-Licenses and versions were read from license files, the npm registry and release pages on 17 November 2026. The project itself will be open source under MIT or GPL, and that choice decides which dependencies are safe.
+Licenses and versions were read from license files, the npm registry and release pages on 17 November 2026. The project is under the Business Source License 1.1, decided on 18 November 2026. That rules out any dependency under the GPL or the AGPL alone, because either would require the whole tool to use the same license.
 
 ### Recommended components
 
@@ -648,7 +648,7 @@ Licenses and versions were read from license files, the npm registry and release
 | [Sprotty](https://github.com/eclipse-sprotty/sprotty) | EPL-2.0 | The closest conceptual fit, since it renders from a model. Smaller community and a steeper learning curve |
 | [Sirius Web](https://docs.obeosoft.com/sirius-web/user-manual/features/diagram.html) | EPL-2.0 | The only platform that already treats diagrams as views of a model. It brings a heavy Java stack and a small ecosystem. See the decision in section 14 |
 | [Apollon](https://github.com/ls1intum/Apollon) | MIT | A teaching-focused editor to study. It covers UML only and stores diagram data, not a semantic model |
-| GoJS, yFiles | Commercial, per developer | Best polish and layout, but commercial and not redistributable. Not usable in an open-source project |
+| GoJS, yFiles | Commercial, per developer | Best polish and layout, but commercial and not redistributable. Not usable in a project whose source others can deploy |
 | Langium | MIT | Builds a textual language with a parser. Worth it only if a text notation becomes a goal |
 | AntV X6 | MIT | Capable, but documentation is Chinese-first |
 
@@ -656,23 +656,25 @@ Licenses and versions were read from license files, the npm registry and release
 
 1. **tldraw.** It is not open source. Production use [requires a license key](https://tldraw.dev/sdk-features/license-key), so it cannot ship inside a project that others deploy.
 2. **GoJS, yFiles and JointJS+.** Commercial and not redistributable.
-3. **EPL-2.0 libraries with a GPL project (elkjs, Sprotty, Sirius Web).** EPL-2.0 code can be combined with GPL code only when the library names the GPL as a secondary license. The elkjs package lists "EPL-2.0 OR GPL-3.0-or-later", but its license file names only EPL-2.0. This was confirmed later on 17 November 2026: elkjs has carried the GPL option since version 0.12.0, and the core specification, section 14, has the detail. Sprotty and Sirius Web remain excluded. Under MIT there is no conflict.
-4. **GPL code (Modelio, pgModeler, PlantUML's GPL build).** Reusable only if the project is GPL. Under MIT it can be studied but not included.
+3. **EPL-2.0 libraries (elkjs, Sprotty, Sirius Web).** The Eclipse Public License asks only that changes to the library's own files be published, so it sits well with the Business Source License. elkjs is used under its EPL-2.0 option, and the core specification, section 14, has the detail. Sprotty and Sirius Web are left out for the reasons in the table above, not for their license.
+4. **GPL and AGPL code (Modelio, pgModeler, PlantUML's GPL build).** It cannot be included, because it would put the whole tool under the GPL. It can be studied.
 5. **bpmn-js and dmn-js.** The [license](https://bpmn.io/license/) forbids removing or covering the bpmn.io watermark. It matters only if BPMN is added.
-6. **libavoid-js.** LGPL-2.1 connector routing. Usable as a separate library under either license.
+6. **libavoid-js.** LGPL-2.1 connector routing. Usable as a separate, replaceable library, with any changes to it published.
 7. **Single-maintainer packages,** such as ltijs. The risk is abandonment, not licensing.
 
-React Flow's attribution link is no concern for an open-source project. Keep it.
+React Flow asks for its attribution link to stay unless a project pays for its Pro plan. Keep it.
 
 ### Choosing the project's license
 
+This section first recommended MIT, on the view that the project had no commercial goal. On 18 November 2026 the project's author decided instead that a for-profit that makes money from the tool should pay for it, and chose the Business Source License 1.1.
+
 | Option | Gains | Costs |
 | --- | --- | --- |
-| MIT (recommended) | Simplest terms and the widest reuse. Compatible with every recommended dependency. Universities and textbook authors can adapt it freely | Anyone may build a closed product on it and share nothing back |
-| GPL-3.0 | Changed versions that are distributed must stay open. GPL code from other projects can be reused | It does not cover hosted use: someone can run a changed version as a web service and share nothing. It also needs care with EPL-2.0 libraries |
-| AGPL-3.0 | The same as GPL, and hosted versions must share their changes too | Some organizations avoid AGPL software. The same care with EPL-2.0 libraries |
+| MIT | Simplest terms and the widest reuse | Anyone may sell it, or host it for money, and pay nothing |
+| AGPL-3.0 | Hosted versions must share their changes | Anyone may still sell it or host it for money, as long as they share their code |
+| Business Source License 1.1 (chosen) | Free for non-profit schools and for individuals. For-profit use needs a paid license. Each version becomes AGPL-3.0-or-later four years after it is released | It is not open source, so some people will not contribute. Outside code needs a contributor license agreement. GPL-only libraries are ruled out |
 
-**Recommendation: MIT.** With no commercial goal there is little to protect, and MIT removes every dependency question. GPL-3.0 is the weakest fit, because this is a hosted tool and GPL does not reach hosted changes. If keeping every changed version open matters to you, choose AGPL-3.0 instead of GPL.
+The full terms are in [`LICENSE`](../LICENSE), a plain summary is in [`LICENSING.md`](../LICENSING.md), and the decision and its details are in the [core specification](SPEC.md), section 1.
 
 ### What must be purpose-built
 
@@ -937,7 +939,7 @@ Five of the eight assumptions hold only with conditions, and three are rejected 
 - How many courses still require Visible Analyst, and how many teach DFDs with a drawing tool.
 - How often students make each kind of DFD error. No frequency study was found.
 - Whether rule explanations and hints improve unassisted performance in this subject. The roadmap makes this a Release 2 exit criterion.
-- Who will host and maintain it. A free tool still needs a server and someone answerable for student data.
+- Who will host and maintain it beyond the first deployment. Even when it is free to use, it needs a server and someone answerable for student data.
 
 ## 14. Key decisions and unresolved questions
 
@@ -952,7 +954,7 @@ Seven decisions shape the build, and each has a recommendation below. Nine quest
 | Storage shape | **A. One document per project plus an operation log.** Simple, and snapshots are trivial. Queries across projects are harder. **B. Relational tables of elements and links.** Strong queries. More schema coupling | A first. Copy rule results into tables for dashboards. Revisit at Level 3 | How soon cross-project reporting is needed |
 | Flow identity across levels | **A. A child's boundary flow is the same element as the parent's flow.** Consistent by construction, but hides the lesson. **B. Separate elements matched by a rule.** A real check, with some duplication. **C. Both: inherited flows are shared, flows the student draws are separate** | C. Balancing compares by identity first and by dictionary composition second | Confirm against how the adopting textbook draws leveled diagrams |
 | Rule violations: block or flag | **A. Block.** The model is never wrong, and the student never sees why. **B. Flag.** The student makes the mistake and reads the explanation | B by default, with blocking as a per-rule profile setting | Instructor preference in pilots |
-| Project license | **A. MIT.** Simplest, widest reuse, no dependency conflicts. Closed products may be built on it. **B. GPL-3.0.** Distributed changes stay open, but hosted changes need not be shared. **C. AGPL-3.0.** Hosted changes must be shared too. Some organizations avoid it | A. If keeping changed versions open matters, choose C and not B, because this is a hosted tool. Section 9 has the detail | Whether you mind someone running a closed, improved version |
+| Project license | **A. MIT.** Simplest, widest reuse. Anyone may sell it. **B. AGPL-3.0.** Hosted changes must be shared, but anyone may still sell it. **C. Business Source License 1.1.** Free for non-profits and individuals, paid for for-profit use, and each version becomes AGPL-3.0-or-later after four years | Decided on 18 November 2026: C. Section 9 has the detail | Settled |
 | Hosting and running cost | **A. Each institution hosts its own copy.** No central cost. Needs local technical staff. **B. One community-hosted instance.** Easiest for instructors. Someone pays for servers and holds student data for many schools. **C. Self-hosting, with AI features billed to the institution's own model account** | C. Cost and responsibility for student data stay with the institution that benefits | Settled on 17 November 2026 for the first deployment: the project's author hosts it. Who hosts for other institutions is still open |
 
 ### Unresolved questions
