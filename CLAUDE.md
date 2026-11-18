@@ -13,7 +13,7 @@ textbook: Dennis, Wixom and Roth, *Systems Analysis and Design*, 8th edition.
 | `docs/VISION.md` | Research and product vision: why the tool exists, what it will and will not do, and the roadmap |
 | `docs/SPEC.md` | Core specification: the model, commands, rules and test cases. Where it differs from the vision, the specification wins |
 | `docs/images/` | Figures used by the documents |
-| `sources/` | The course textbook as a PDF, and notes taken from it in `sources/notes/`. Start with `sources/README.md`: it covers copyright, how to read the PDF, and known errors in the book |
+| `sources/` | Local only, never committed: `.gitignore` excludes the whole folder, because the notes may infringe copyright. It holds the course textbook as a PDF, and notes taken from it in `sources/notes/`. Start with `sources/README.md`: it covers copyright, how to read the PDF, and known errors in the book |
 
 ## What belongs in this file
 

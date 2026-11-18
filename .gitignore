@@ -1,6 +1,3 @@
-# The course textbook is copyrighted. Never commit it, or any other book file.
-# The notes in sources/notes/ and sources/README.md are ours and are kept.
-sources/**/*.pdf
-sources/**/*.epub
-sources/**/*.mobi
-sources/**/*.djvu
+# The course textbook, the vendor tutorials and the notes taken from them may be
+# copyrighted. The whole folder stays on the author's computer and is never committed.
+sources/

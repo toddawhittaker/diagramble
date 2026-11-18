@@ -1517,7 +1517,7 @@ against the book.
 | Figure 8-25, page 290 | Interface numbers used twice on one diagram | The text says each number is unique (page 262). The tool keeps them unique |
 
 Chapter 5 was read against section 9, and chapters 9 and 10 against section 11. The
-notes are in `sources/notes/`.
+notes are kept in `sources/notes/` on the author's computer, outside the repository.
 
 | Question | What the textbook says | Where | Effect here |
 | --- | --- | --- | --- |
@@ -1557,7 +1557,7 @@ These points matter when testing against the book's design chapters.
 
 Two vendor tutorials were read on 17 November 2026: the Zachman Framework edition of
 2009, and a shorter one that reprints its framework chapter. The notes are in
-`sources/notes/visible-analyst-gap-report.md`, and page numbers below are PDF pages of
+`sources/notes/visible-analyst-gap-report.md`, outside the repository, and page numbers below are PDF pages of
 the 2009 tutorial. The table has every message and check that the tutorials show from
 Visible Analyst's Analyze function for the diagrams this specification covers.
 
@@ -1698,7 +1698,7 @@ Left out, with the reason:
 
 Every exercise, minicase and "Your Turn" box of chapters 1 to 3 and 6 to 12 was read on
 17 November 2026, 179 items in all. The notes are in
-`sources/notes/textbook-exercises-report.md`. None was out of the tool's reach. The
+`sources/notes/textbook-exercises-report.md`, outside the repository. None was out of the tool's reach. The
 project's author chose what to change.
 
 | Point | Settled as | Where |
