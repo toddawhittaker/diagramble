@@ -12,7 +12,9 @@ Revised on 17 November 2026 to fit the course textbook: Dennis, Wixom and Roth, 
 
 Build a small web tool that keeps one model behind every diagram, checks that model against explicit rules, and explains each violation in plain words. That is the part of Visible Analyst that matters, and no free or web-based tool offers it.
 
-"Diagramble" is used below as the working name. CASE means Computer-Aided Software Engineering. DFD means data flow diagram. ERD means entity relationship diagram.
+The product is called Diagramble, pronounced DYE-uh-GRAM-buhl with the main stress on GRAM, and its tagline is "See the system. Shape the solution." The name is coined from "diagram" and "able". Diagramming is the core activity of systems analysis and design: modeling processes, data, entities and relationships in pictures. "Able" suggests capability, accessibility and ease of use, and echoes words such as learnable, approachable and manageable. Together they mean making systems diagramming accessible and capable. The name also has a light echo of "ramble" and "scramble", which makes it sound friendly without making the tool seem like a toy. It was chosen because it is short, easy to say and remember, and fits both a teaching tool and a professional modeling tool.
+
+CASE means Computer-Aided Software Engineering. DFD means data flow diagram. ERD means entity relationship diagram.
 
 ### Key findings
 

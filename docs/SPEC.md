@@ -30,7 +30,7 @@ document wins. Section 14 records the smaller points settled the same day.
 
 | Decision | Choice | Effect |
 | --- | --- | --- |
-| License | AGPL-3.0-or-later | Dependencies must be compatible. Libraries under the Eclipse Public License alone (Sprotty, Sirius Web) are excluded. elkjs is usable under its "GPL-3.0-or-later" option, which section 14 confirms |
+| License | Business Source License 1.1, decided on 18 November 2026. Free production use for non-profit organizations (including credit-bearing tuition), individuals' own study and teaching (including students at for-profit schools), and a one-time paid setup for a non-profit that hosts the tool itself, all only with a copy obtained free or from the author. A commercial license is needed for any other use by a for-profit organization; for a company paid to run a college's courses that use it; for selling or bundling; for any recurring charge for hosting, operating, maintaining or supporting it, even to a non-profit; and for paid training that earns no academic credit. A "charge" includes indirect income such as advertising, data, revenue shares and paid bundles. Each version becomes AGPL-3.0-or-later four years after it is published. The full terms are in `LICENSE`, and a plain-language summary is in `LICENSING.md` | It is not an open source license. No dependency may be under the GPL or the AGPL alone, because those would require the whole tool to use the same license. Libraries under the Eclipse Public License are allowed. elkjs is used under its "EPL-2.0" option, which section 14 confirms. Outside contributions need a contributor license agreement, so that commercial licenses can be sold |
 | First deployment | Hosted by the project's author | The trial launch in Release 0 runs against that deployment. Who hosts for other institutions is not decided |
 | Textbook | Dennis, Wixom and Roth, *Systems Analysis and Design*, 8th edition (Wiley, 2022) | The tool is built for this book. It sets the symbol style, the names of things, the limits and the wording of the rules. See section 13 |
 | Course coverage | Chapters 1 to 12. Chapter 13, on agile methods, is not covered | The design diagrams of chapters 9 and 10 join the roadmap in the second release. None is in Release 0 |
@@ -39,6 +39,8 @@ document wins. Section 14 records the smaller points settled the same day.
 | Data model | The entity relationship diagram, its dictionary entries and the CRUD matrix, checked against the process model, in the first release | See section 9. Not built in Release 0 |
 | Design diagrams | The physical DFD, structure chart, program specification and physical data model of chapters 9 and 10, in the second release | See section 11. Not built in Release 0 |
 | Other chapters | Checked forms for chapters 1, 3, 6 and 11. The interface structure diagram for chapter 8. A project binder for everything else. All of it exports to PDF, in the second release | See section 10. Not built in Release 0 |
+| Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again, decided on 18 November 2026 | See section 3.9. Not built in Release 0 |
+| Instructors' AI agents | A Model Context Protocol (MCP) server lets an instructor's own AI agent build scenarios and starter cases, using a personal API key, decided on 18 November 2026 | See section 7.1. Not built in Release 0 |
 | Stack | TypeScript everywhere | One shared package holds the model and rules and runs in both browser and server |
 | Flow identity | Separate flow elements, each carrying a shared dictionary definition | See section 3.3 |
 | AI | Agent integration must be possible from the start | See section 7. No AI feature is built in Release 0 |
@@ -58,7 +60,8 @@ In scope:
 
 Out of scope: use case forms (section 8), the ERD and the CRUD matrix (section 9), the
 forms, diagram and binder of section 10, the design diagrams of the textbook's chapters 9
-and 10 (section 11), accounts, assignment profiles, export, AI features, real-time
+and 10 (section 11), accounts, saving to the server and project files (section 3.9),
+assignment profiles, export, AI features, real-time
 editing, and visual polish.
 
 Exit criteria are those in section 11 of the product vision under "Release 0".
@@ -228,6 +231,45 @@ table of costs, a structure chart to criticize, a set of tables to size.
 - The starter cases shipped with the tool are original. Each asks for the same kind of
   work as an exercise in the textbook, with a different business and different numbers.
   None copies the textbook's cases, figures or figures' numbers.
+
+### 3.9 Saving and project files
+
+**Work is saved as the student goes.** Each project belongs to one student's account and
+is kept on the server. Every command the server accepts (section 4) is saved before the
+next one is applied. There is no Save button. The top bar shows when the project was last
+saved.
+
+- If the connection drops, the browser keeps the commands in order and sends them when
+  the connection returns. Until then the top bar says the latest changes are not saved
+  yet. Closing the page while changes are waiting asks the student first.
+- Undo and redo are commands like any other, so they are saved the same way.
+
+**A student has many projects.** A project list shows each project's name and when it was
+last changed. From it the student can open a project, start a new one (empty, or from a
+starter case as in section 3.8), copy one, rename one, or delete one. Deleting asks the
+student to confirm.
+
+**A project can be exported to a file and imported again.** This lets a student keep their
+own copy, work on another computer or another deployment, or give the file to someone
+else. It is not the way to hand work in. Students hand in the PDF of section 10.8.
+
+- The file is the storage form of section 3.6, as UTF-8 JSON, with the ending
+  `.diagramble.json`. It holds the whole project: every element, view and setting, the
+  log, and the binder's attached files. It holds nothing about the student, such as a
+  name or account.
+- The format is documented and kept stable, so that no student's work is locked in and
+  other tools can read it.
+- Importing a file always makes a new project in the list. It never replaces an existing
+  project.
+- Before importing, the tool checks the file. A file made by an older version is brought
+  up to date. A file made by a newer version, a file that is not a Diagramble project, or
+  a file that breaks an invariant of section 3.4 is refused with a plain sentence that
+  says what is wrong. Nothing is imported from a refused file.
+- A starter case file is the same format, so importing one is the same as opening that
+  starter case. Elements keep the `origin` they had in the file.
+- This is how an instructor gives a class a scenario. They build it, save it as a starter
+  case, export the file and post it in Canvas, and each student imports it as their own
+  new project. An instructor's AI agent can build the scenario for them (section 7.1).
 
 ## 4. Commands and queries
 
@@ -585,6 +627,30 @@ product vision.
 7. **The gateway is neutral and server-side.** It holds the institution's own key, works
    with more than one model provider, removes student identity, and logs every request
    and response against the project.
+
+### 7.1 Building scenarios with an instructor's own AI agent
+
+An instructor can ask their own AI agent to build a scenario, such as "a small bakery's
+ordering system, with a level 0 diagram that has two balancing errors for the students
+to find." The agent works through a Model Context Protocol (MCP) server that Diagramble
+provides. This is separate from the student assistance levels of item 4 above, and it
+never touches a student's work.
+
+- **An API key is needed.** An instructor creates a personal API key in their account,
+  names it, and can revoke it at any time. The key is shown once, when it is made, and
+  the server keeps only a hash of it. Each key acts as its owner and reaches only its
+  owner's own projects. Every request is logged against the key.
+- **The tools are the commands and queries of section 4,** offered as MCP tools as items
+  1 and 2 above describe, plus making a project, saving a project as a starter case
+  (section 3.8) and exporting a project file (section 3.9).
+- **The agent's work is checked like anyone else's.** Each command must keep the
+  invariants of section 3.4, and the agent can read the findings. That lets it check that
+  a "find the errors" scenario has exactly the errors the instructor asked for.
+- **What the agent makes is marked.** Elements it creates have the `origin` `ai` in the
+  instructor's project, so the instructor can review them. Saving the project as a
+  starter case marks every element as given, like any other starter case.
+- **The agent and its AI provider are the instructor's own.** Diagramble makes no AI
+  requests for this and pays for none.
 
 ## 8. Use case forms (first release)
 
@@ -1540,16 +1606,21 @@ confirmed the eight calls listed in section 14.2.
 | Calculate or check | As section 10 has it. The tool adds up the totals. The student types the expected value, return on investment, break-even point and net present value, and the tool checks them | The textbook teaches those four as formulas |
 | Binder sections that could be forms | They stay binder sections | Nothing in them can be checked, and a binder section still exports to PDF |
 | Tests and requirements | TP-02 stays: every functional requirement needs a test | The textbook ties a test to a requirement, not to a use case |
-| elkjs license | Usable. From version 0.12.0 the package is released under "EPL-2.0 OR GPL-3.0-or-later" | See below |
+| elkjs license | Usable. From version 0.12.0 the package is released under "EPL-2.0 OR GPL-3.0-or-later". Since 18 November 2026 it is used under EPL-2.0 | See below |
 | Layout library | elkjs | Chosen by the project's author. Dagre stays the fallback if elkjs proves unworkable |
 
 The elkjs license was checked on 17 November 2026. The project behind the library, ELK,
 names GPL-3.0 as a secondary license in its notice file. The elkjs contributors agreed
 to the same change, and the issue that tracked their agreement was closed as complete in
-July 2026. Code under GPL-3.0 may be combined with a work under AGPL-3.0, by section 13
-of both licenses. The license file in the elkjs repository still holds only the text of
+July 2026. The license file in the elkjs repository still holds only the text of
 the Eclipse Public License, so the package's own license field is the statement to rely
 on.
+
+The project's license changed from AGPL-3.0-or-later to the Business Source License on
+18 November 2026 (section 1). The GPL option no longer helps, because GPL code would force
+the whole tool under the GPL. elkjs is used under EPL-2.0 instead. EPL-2.0 lets its files
+be combined with code under another license, as long as changes to elkjs's own files are
+shared under EPL-2.0.
 
 ### 14.2 Calls made in sections 9 and 11, confirmed
 

@@ -1,6 +1,6 @@
 # Diagramble
 
-Diagramble is an open-source web tool for teaching systems analysis and design. It
+Diagramble is a source-available web tool for teaching systems analysis and design. It
 keeps one model behind every diagram, checks that model against explicit rules, and
 explains each problem in plain words. It covers data flow diagrams, entity
 relationship diagrams and a data dictionary, and it is built to support the course
