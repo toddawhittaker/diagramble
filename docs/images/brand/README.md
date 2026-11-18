@@ -1,7 +1,7 @@
 # Diagramble logo
 
-The mark is the "Shared Source" design, drawn by GPT 6.2 Sol on 18 November 2026
-(`docs/images/logo-options/logo-2.svg`), with its shapes unchanged. It is recoloured for
+The mark is the "Shared Source" design, drawn by GPT 6.2 Sol on 18 November 2026, with
+its shapes unchanged. It is recoloured for
 the Drafting Paper look in `docs/mockups/STYLES.md`: it uses that look's ink colours, and
 the name is set in that look's title typeface.
 
