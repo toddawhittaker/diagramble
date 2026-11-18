@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 228 48" role="img" aria-labelledby="title">
+  <title id="title">Diagramble — Shared Source</title>
+  <rect width="228" height="48" rx="10" fill="#F3F1FC"/>
+  <path d="M19 24h6m0-14v28m0-28h7m-7 14h7m-7 14h7"
+        fill="none" stroke="#5E4B96" stroke-width="3.5" stroke-linecap="round"/>
+  <rect x="7" y="16" width="13" height="16" rx="3" fill="#5E4B96"/>
+  <circle cx="37" cy="10" r="4.5" fill="#5E4B96"/>
+  <rect x="32.5" y="19.5" width="9" height="9" rx="1" fill="#5E4B96"/>
+  <path d="M32 36h10m-10 4h10" stroke="#5E4B96" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="49" y="34" fill="#2E2549" font-family="system-ui, sans-serif" font-size="30" font-weight="650">Diagramble</text>
+</svg>

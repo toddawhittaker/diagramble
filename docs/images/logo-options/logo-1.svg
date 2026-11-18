@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 228 48" role="img" aria-labelledby="title">
+  <title id="title">Diagramble — Process in Motion</title>
+  <rect width="228" height="48" rx="10" fill="#F4FAFB"/>
+  <circle cx="24" cy="24" r="12" fill="#C5E9EF" stroke="#146477" stroke-width="3.5"/>
+  <path d="M23 17V9H35m-4-4 4 4-4 4M12 39h11v-8m-4 4 4-4 4 4"
+        fill="none" stroke="#146477" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="49" y="34" fill="#173745" font-family="system-ui, sans-serif" font-size="30" font-weight="650">Diagramble</text>
+</svg>

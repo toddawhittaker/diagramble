@@ -5,6 +5,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router';
 import { Button, Switch } from '../components/controls';
 import { ModeSwitch } from '../components/forms';
 import { Count, FindingMarks, Mark } from '../components/Mark';
+import { Wordmark } from '../components/Wordmark';
 import { all, dataDefinitions, diagramPath, diagramsInOrder, diagramTitle, isAboveProject } from '../model/queries';
 import { binderSections, feasibility, systemRequest } from '../model/queries2';
 import type { Id } from '../model/types';
@@ -39,7 +40,7 @@ export function TopBar() {
   return (
     <header className="topbar">
       <Link className="topbar-product" to="/">
-        Diagramble
+        <Wordmark height={26} />
       </Link>
       <span className="topbar-project">{model.name}</span>
       <span className="grow" />

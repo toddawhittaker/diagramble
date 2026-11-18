@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 228 48" role="img" aria-labelledby="title">
+  <title id="title">Diagramble — Rule Fitted</title>
+  <rect width="228" height="48" rx="10" fill="#F0F8F3"/>
+  <path d="M29 10H13v28h25V24" fill="none" stroke="#204436"
+        stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m20 22 6 6L40 13" fill="none" stroke="#24754F"
+        stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="49" y="34" fill="#204436" font-family="system-ui, sans-serif" font-size="30" font-weight="650">Diagramble</text>
+</svg>

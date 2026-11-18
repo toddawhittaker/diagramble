@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 228 48" role="img" aria-labelledby="title">
+  <title id="title">Diagramble — Model in Words</title>
+  <rect width="228" height="48" rx="10" fill="#FFF2F5"/>
+  <path d="M12 10h24a4 4 0 0 1 4 4v16a4 4 0 0 1-4 4H23l-8 7v-7h-3a4 4 0 0 1-4-4V14a4 4 0 0 1 4-4Z"
+        fill="#F6D4E0" stroke="#893750" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M19 18h13m-13 8h9" stroke="#893750" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M15 18h.1m-.1 8h.1" stroke="#893750" stroke-width="3.2" stroke-linecap="round"/>
+  <text x="49" y="34" fill="#4F2937" font-family="system-ui, sans-serif" font-size="30" font-weight="650">Diagramble</text>
+</svg>

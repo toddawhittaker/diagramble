@@ -3,3 +3,4 @@ export * from './controls';
 export * from './Problems';
 export * from './EntryFields';
 export * from './forms';
+export * from './Wordmark';
