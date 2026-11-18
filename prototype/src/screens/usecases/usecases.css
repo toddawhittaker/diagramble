@@ -1,0 +1,296 @@
+/* The use case form. Every colour is a variable from the theme. */
+
+/* ---- The list of use cases ---- */
+
+.usecases-list-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.usecases-list-name {
+  overflow-wrap: anywhere;
+}
+
+.usecases-list-second {
+  font-size: 13px;
+}
+
+.usecases-list-foot {
+  padding: 12px;
+}
+
+/* ---- The ruled form: a narrow column of labels, the values beside them ---- */
+
+.usecases-form {
+  max-width: 860px;
+  border-top: 1px solid var(--hairline);
+}
+
+.usecases-row {
+  display: grid;
+  grid-template-columns: 124px minmax(0, 1fr);
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.usecases-label {
+  padding-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.usecases-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.usecases-delete {
+  border-bottom: 0;
+}
+
+/* A text box on the form has no box until the pointer or the cursor is on it. */
+.usecases-input {
+  border-color: transparent;
+}
+
+/* The "missing" look for an empty field: muted italic words over a dashed underline. */
+.usecases-input.usecases-empty,
+.usecases-pick.usecases-empty {
+  color: var(--muted);
+  font-style: italic;
+  border-bottom: 1px dashed var(--muted);
+}
+
+.usecases-pick option {
+  color: var(--ink);
+  font-style: normal;
+}
+
+.usecases-number {
+  width: 64px;
+}
+
+.usecases-narrow {
+  width: 140px;
+}
+
+.usecases-medium {
+  width: 260px;
+  max-width: 100%;
+}
+
+.usecases-note {
+  font-size: 13px;
+}
+
+/* ---- One line of a list: a number, the text, and its actions ---- */
+
+.usecases-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.usecases-line-n {
+  flex: 0 0 22px;
+  color: var(--muted);
+}
+
+.usecases-substep {
+  padding-left: 12px;
+}
+
+.usecases-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.usecases-action {
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: underline;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.usecases-action:hover {
+  color: var(--ink);
+}
+
+.usecases-action:disabled {
+  color: var(--disabled);
+  text-decoration: none;
+  cursor: default;
+}
+
+/* ---- The normal course ---- */
+
+.usecases-steps {
+  table-layout: fixed;
+}
+
+.usecases-col-n {
+  width: 28px;
+}
+
+.usecases-steps td.usecases-col-n {
+  padding-top: 14px;
+}
+
+.usecases-col-info {
+  width: 44%;
+}
+
+.usecases-dir {
+  flex: 0 0 62px;
+  width: 62px;
+  min-height: 28px;
+  padding: 2px 4px;
+  font-size: 14px;
+}
+
+.usecases-add .usecases-pick {
+  min-height: 28px;
+  padding: 2px 4px;
+  font-size: 14px;
+}
+
+.usecases-step-pick {
+  flex: 0 0 96px;
+  width: 96px;
+}
+
+.usecases-data {
+  overflow-wrap: anywhere;
+}
+
+/* ---- Summary inputs and outputs, side by side ---- */
+
+.usecases-summaries {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+.usecases-summary {
+  flex: 1 1 260px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.usecases-summary .table td {
+  vertical-align: middle;
+}
+
+.usecases-col-action {
+  width: 1%;
+  text-align: right;
+}
+
+/* ---- The right panel ---- */
+
+.usecases-links td {
+  overflow-wrap: anywhere;
+}
+
+.usecases-verdict {
+  width: 1%;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.usecases-flows {
+  display: flex;
+  gap: 10px;
+}
+
+.usecases-flows .field-label {
+  flex: 0 0 36px;
+  padding-top: 3px;
+}
+
+.usecases-flows ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.usecases-fragment {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+}
+
+/* ---- An exception and the steps that handle it ---- */
+
+.usecases-exception {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.usecases-exception + .usecases-exception {
+  padding-top: 8px;
+  border-top: 1px solid var(--hairline);
+}
+
+.usecases-handling {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 30px;
+  padding-left: 12px;
+  border-left: 1px solid var(--hairline);
+}
+
+.usecases-handling-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---- The views of the whole project: the event-response list and the use case list ---- */
+
+.usecases-list-views {
+  display: flex;
+  flex-direction: column;
+}
+
+.usecases-list-heading {
+  padding: 10px 12px 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.usecases-view {
+  max-width: 860px;
+}
+
+.usecases-view td {
+  overflow-wrap: anywhere;
+}
+
+.usecases-view-n {
+  width: 64px;
+  white-space: nowrap;
+}

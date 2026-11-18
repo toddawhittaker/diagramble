@@ -1,0 +1,206 @@
+/* The data dictionary screen. Every colour comes from a theme variable. */
+
+.dictionary-list-top {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.dictionary-list-top .switch-option {
+  flex: 1 1 0;
+}
+
+.dictionary-list-top .switch {
+  display: flex;
+}
+
+.dictionary-new-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.dictionary-new-buttons .btn {
+  flex: 1 1 0;
+  padding: 0 6px;
+}
+
+.dictionary-group {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 12px 6px;
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 17px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.dictionary-row-name {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dictionary-row-used {
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.dictionary-list-note {
+  padding: 16px 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.dictionary-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 760px;
+}
+
+.dictionary-kind {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dictionary-table-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dictionary-table td {
+  vertical-align: middle;
+}
+
+.dictionary-table select.input {
+  width: auto;
+  min-height: 30px;
+  padding: 3px 6px;
+}
+
+.dictionary-row-tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.dictionary-add {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--hairline);
+}
+
+.dictionary-add-options {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--hairline);
+}
+
+.dictionary-add-options .row {
+  min-height: 32px;
+}
+
+.dictionary-row-alias {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.dictionary-limit {
+  width: 110px;
+}
+
+.dictionary-limit .input {
+  min-height: 30px;
+  padding: 3px 6px;
+}
+
+.dictionary-type-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.dictionary-type-select {
+  flex: 0 1 240px;
+}
+
+.dictionary-length {
+  flex: 0 0 110px;
+}
+
+.dictionary-null {
+  flex: 0 0 130px;
+}
+
+.dictionary-unsaid {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.dictionary-unsaid option {
+  color: var(--ink);
+  font-style: normal;
+}
+
+.dictionary-values-value {
+  width: 30%;
+}
+
+.dictionary-owner {
+  padding: 8px 10px;
+  border: 1px solid var(--hairline);
+}
+
+.dictionary-delete {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+.dictionary-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--ink);
+}
+
+.dictionary-used-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dictionary-used-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

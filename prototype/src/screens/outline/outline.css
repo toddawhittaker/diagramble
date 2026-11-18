@@ -1,0 +1,223 @@
+/* The outline view. Every colour is a theme variable. Square corners, hairlines, no shadows. */
+
+.outline-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.outline-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.outline-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.outline-text {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  white-space: pre;
+}
+
+.outline-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.outline-head h2 {
+  margin-right: auto;
+}
+
+.outline-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.outline-columns,
+.outline-list .outline-row {
+  display: grid;
+  align-items: center;
+  column-gap: 12px;
+}
+
+.outline-columns {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--hairline);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.outline-cols-item {
+  grid-template-columns: 130px minmax(0, 1fr) 110px;
+}
+
+.outline-cols-flow {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.outline-cols-control {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
+}
+
+.outline-list .outline-row:focus-visible {
+  outline: 2px solid var(--select);
+  outline-offset: -2px;
+}
+
+.outline-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.outline-right {
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+/* What the selected row shows under itself. The bar marks it as part of the selected row. */
+.outline-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px 12px;
+  border-left: 3px solid var(--select);
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* The aliases, the notes and the process description of the selected row. */
+.outline-entry {
+  padding-top: 10px;
+  border-top: 1px solid var(--hairline);
+}
+
+/* One line above the lists: the diagram is above the project, or which process it expands. */
+.outline-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--hairline);
+}
+
+.outline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.outline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.outline-form-new {
+  border: 1px solid var(--hairline);
+  border-top: 0;
+}
+
+.outline-field {
+  flex: 1 1 170px;
+  min-width: 0;
+}
+
+.outline-form-buttons {
+  display: flex;
+  gap: 8px;
+  /* Lines the buttons up with the boxes, under the small labels. */
+  padding-top: 21px;
+}
+
+.outline-form-message {
+  flex: 1 0 100%;
+  font-weight: 600;
+}
+
+.outline-rename {
+  padding: 4px 12px 4px 9px;
+  border-left: 3px solid var(--select);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.outline-key {
+  display: inline-block;
+  min-width: 22px;
+  padding: 0 5px;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  text-align: center;
+}
+
+.outline-keybar {
+  flex: 0 0 50px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 20px;
+  border-top: 1px solid var(--hairline);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.outline-keypair {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+}
+
+button.outline-keypair {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.outline-allkeys {
+  flex: 0 0 auto;
+  padding: 12px 20px;
+  border-top: 1px solid var(--hairline);
+}
+
+.outline-allkeys dl {
+  display: grid;
+  grid-template-columns: max-content 1fr max-content 1fr;
+  gap: 6px 12px;
+  margin: 8px 0 0;
+}
+
+.outline-allkeys dt,
+.outline-allkeys dd {
+  margin: 0;
+}

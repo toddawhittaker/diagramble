@@ -1,0 +1,465 @@
+/* The entity relationship diagram and the CRUD matrix. Every class begins with "datamodel-". */
+
+/* ---- The diagram: tool strip and canvas ---- */
+
+.datamodel-work {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.datamodel-tools {
+  flex: 0 0 72px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--hairline);
+  background: var(--paper);
+}
+
+.datamodel-tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.datamodel-tool svg {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.datamodel-canvas {
+  flex: 1 1 auto;
+  min-width: 0;
+  position: relative;
+}
+
+.datamodel-canvas-entity .react-flow__pane {
+  cursor: crosshair;
+}
+
+.datamodel-hint {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 5;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.datamodel-name-box {
+  position: absolute;
+  z-index: 6;
+  width: 180px;
+}
+
+.datamodel-zoom {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+}
+
+.datamodel-zoom button {
+  min-width: 30px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.datamodel-zoom button:hover {
+  background: var(--side-paper);
+}
+
+.datamodel-zoom-value {
+  min-width: 52px;
+  padding: 0 6px;
+  border-left: 1px solid var(--hairline);
+  border-right: 1px solid var(--hairline);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 28px;
+}
+
+.datamodel-zoom-fit {
+  border-left: 1px solid var(--hairline) !important;
+}
+
+/* ---- An entity box ---- */
+
+.datamodel-entity {
+  position: relative;
+  min-width: 170px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14px;
+}
+
+/* A dependent entity has a double border. */
+.datamodel-entity-dependent {
+  border: 4px double var(--ink);
+}
+
+.datamodel-entity-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--ink);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.datamodel-entity-list {
+  margin: 0;
+  padding: 5px 10px;
+  list-style: none;
+  white-space: nowrap;
+}
+
+.datamodel-entity-list + .datamodel-entity-list {
+  border-top: 1px dashed var(--ink);
+}
+
+.datamodel-entity-star {
+  display: inline-block;
+  width: 12px;
+  font-family: var(--font-mono);
+}
+
+.datamodel-entity-inherited {
+  color: var(--muted);
+}
+
+/* The handles cover the whole box. They react only while the "Relationship" tool is chosen. */
+.datamodel-entity .datamodel-handle {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  opacity: 0;
+}
+
+.datamodel-entity .datamodel-handle-off {
+  pointer-events: none !important;
+}
+
+/* ---- A relationship line ---- */
+
+.datamodel-rel-symbols {
+  fill: none;
+  pointer-events: none;
+}
+
+.datamodel-rel-symbols circle {
+  fill: var(--paper);
+}
+
+.datamodel-rel-unknown-back {
+  fill: var(--paper);
+  stroke: none;
+}
+
+.datamodel-rel-unknown {
+  stroke: none;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.datamodel-rel-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 3px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.datamodel-rel-label-selected {
+  color: var(--select);
+}
+
+/* ---- The right panel ---- */
+
+.datamodel-kind {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.datamodel-attrs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+}
+
+.datamodel-attr {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.datamodel-attr-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.datamodel-icon-btn {
+  min-width: 26px;
+  padding: 0 6px;
+}
+
+.datamodel-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.datamodel-check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
+.datamodel-repeats {
+  flex: 0 0 auto;
+  font-size: 13px;
+}
+
+.datamodel-check-off {
+  color: var(--disabled);
+  cursor: default;
+}
+
+.datamodel-dict th:first-child,
+.datamodel-dict td:first-child {
+  padding-left: 0;
+}
+
+.datamodel-sentence-open {
+  margin-top: 4px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.datamodel-crud-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.datamodel-sentence {
+  padding: 8px 10px;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+  font-family: var(--font-title);
+  font-size: 17px;
+}
+
+.datamodel-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.datamodel-divider {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  margin: 4px 0;
+}
+
+.datamodel-confirm {
+  padding: 10px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+/* ---- The CRUD matrix ---- */
+
+.datamodel-crud {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.datamodel-crud-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.datamodel-crud-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.datamodel-crud-table th,
+.datamodel-crud-table td {
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  background: var(--paper);
+  font-weight: 400;
+  text-align: left;
+}
+
+/* The heading row and the first column stay in place when the matrix scrolls. */
+.datamodel-crud-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  width: 104px;
+  min-width: 104px;
+  padding: 8px;
+  border-bottom: 1px solid var(--ink);
+  vertical-align: bottom;
+  font-size: 14px;
+}
+
+.datamodel-crud-table tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 240px;
+  padding: 6px 12px 6px 28px;
+  white-space: nowrap;
+}
+
+.datamodel-crud-table thead th.datamodel-crud-corner {
+  left: 0;
+  z-index: 3;
+  width: auto;
+  min-width: 240px;
+  padding-left: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.datamodel-crud-table tr.datamodel-crud-entity th,
+.datamodel-crud-table tr.datamodel-crud-entity td {
+  border-top: 1px solid var(--ink);
+  background: var(--side-paper);
+}
+
+.datamodel-crud-table tr.datamodel-crud-entity th {
+  padding-left: 12px;
+  font-weight: 700;
+}
+
+.datamodel-crud-number {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.datamodel-crud-table td {
+  padding: 0;
+  height: 36px;
+}
+
+.datamodel-crud-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  height: 36px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  /* Keep a focused cell clear of the sticky heading row and first column. */
+  scroll-margin: 90px 8px 8px 250px;
+}
+
+.datamodel-crud-cell:focus {
+  outline: 2px solid var(--select);
+  outline-offset: -2px;
+}
+
+.datamodel-crud-cell-sum {
+  color: var(--muted);
+}
+
+.datamodel-crud-toggle {
+  width: 22px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.datamodel-crud-toggle.is-selected {
+  border-color: var(--select);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.datamodel-crud-summary {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+.datamodel-crud-summary p {
+  margin: 0;
+}
+
+.datamodel-help {
+  padding: 20px;
+  color: var(--muted);
+}

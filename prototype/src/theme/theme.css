@@ -1,0 +1,858 @@
+/* Drafting Paper, in a light and a dark mode. See docs/mockups/STYLES.md.
+   Each colour has one meaning. Use the variables, never a hex value. */
+
+:root {
+  --paper: #f7f3ea; /* background of the top bar, the work area and the canvas */
+  --side-paper: #f1ece1; /* background of the navigator and the right panel */
+  --ink: #1e2a38; /* text, diagram lines, the primary button */
+  --muted: #6b6558; /* secondary text */
+  --hairline: #c9c1b2; /* dividers, borders, the canvas grid */
+  --select: #1f5fa8; /* the selected item, and nothing else */
+  --select-tint: #dce8f5;
+  --error: #b3261e;
+  --warning: #b87a00;
+  --ok: #2f6b3a;
+  --ai: #5a3ea8; /* text written by AI, and nothing else */
+  --disabled: #a8a294;
+  --on-error: #ffffff; /* the exclamation mark inside the error mark */
+  --on-warning: #1e2a38; /* the exclamation mark inside the warning mark */
+  --on-ink: #f7f3ea; /* text on the primary button */
+
+  --font-title: 'Source Serif 4', Georgia, serif;
+  --font-body: 'Source Sans 3', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --topbar-h: 48px;
+  --nav-w: 216px;
+  --header-h: 72px;
+  --panel-w: 390px;
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --paper: #1a1917;
+  --side-paper: #22201c;
+  --ink: #ece6d8;
+  --muted: #a39c8c;
+  --hairline: #3d3933;
+  --select: #7fb2ea;
+  --select-tint: #1f3044;
+  --error: #f0776c;
+  --warning: #e3ac3f;
+  --ok: #7cc08b;
+  --ai: #ad95f2;
+  --disabled: #5e5a51;
+  --on-error: #1a1917;
+  --on-warning: #1a1917;
+  --on-ink: #1a1917;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-title);
+  font-weight: 600;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--select);
+  outline-offset: 1px;
+}
+
+/* ---- Small text helpers ---- */
+
+.muted {
+  color: var(--muted);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.87em;
+}
+
+.title {
+  font-family: var(--font-title);
+  font-weight: 600;
+}
+
+.grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.hstack {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vstack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ---- The frame ---- */
+
+.app {
+  display: grid;
+  grid-template-columns: var(--nav-w) minmax(0, 1fr);
+  grid-template-rows: var(--topbar-h) minmax(0, 1fr);
+  height: 100%;
+}
+
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 12px 0 20px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.topbar-product {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.topbar-project {
+  padding-left: 16px;
+  border-left: 1px solid var(--ink);
+  font-size: 16px;
+}
+
+.topbar-saved {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.topbar-counts {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  border-left: 1px solid var(--hairline);
+  border-right: 1px solid var(--hairline);
+  height: 24px;
+  text-decoration: none;
+}
+
+.navigator {
+  display: flex;
+  flex-direction: column;
+  background: var(--side-paper);
+  border-right: 1px solid var(--hairline);
+  overflow-y: auto;
+}
+
+.nav-group {
+  padding: 10px 12px 4px;
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+.nav-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 12px 6px 9px;
+  border-left: 3px solid transparent;
+  text-decoration: none;
+  outline-offset: -2px;
+}
+
+.nav-row.nav-top {
+  min-height: 44px;
+  font-weight: 600;
+  border-top: 1px solid var(--hairline);
+}
+
+.nav-row:first-child {
+  border-top: 0;
+}
+
+.nav-row:hover {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.nav-row .nav-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A diagram row may run to two lines, so a long title stays readable beside its marks. */
+.nav-row.nav-diagram {
+  font-size: 14px;
+}
+
+.nav-row.nav-diagram .nav-label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+
+.nav-row.nav-diagram .marks {
+  gap: 6px;
+}
+
+.nav-row.nav-diagram .mark {
+  gap: 3px;
+}
+
+.nav-spacer {
+  flex: 1 1 auto;
+  border-top: 1px solid var(--hairline);
+}
+
+.main {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* The centre column of a screen: a page header, then the body. */
+.work {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--paper);
+}
+
+/* The part of the work area under the page header. Add .scroll or .pad as needed. */
+.work-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+}
+
+.scroll {
+  overflow: auto;
+}
+
+.pad {
+  padding: 20px;
+}
+
+.page-header {
+  flex: 0 0 var(--header-h);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.page-header-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.breadcrumb {
+  font-size: 14px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.breadcrumb a {
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.page-title {
+  font-size: 28px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.page-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+/* A fixed-width column on the left of a screen, such as the dictionary's list. */
+.list-column {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--paper);
+  border-right: 1px solid var(--hairline);
+}
+
+.right-panel {
+  flex: 0 0 var(--panel-w);
+  width: var(--panel-w);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  overflow-y: auto;
+  background: var(--side-paper);
+  border-left: 1px solid var(--hairline);
+}
+
+.panel-heading {
+  font-size: 24px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.panel-subheading {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 18px;
+}
+
+/* ---- Rows in a list ---- */
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 12px 6px 9px;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-bottom: 1px solid var(--hairline);
+  background: none;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.row:hover {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.row.is-selected:hover {
+  background: var(--select-tint);
+}
+
+/* ---- Buttons ---- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: color-mix(in srgb, var(--ink) 8%, var(--paper));
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.btn-primary:hover {
+  background: color-mix(in srgb, var(--ink) 85%, var(--paper));
+}
+
+.btn-small {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  border-color: var(--disabled);
+  color: var(--disabled);
+  background: transparent;
+  cursor: default;
+}
+
+.btn-link {
+  display: inline;
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: 400;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.btn-link:hover {
+  background: none;
+  text-decoration-thickness: 2px;
+}
+
+/* ---- The two-part switch and tabs ---- */
+
+.switch {
+  display: inline-flex;
+}
+
+.switch-option {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.switch-option + .switch-option {
+  margin-left: -1px;
+}
+
+.switch-option.is-selected {
+  position: relative;
+  border-color: var(--select);
+  outline: 1px solid var(--select);
+  outline-offset: -2px;
+}
+
+.switch-small .switch-option {
+  height: 26px;
+  padding: 0 9px;
+  font-size: 13px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tab {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tab.is-selected {
+  border-color: var(--select);
+}
+
+/* ---- Counts and marks ---- */
+
+/* A count is a plain monospaced number. There are no pills. */
+.count {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.mark svg {
+  flex: 0 0 auto;
+  display: block;
+}
+
+.mark-word {
+  font-weight: 700;
+}
+
+.mark-error .mark-word {
+  color: var(--error);
+}
+
+.mark-warning .mark-word {
+  color: var(--warning);
+}
+
+.mark-ok {
+  color: var(--ok);
+}
+
+.mark-ai {
+  color: var(--ai);
+  font-weight: 700;
+}
+
+.marks {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+/* Something the rules ask for has been left empty. */
+.missing {
+  color: var(--muted);
+  font-style: italic;
+  border-bottom: 1px dashed var(--muted);
+}
+
+/* ---- Fields ---- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.input {
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid var(--hairline);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.input:hover {
+  border-color: var(--muted);
+}
+
+.input:focus {
+  outline: 2px solid var(--select);
+  outline-offset: -1px;
+}
+
+.input::placeholder {
+  color: var(--muted);
+  font-style: italic;
+}
+
+textarea.input {
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.field-hint {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---- Tables: horizontal hairlines only, small monospaced headings ---- */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--hairline);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+  text-align: left;
+}
+
+.table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: top;
+}
+
+.table-caption {
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+/* ---- Problem cards ---- */
+
+.problem-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.problem-card {
+  border: 1px solid var(--hairline);
+  border-left-width: 3px;
+  background: var(--paper);
+}
+
+.problem-card.is-selected {
+  border-color: var(--select);
+  outline-offset: -1px;
+}
+
+.problem-card-head {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.problem-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.problem-card-message {
+  font-size: 16px;
+}
+
+.problem-card.is-open .problem-card-message {
+  font-weight: 700;
+}
+
+.problem-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 12px 12px;
+}
+
+.problem-card-label {
+  font-weight: 700;
+}
+
+.problem-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Only text an AI model wrote sits in this box. */
+.ai-box {
+  padding: 8px 10px;
+  border: 1px dashed var(--ai);
+}
+
+.ai-box-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2px;
+  font-weight: 700;
+}
+
+/* ---- Selection. Nothing else uses the selection colour. ---- */
+
+.is-selected {
+  outline: 2px solid var(--select);
+  outline-offset: -2px;
+  background: var(--select-tint);
+}
+
+.switch-option.is-selected,
+.tab.is-selected,
+.problem-card.is-selected {
+  background: var(--select-tint);
+}
+
+/* A selected row in a list also has a thick bar down its left edge. */
+.row.is-selected,
+.nav-row.is-selected {
+  border-left-color: var(--select);
+}
+
+/* ---- A diagram above the project's top diagram ---- */
+
+.nav-row.nav-above {
+  color: var(--muted);
+}
+
+.nav-above-note {
+  display: block;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* ---- EntryFields: aliases, notes and the process description ---- */
+
+.entry-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.entry-fields-compact {
+  gap: 8px;
+}
+
+.entry-aliases {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry-alias {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.entry-alias-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Placeholders, and the error strip ---- */
+
+.placeholder {
+  padding: 32px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.error-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* ---- React Flow, tuned to the paper. Screen agents import '@xyflow/react/dist/style.css' themselves. ---- */
+
+.react-flow {
+  --xy-background-color: var(--paper);
+  --xy-background-pattern-color: var(--hairline);
+  --xy-edge-stroke: var(--ink);
+  --xy-edge-stroke-selected: var(--select);
+  --xy-connectionline-stroke: var(--ink);
+  --xy-node-color: var(--ink);
+  --xy-node-background-color: var(--paper);
+  --xy-node-border: 0;
+  --xy-node-boxshadow-hover: none;
+  --xy-node-boxshadow-selected: none;
+  --xy-handle-background-color: var(--ink);
+  --xy-handle-border-color: var(--paper);
+  --xy-edge-label-background-color: var(--paper);
+  --xy-edge-label-color: var(--ink);
+  --xy-controls-button-background-color: var(--paper);
+  --xy-controls-button-background-color-hover: var(--side-paper);
+  --xy-controls-button-color: var(--ink);
+  --xy-controls-button-border-color: var(--hairline);
+  --xy-attribution-background-color: transparent;
+  font-family: var(--font-body);
+}
+
+/* ---- A refused command ---- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 640px;
+  padding: 10px 14px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  z-index: 50;
+}

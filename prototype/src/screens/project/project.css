@@ -1,0 +1,576 @@
+/* The problems list, the help page and the export page. Every class begins with "project-". */
+
+.project-column {
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.project-filter {
+  max-width: 440px;
+}
+
+/* ---- Problems ---- */
+
+.project-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.project-group-heading {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.project-problem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px;
+  gap: 12px;
+  align-items: start;
+}
+
+.project-problem > .btn {
+  margin-top: 8px;
+}
+
+/* ---- Help ---- */
+
+.project-help-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.project-help-section:last-child {
+  border-bottom: 0;
+}
+
+.project-help-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 24px;
+}
+
+.project-help-subheading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 6px;
+  font-size: 18px;
+}
+
+.project-help-note {
+  max-width: 680px;
+}
+
+.project-help-section > p {
+  max-width: 680px;
+}
+
+.project-symbols {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 0 24px;
+}
+
+.project-symbol {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.project-symbol-name {
+  font-weight: 700;
+}
+
+.project-picture {
+  display: block;
+  font-family: var(--font-body);
+}
+
+.project-marks td:first-child {
+  width: 200px;
+  white-space: nowrap;
+}
+
+.project-rule-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 440px;
+  gap: 12px;
+  align-items: center;
+}
+
+.project-family {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.project-rule {
+  border: 1px solid var(--hairline);
+  padding: 10px 12px;
+}
+
+.project-rule-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.project-rule-code {
+  font-weight: 500;
+}
+
+.project-rule-body {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 0;
+}
+
+.project-rule-body dt {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  padding-top: 3px;
+}
+
+.project-rule-body dd {
+  margin: 0;
+}
+
+/* A blank in a rule's message, filled in when the rule reports a finding. */
+.project-blank {
+  color: var(--muted);
+  border-bottom: 1px dashed var(--muted);
+}
+
+/* ---- Export: the controls ---- */
+
+.project-export-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 14px;
+}
+
+.project-export-controls .panel-subheading {
+  margin-top: 8px;
+}
+
+.project-export-controls .panel-subheading:first-child {
+  margin-top: 0;
+}
+
+.project-ticks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.project-tick-group {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.project-tick {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.project-tick input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: var(--ink);
+}
+
+.project-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--ink);
+}
+
+.project-confirm .hstack {
+  flex-wrap: wrap;
+}
+
+/* ---- Export: the preview ---- */
+
+.project-preview-area {
+  background: var(--side-paper);
+}
+
+/* The pages always use the light colours, whatever mode the app is in, so that the
+   printed document looks like the textbook. This rule is the one place outside
+   theme.css that holds colour values. They are copied from the light set there. */
+.project-preview {
+  --paper: #f7f3ea;
+  --side-paper: #f1ece1;
+  --ink: #1e2a38;
+  --muted: #6b6558;
+  --hairline: #c9c1b2;
+  --select: #1f5fa8;
+  --select-tint: #dce8f5;
+  --error: #b3261e;
+  --warning: #b87a00;
+  --ok: #2f6b3a;
+  --ai: #5a3ea8;
+  --disabled: #a8a294;
+  --on-error: #ffffff;
+  --on-warning: #1e2a38;
+  --on-ink: #f7f3ea;
+  color-scheme: light;
+  color: var(--ink);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.project-page {
+  width: 100%;
+  max-width: 860px;
+  padding: 44px 48px;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.project-title-page {
+  min-height: 300px;
+}
+
+.project-doc-title {
+  font-size: 34px;
+  line-height: 1.2;
+}
+
+.project-page-title {
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ink);
+  font-size: 24px;
+}
+
+.project-page-subtitle {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: 18px;
+}
+
+.project-caption {
+  margin-top: 18px;
+}
+
+.project-page-title + .project-caption {
+  margin-top: 0;
+}
+
+.project-drawing {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  font-family: var(--font-body);
+}
+
+.project-contents {
+  margin: 4px 0 0;
+  padding-left: 22px;
+}
+
+.project-plain-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.project-steps {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.project-steps ol {
+  padding-left: 20px;
+}
+
+.project-use-case + .project-use-case {
+  margin-top: 28px;
+}
+
+/* A form laid out as a table: the field name on the left, its value on the right. */
+.project-form th {
+  width: 130px;
+  vertical-align: top;
+  padding-top: 9px;
+}
+
+.project-crud th,
+.project-crud td {
+  font-size: 13px;
+}
+
+.project-crud-entity td {
+  font-weight: 700;
+}
+
+.project-crud-attribute {
+  padding-left: 20px !important;
+}
+
+.project-problem-mark {
+  width: 100px;
+  white-space: nowrap;
+}
+
+.project-problem-code {
+  width: 70px;
+  white-space: nowrap;
+}
+
+/* ---- Printing: only the preview pages, one section to a page, in the light colours.
+   The rules apply only while the export page is open, so other screens print as usual. ---- */
+
+@media print {
+  html:has(.project-preview),
+  html:has(.project-preview) body,
+  html:has(.project-preview) #root {
+    height: auto;
+    overflow: visible;
+    background: none;
+  }
+
+  html:has(.project-preview) .topbar,
+  html:has(.project-preview) .navigator,
+  html:has(.project-preview) .toast,
+  html:has(.project-preview) .list-column,
+  html:has(.project-preview) .right-panel,
+  html:has(.project-preview) .page-header {
+    display: none;
+  }
+
+  html:has(.project-preview) .app,
+  html:has(.project-preview) .main,
+  html:has(.project-preview) .work,
+  html:has(.project-preview) .work-body {
+    display: block;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    background: none;
+  }
+
+  .project-preview {
+    display: block;
+    padding: 0;
+  }
+
+  .project-page {
+    max-width: none;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    break-before: page;
+  }
+
+  .project-page:first-child {
+    break-before: auto;
+  }
+
+  .project-drawing,
+  .project-page tr,
+  .project-page-subtitle,
+  .project-page .table-caption {
+    break-inside: avoid;
+  }
+
+  .project-page-subtitle,
+  .project-page .table-caption {
+    break-after: avoid;
+  }
+
+  @page {
+    margin: 18mm;
+  }
+}
+
+/* ---- Search ---- */
+
+.project-search-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 12px;
+  align-items: end;
+}
+
+.project-search-only {
+  max-width: 560px;
+}
+
+.project-search-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  color: var(--ink);
+}
+
+.project-search-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.project-search-where {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.project-search-match {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.project-search-field {
+  font-size: 12px;
+}
+
+/* The words that matched. Bold and underlined, because the selection colours mean "selected" only. */
+.project-search-hit {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* ---- The project page ---- */
+
+.project-name {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.project-counts {
+  max-width: 320px;
+}
+
+.project-counts td:last-child,
+.project-counts th:last-child {
+  text-align: right;
+}
+
+.project-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.project-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.project-choice input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 3px 0 0;
+  accent-color: var(--ink);
+}
+
+.project-choice-label {
+  display: block;
+  font-weight: 600;
+}
+
+.project-choice-about {
+  display: block;
+  max-width: 640px;
+}
+
+.project-starters {
+  border-top: 1px solid var(--hairline);
+}
+
+.project-starter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px 16px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.project-starter-title {
+  font-weight: 700;
+}
+
+.project-starter > .project-confirm {
+  grid-column: 1 / -1;
+}
+
+.project-file {
+  font: inherit;
+  color: var(--ink);
+}
+
+/* Not a rule finding, so it does not use the error colour or mark. */
+.project-file-error {
+  padding: 10px;
+  border: 1px solid var(--ink);
+  font-weight: 600;
+}
+
+.project-save {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 10px 16px;
+  align-items: center;
+}
+
+/* ---- Export: additions ---- */
+
+.project-process-description {
+  margin-top: 6px;
+  white-space: pre-wrap;
+}
+
+.project-notes {
+  margin-top: 4px;
+  white-space: pre-wrap;
+}
+
+.project-fragment {
+  margin-top: 22px;
+}
+
+@media print {
+  .project-fragment {
+    break-inside: avoid;
+  }
+}

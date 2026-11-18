@@ -1,0 +1,6 @@
+# The course textbook is copyrighted. Never commit it, or any other book file.
+# The notes in sources/notes/ and sources/README.md are ours and are kept.
+sources/**/*.pdf
+sources/**/*.epub
+sources/**/*.mobi
+sources/**/*.djvu
