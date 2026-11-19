@@ -1,7 +1,14 @@
 version: 2
 updates:
-  # The prototype's npm packages are left out: it is throwaway code
-  # (docs/WORKFLOW.md, "Dependencies").
+  # The root's npm packages are covered. The prototype's are left out: it is
+  # throwaway code (docs/WORKFLOW.md, "Dependencies").
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      npm:
+        patterns: ["*"]
   - package-ecosystem: github-actions
     directory: /
     schedule:

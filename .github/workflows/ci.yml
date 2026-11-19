@@ -69,3 +69,48 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+
+  app:
+    name: App
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    env:
+      # Throwaway credentials for the service container below; they open
+      # nothing outside this job.
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/diagramble_test
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: diagramble_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      # The browser steps and the image build wait for the files they need.
+      - name: Install the browser for the browser tests
+        if: hashFiles('apps/web/playwright.config.ts') != ''
+        working-directory: apps/web
+        run: npx playwright install --with-deps --only-shell chromium
+      - name: Run the browser tests
+        if: hashFiles('apps/web/playwright.config.ts') != ''
+        run: npm run test:browser
+      - name: Build the Docker image
+        if: hashFiles('Dockerfile') != ''
+        run: docker build .
