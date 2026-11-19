@@ -70,8 +70,30 @@ jobs:
       - run: npm test
       - run: npm run build
 
-  app:
-    name: App
+  app-checks:
+    name: App checks
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
+      # The image build waits for the file it needs.
+      - name: Build the Docker image
+        if: hashFiles('Dockerfile') != ''
+        run: docker build .
+
+  # The tests run in a job of their own, so a test or coverage failure shows
+  # as its own red check.
+  app-tests:
+    name: App tests
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     env:
@@ -99,11 +121,9 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - run: npm ci
-      - run: npm run typecheck
-      - run: npm run lint
+      # Fails when coverage falls below 75% (CLAUDE.md, "Testing rules").
       - run: npm test
-      - run: npm run build
-      # The browser steps and the image build wait for the files they need.
+      # The browser steps wait for the file they need.
       - name: Install the browser for the browser tests
         if: hashFiles('apps/web/playwright.config.ts') != ''
         working-directory: apps/web
@@ -111,6 +131,3 @@ jobs:
       - name: Run the browser tests
         if: hashFiles('apps/web/playwright.config.ts') != ''
         run: npm run test:browser
-      - name: Build the Docker image
-        if: hashFiles('Dockerfile') != ''
-        run: docker build .
