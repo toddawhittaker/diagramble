@@ -68,10 +68,9 @@ not open source.
   (AGPL), version 3 or later, four years after it is released.
 
 [`LICENSING.md`](LICENSING.md) gives the full list in plain words. Where it and the
-license differ, the license governs. A commercial license is needed for any for-profit
-hosting, including the author's.
+license differ, the license governs.
 
 ## Contributing
 
 Outside contributions are not being accepted yet. They will need a contributor license
-agreement, so that the license terms can be kept.
+agreement, so that commercial licenses can still be offered.
