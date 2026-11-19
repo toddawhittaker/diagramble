@@ -33,9 +33,9 @@ Rules:
 - Prefer the boring, obvious solution. Use what is already in the repo before
   adding a dependency, and say why if you add one. Never add a dependency
   licensed under the GPL or the AGPL alone (SPEC.md section 1, "License").
-- Keep `packages/model` and `packages/rules` free of React, the browser and
-  the server (SPEC.md section 12). Until those packages exist, the same holds
-  for `prototype/src/model` and `prototype/src/rules`.
+- Keep `packages/model`, `packages/rules` and `packages/cases` free of React,
+  the browser and the server (SPEC.md section 12). `npm run lint` enforces it.
+  The same holds for `prototype/src/model` and `prototype/src/rules`.
 - Rules are deterministic, and every finding explains what is wrong, why it
   matters and how to fix it (VISION.md section 6, "Product principles").
 - Never copy the textbook's text, figures, cases or worked numbers into code,

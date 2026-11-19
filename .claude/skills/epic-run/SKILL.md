@@ -44,8 +44,9 @@ work it closes.
    point every task prompt at it. Each prompt adds the task row, the base
    commit, the files in scope, and what done looks like.
 7. **Verify each report** before merging: in the agent's worktree run
-   `npm run typecheck` and `npm run lint` in `prototype/` (builder, tester
-   and ui-designer also run these in a Stop hook), read the diff, check with
+   `npm run typecheck` and `npm run lint` at the root, and in `prototype/`
+   too when the task touches it (builder, tester and ui-designer also run
+   these in a Stop hook), read the diff, check with
    `gh pr view <n> --json files` that the files it claims are in the PR,
    and rule on anything it did outside its file list. Before pushing any
    edit of your own, run `node scripts/check-comment-history.mjs` and
@@ -120,7 +121,8 @@ work it closes.
   agent impossible to resume for a CI fix. After the merge, delete the
   branch and worktree without asking.
 - Tell reviewers never to switch branches in the main checkout.
-- A fresh worktree needs `npm ci` in `prototype/` before any check runs.
+- A fresh worktree needs `npm ci` at the root before any check runs, and in
+  `prototype/` too when a task touches it.
 - A worktree has no `sources/` folder, because Git ignores it. When a task
   needs the textbook notes, give the agent the main checkout's absolute
   path to them.
@@ -140,14 +142,15 @@ docs/EPIC-<n>.md on the epic branch; read your task's row.
 - In your worktree: `git fetch origin && git reset --hard <base from your
   prompt>`, then `git switch -c task/<n>-<short-name>`.
 - Node: the .nvmrc version must be first on PATH (the SessionStart hook
-  does this; otherwise use its full path). Run `npm ci` in `prototype/`.
+  does this; otherwise use its full path). Run `npm ci` at the root.
 - Scratchpad <path> is shared; use a subfolder named after your task.
 - Tests first: a bug fix starts with a failing test. Design tests from the
   SPEC.md invariant.
 - Verify the way CI does, so the PR goes green on its first run. Before
   opening the PR, merge the current epic head into your branch. Then run,
-  in `prototype/`, the whole test suite (`npm test`), not just the changed
-  files, and `npm run typecheck`, `npm run lint` and `npm run build`. For a
+  at the root, the whole test suite (`npm test`), not just the changed
+  files, and `npm run typecheck`, `npm run lint` and `npm run build`. Run
+  the same checks in `prototype/` only when the task touches it. For a
   change to any Markdown file, run `python3 scripts/check-docs-links.py`
   from the repository root.
 - A failure near your code is yours until it is shown to fail the same way

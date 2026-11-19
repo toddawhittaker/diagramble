@@ -28,9 +28,21 @@ second releases. It is frozen and serves only as a reference for screen layout, 
 its model and rules differ from the specification. It is deleted once the real
 application has the second release's screens. The real application has not been started.
 
-## Running the prototype
+## Running the code
 
-You need a current version of [Node.js](https://nodejs.org/).
+You need the version of [Node.js](https://nodejs.org/) in `.nvmrc`. The real
+application is an npm workspaces project at the repository root:
+
+```
+npm ci
+npm run typecheck
+npm run lint
+npm test
+npm run build
+npm run dev --workspace @diagramble/web   # serves the web app with Vite
+```
+
+The prototype is its own project:
 
 ```
 cd prototype

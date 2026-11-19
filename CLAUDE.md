@@ -34,11 +34,13 @@ behind a hard-to-undo choice.
 
 ## Layout and commands
 
-The only code so far is a throwaway clickable prototype in `prototype/`, an npm project.
-It runs in the browser with sample data and has no backend. It covers the first-release
-and second-release screens of the specification. It is frozen, a reference for screen
-layout only, and is deleted once `apps/web` has the Release 2 screens.
-`prototype/README.md` describes its parts. The real application's layout is SPEC.md section 12.
+The real application is an npm workspaces project at the root, over `packages/model`,
+`packages/rules`, `packages/cases`, `apps/web` and `apps/server`; its layout is SPEC.md
+section 12. A throwaway clickable prototype in `prototype/` is its own npm project, not a
+workspace. It runs in the browser with sample data and has no backend. It covers the
+first-release and second-release screens of the specification. It is frozen, a reference
+for screen layout only, and is deleted once `apps/web` has the Release 2 screens.
+`prototype/README.md` describes its parts.
 
 Prerequisites: the `.nvmrc` Node (a SessionStart hook puts it on PATH in Claude
 sessions; humans run `nvm use`), and gitleaks for the pre-commit hook
@@ -46,13 +48,14 @@ sessions; humans run `nvm use`), and gitleaks for the pre-commit hook
 
 | Command | What it does |
 |---|---|
-| `npm ci` | Install the prototype from its lockfile (in `prototype/`) |
-| `npm run typecheck` / `npm run lint` / `npm test` | The three fast checks (in `prototype/`) |
-| `npm run build` / `npm run dev` | Build into `dist/`, or serve at http://localhost:5173 (in `prototype/`) |
+| `npm ci` | Install the workspaces from the root lockfile |
+| `npm run typecheck` / `npm run lint` / `npm test` | The three fast checks, over every workspace. `lint` also runs the boundary check |
+| `npm run build` | Build `apps/web` with Vite |
+| `npm run test:browser` | The browser tests, in the workspaces that have them |
+| `npm run dev --workspace @diagramble/web` | Serve the web app with Vite |
+| `npm ci`, `npm run typecheck` / `lint` / `test` / `build` / `dev` | The same checks for the prototype, run in `prototype/`; `dev` serves http://localhost:5173 |
 | `node scripts/check-comment-history.mjs` | Fails on project history in comments, repo-wide |
 | `python3 scripts/check-docs-links.py` | Fails on a broken relative link or image in Markdown |
-
-Add the commands for the real application here when it exists.
 
 ## How work gets done here
 
