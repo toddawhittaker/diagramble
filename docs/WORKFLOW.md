@@ -20,7 +20,9 @@ npm run dev --workspace @diagramble/web   # serves the web app with Vite
 
 The boundary check, `scripts/check-boundaries.mjs`, fails when `packages/model`,
 `packages/rules` or `packages/cases` import anything but their own files, their
-listed dependencies, or Vitest in tests (SPEC.md section 12).
+listed dependencies, or, in test files, Vitest and their own development
+dependencies. It also fails on any `/// <reference>` directive, which would bring
+back Node or browser types (SPEC.md section 12).
 
 The prototype is its own npm project in `prototype/`, with its own lockfile. It is
 not a workspace, and the root commands do not touch it:
