@@ -44,7 +44,9 @@ file in common. These rules make that hold.
    change only in fold tasks. When two epics add to the same section, the one merging
    second keeps both when it merges `main` in, which it must do before its epic pull
    request anyway (WORKFLOW.md, "Pull requests").
-7. **The prototype is frozen.** No epic edits `prototype/`.
+7. **The prototype is frozen.** No epic edits `prototype/`. It is retired at the Release 1
+   gate, once `apps/web` covers its first-release screens (section 2, "What may be taken
+   from the prototype").
 
 | Shared file | Owner | Who else may edit it |
 | --- | --- | --- |
@@ -52,7 +54,7 @@ file in common. These rules make that hold.
 | `package-lock.json` | Epic 1 | An epic's dependency task, under rule 3 |
 | `.github/workflows/ci.yml`, `.github/dependabot.yml` | Epic 1 | No Release 0 epic |
 | A workspace's `package.json` and `tsconfig.json` | The epic that owns the workspace | Dependency tasks |
-| `Dockerfile`, `compose.yaml`, `.dockerignore` | Epic 3 | Epic 6, to serve the web app's build |
+| `Dockerfile`, `compose.yaml`, `.dockerignore` | Epic 3 | Epic 7, to serve the web app's build |
 | CLAUDE.md's commands table, WORKFLOW.md's "Local development" and "CI", the `epic-run` skill | Epic 1 | Fold tasks |
 | `docs/STATUS.md`, `docs/SPEC.md` | Fold tasks, by adding | Nobody else |
 
@@ -70,7 +72,7 @@ Release 0 proves the risky parts (VISION.md section 11, "Release 0"; SPEC.md sec
 | --- | --- | --- |
 | Balancing through the dictionary is right on three cases, one with a flow split into parts | 2, 3 | Epic 4 |
 | One element on two diagrams is renamed once, and both update | 1, 4 | Epic 2 in the model, Epic 5 on screen |
-| A launch from a Canvas test course opens a project and returns a score | 6 | Epic 3, then Epic 6 |
+| A trial launch from a Canvas test course signs the student in and opens their saved project | 6, 7 | Epic 3, then Epic 6, then Epic 7 |
 | A keyboard-only user builds a context diagram in the outline view | 5 | Epic 5 |
 
 ### Epic 1: Foundation
@@ -120,11 +122,14 @@ and 6. Owns `packages/model`. Depends on Epic 1. Runs beside Epic 3. Size L.
   `getFindings` and `preview` need the rules, so Epic 4 builds them.
 - One file per family of kinds, so that Release 1's use case and ERD epics add files.
 
+- Every creating command carries the new item's identifier, and `apply` refuses one whose
+  identifier is already used in the project (SPEC.md sections 3.2 and 4.1). Tests use
+  readable identifiers.
+
 Exit: a test for every invariant, a test that a data store on two diagrams renamed once
-shows the new name on both, and a test that replaying the log rebuilds the model.
-Element identity, the log entry and the storage form are hard to undo, so the epic's
-architect run brings them to the user (Q2) and its fold records them in SPEC.md
-section 3.6.
+shows the new name on both, and a test that replaying the log rebuilds the model. The log
+entry and the storage form are hard to undo, so the epic's architect run brings them to
+the user and its fold records them in SPEC.md section 3.6.
 
 ### Epic 3: Server and Canvas launch
 
@@ -136,22 +141,24 @@ Depends on Epic 1. Runs beside Epics 2, 4 and 5. Size M.
 - The Learning Tools Interoperability (LTI) 1.3 login and launch on `jose`: state, nonce,
   signature, issuer, audience and deployment checks, and the tool's public key set. One
   platform registration, read from settings.
-- Score return through Assignment and Grade Services (AGS), with a signed client
-  assertion for the access token.
+- PostgreSQL through Kysely, with the migration runner, for accounts, sign-in methods,
+  sessions and launch nonces. The project tables are Epic 6's.
 - An account kept apart from its sign-in methods (SPEC.md section 1, "Sign-in"); an LTI
   sign-in method keyed by the token's issuer and subject; a session cookie that points to
-  a stored record (Q1 says where).
+  a stored session. The launch's course and whether the person is an instructor are kept
+  only if Epic 6 needs them to find the student's project for that course.
+- No score return, Deep Linking or roster service (SPEC.md section 1, "Grading and class
+  management").
 - The Docker image, and the Compose file that adds PostgreSQL.
 - Tests against a fake platform whose good and tampered tokens are signed in the test.
 
-Exit: a launch from the Canvas test course (Q4) reaches the deployed server, signs the
-user in, and posts a fixed score that shows in the gradebook. What SpeedGrader shows is
-written down for Epic 6. The security reviewer has run.
+Exit: a launch from the Canvas test course (Q4) reaches the deployed server and signs the
+user in. The security reviewer has run.
 
 ### Epic 4: Rules and test cases
 
 Serves SPEC.md sections 5 and 6. Owns `packages/rules` and `packages/cases`. Depends on
-Epic 2. Runs beside Epics 3 and 5. Size L.
+Epic 2. Runs beside Epics 3, 5 and 6. Size L.
 
 - The rule shape and finding of section 5.1, and the one built-in profile.
 - One task per rule family, each owning its file and codes: element and connection
@@ -165,8 +172,9 @@ Exit: all three cases pass as automated tests, which meets the first exit criter
 ### Epic 5: Canvas and outline view
 
 Serves SPEC.md section 2 items 4 and 5 and section 3.5, VISION.md section 5
-("Accessibility and keyboard modeling"), and `docs/mockups/STYLES.md`. Owns `apps/web`.
-Depends on Epic 2. Runs beside Epics 3 and 4. Size M.
+("Accessibility and keyboard modeling"), and `docs/mockups/STYLES.md`. Owns `apps/web`,
+except the save-queue folder that Epic 6 owns. Depends on Epic 2. Runs beside Epics 3, 4
+and 6. Size M.
 
 - A Vite, React and React Router app with one store over the model's `apply`, held in
   memory. A first task builds it; the canvas and the outline are then separate folders
@@ -181,28 +189,50 @@ Exit: Playwright tests that build a context diagram with the keyboard alone (the
 exit criterion) and rename an element shown on two diagrams. The accessibility reviewer
 has run over the outline.
 
-### Epic 6: Trial launch
+### Epic 6: Saving
+
+Serves SPEC.md section 2 item 7 and section 3.9's "Work is saved as the student goes".
+Owns the project store in `apps/server` (one folder, its migrations and its routes) and
+the save queue in `apps/web` (one folder), under section 1's rules 4 and 5. Depends on
+Epics 2 and 3. Runs beside Epics 4 and 5. Size M.
+
+- The project-store interface of SPEC.md section 12 (load, save, append to the log) on
+  Kysely, with tables keyed by project, and items by project and identifier together.
+- A save request that takes one command, checks it with the model's schema, applies it to
+  the saved project, and stores it before the next. A creating command whose identifier
+  is already used is refused (SPEC.md section 3.2).
+- The browser's save queue: commands sent in order, kept while offline, a new identifier
+  made and the command sent again after that refusal, and a warning before the page
+  closes with changes waiting. It knows nothing of the web store; Epic 7 connects it.
+- One project per student per Canvas course, made empty on first open.
+
+Exit: tests that a command is saved before the next is applied, that a queue held offline
+arrives in order, and that a reused identifier is refused and sent again. The save request
+and the database schema are hard to undo, so the epic's architect run brings them to the
+user. The security reviewer has run.
+
+### Epic 7: Trial launch
 
 Serves SPEC.md section 2 item 6 and the third exit criterion. Owns the path from launch
-to app: the score route and the serving of the web build in `apps/server`, and the
-launch entry in `apps/web`. Depends on Epics 3, 4 and 5. Size S.
+to app: the serving of the web build in `apps/server`, and the launch entry in `apps/web`.
+Depends on Epics 4, 5 and 6. Size S.
 
-- The launch opens the web app on a project, and the app lists its findings (Q3).
-- The browser sends the project in its storage form; the server checks it against the
-  model's schema, runs the rules, and posts a score and a comment (Q3) in the form that
-  Epic 3 found SpeedGrader shows best.
+- The launch opens the web app on the student's saved project for that course, and the
+  app lists its findings.
+- The web store sends each accepted command through Epic 6's save queue, and the top bar
+  says when the project was last saved.
 - The trial in the Canvas test course, then the release gate's whole-system review by the
   architect (WORKFLOW.md, "Epic plans"), its findings filed as issues.
 
-Exit: all four Release 0 exit criteria shown on the deployed server.
+Exit: all four Release 0 exit criteria shown on the deployed server, including a second
+launch that opens the work saved by the first.
 
 ### What Release 0 leaves thin on purpose
 
-Everything on SPEC.md section 2's out-of-scope list. No project is saved, so work is lost
-when the page closes. Accounts exist only as far as the launch needs them (Q1). The score
-trusts the project the browser sends; Release 1 scores the server's saved copy. There is
-one Canvas platform registration. The Release 1 commands and queries of SPEC.md section
-4 are left out. Only Gane and Sarson symbols are drawn, and findings are a plain list.
+Everything on SPEC.md section 2's out-of-scope list. A student has one project per Canvas
+course and no project list. Nothing is sent to Canvas. There is one Canvas platform
+registration. The Release 1 commands and queries of SPEC.md section 4 are left out. Only
+Gane and Sarson symbols are drawn, and findings are a plain list.
 
 ### What may be taken from the prototype
 
@@ -215,10 +245,14 @@ message, reason and fix text, and the theme's CSS variables as an example of
 These must not be copied, because they differ from SPEC.md (`prototype/README.md`, "Where
 the prototype differs from the specification"): undo by whole copies of the model with no
 command log; undo and redo as store functions; saving to `localStorage` and the hash
-router; `addFlow` reusing a definition with the same name; readable identifiers such as
-`dg-context`, and the `nextId` and `project` parts that section 3.6 lacks, until Q2 is
-settled; every kind and field of Releases 1 and 2; and the tests, which are written anew
+router; `addFlow` reusing a definition with the same name; the identifier counter
+`nextId` and the `project` part that section 3.6 lacks (identifiers follow SPEC.md
+section 3.2); every kind and field of Releases 1 and 2; and the tests, which are written anew
 from SPEC.md sections 3.4 and 6.
+
+The prototype stays the reference for Release 1's screens and is retired at the Release 1
+gate, once `apps/web` covers its first-release screens. That was the recommendation, and
+it stands as decided since nobody chose otherwise by 18 November 2026.
 
 ## 3. Release 1 candidates
 
@@ -227,15 +261,15 @@ section 10, Level 1). SPEC.md sections 8 and 9 fix its new parts.
 
 | Code | Epic | What it does | Depends on |
 | --- | --- | --- | --- |
-| R1-a | Saving and the project list | SPEC.md section 3.9: each accepted command saved before the next, the project-store interface of section 12, the queue kept while offline, and the project list. Its database schema and save request are hard to undo, so its architect run brings both to the user | Release 0 |
+| R1-a | Project list | SPEC.md section 3.9: the project list, starting a new project, and copying, renaming and deleting one, over Release 0's saving | Release 0 |
 | R1-b | Project files and starter cases | Export and import with version upgrades and plain refusals (section 3.9), saving a project as a starter case (section 3.8), two shipped starter cases and symbol help (VISION.md section 10, item 17) | R1-a |
 | R1-c | Data flow diagrams and dictionary, complete | The Release 1 commands and queries of section 4, the settings of section 3.7, the full editor, the dictionary screen, the problems panel, where-used, safe rename and delete, and the DeMarco and Yourdon display (VISION.md section 10, items 3 to 5, 11, 12) | Release 0 |
 | R1-d | Use case forms | SPEC.md section 8: kinds, rules, worked-out views and the form screen | Release 0 |
 | R1-e | Entity relationship diagram and CRUD matrix | SPEC.md section 9, including the checks against the process model | Release 0 |
-| R1-f | Canvas launch for live sections | Several platform registrations and key rotation; the launch opens the student's own saved project for that Canvas link and scores the saved copy (VISION.md section 10, item 16) | R1-a |
+| R1-f | Canvas launch for live sections | Several platform registrations and key rotation (VISION.md section 10, item 16). No score is sent | Release 0 |
 | R1-g | Project document as PDF | The Release 1 exit criterion on a PDF. Needs SPEC.md section 14.3 item 6 settled, and SPEC.md to say which part of section 10.8 comes in Release 1 | R1-c, R1-d, R1-e |
 | R1-h | Keyboard and screen reader | The outline as a full keyboard editor for every Release 1 kind, and a screen-reader pass (VISION.md section 10, item 13) | R1-c, R1-d, R1-e |
-| R1-i | Instructor MCP server | SPEC.md section 7.1: personal API keys kept as hashes, revocable and logged, and Model Context Protocol (MCP) tools made from the command and query registry. Here only if Q5 says so | R1-a, R1-b |
+| R1-i | Instructor MCP server | SPEC.md section 7.1: personal API keys kept as hashes, revocable and logged, and Model Context Protocol (MCP) tools made from the command and query registry. Decided for Release 1 on 18 November 2026 | R1-a, R1-b |
 | R1-j | Checked against the book | The exit criteria on chapters 4 and 5, on Visible Analyst's checks, and on a student finishing the starter case alone. It needs `sources/`, so it runs from the main checkout | All of the above |
 
 ## 4. Release 2 candidates
@@ -245,8 +279,7 @@ section 10, Level 2). SPEC.md sections 7, 10 and 11 fix most of it.
 
 | Code | Epic | What it does | Depends on |
 | --- | --- | --- | --- |
-| R2-a | AI gateway and assistance levels 1 and 2 | SPEC.md section 7 and section 1, "AI models and agents": the server builds each request's tools from the level, an AI SDK tool-loop agent uses only read-only queries, every step is logged and student identity removed. Meets the criterion that levels 0 to 2 are enforced and logged | R1-a, and a source for the level (Q6) |
-| R2-b | Canvas settings per link, and certification | Deep Linking 2.0, the assistance level and rule profile set per Canvas link, and LTI Advantage certification. Scope depends on Q6 | R1-f |
+| R2-a | Course settings, AI gateway and assistance levels 1 and 2 | SPEC.md section 7 and section 1, "AI models and agents" and "Course settings": the screen where an instructor sets a course's level and rule profile, the server reading the level from it to build each request's tools, an AI SDK tool-loop agent using only read-only queries, every step logged and student identity removed. Meets the criterion that levels 0 to 2 are enforced and logged | Release 1 |
 | R2-c | Planning forms | System request, feasibility analysis and alternative matrix (SPEC.md sections 10.1, 10.2, 10.4) | Release 1 |
 | R2-d | Requirements and test plan | SPEC.md sections 10.3 and 10.5, with their trace links | Release 1 |
 | R2-e | Interface structure diagram | SPEC.md section 10.6 | Release 1 |
@@ -258,6 +291,9 @@ section 10, Level 2). SPEC.md sections 7, 10 and 11 fix most of it.
 | R2-k | Physical data model and storage estimate | SPEC.md sections 11.5 and 11.6 | R2-h |
 | R2-l | Accessibility audit | An independent audit and a published conformance report | The screens of R2-c to R2-k |
 
+There is no R2-b. It held Canvas settings per link and LTI Advantage certification, both
+dropped on 18 November 2026 (SPEC.md section 1, "Grading and class management").
+
 The experimental track follows R2-a: assistance levels 3 and 4, where an agent critiques
 a draft or proposes commands through `preview` for the student to accept (SPEC.md section
 7 items 4 and 5; VISION.md section 10, Level 4). Each ships alone, behind its own exit
@@ -268,67 +304,26 @@ SPEC.md section yet, so they cannot be planned.
 
 ```
 Epic 1 Foundation
- ├─ Epic 2 Model ─┬─ Epic 4 Rules and test cases ─┐
- │                └─ Epic 5 Canvas and outline ───┤
- └─ Epic 3 Server and Canvas launch ──────────────┴─ Epic 6 Trial launch
+ ├─ Epic 2 Model ─┬─ Epic 4 Rules and test cases ─────┐
+ │                ├─ Epic 5 Canvas and outline ───────┤
+ │                └─┐                                 │
+ └─ Epic 3 Server ──┴─ Epic 6 Saving ─────────────────┴─ Epic 7 Trial launch
 ```
 
 | Stage | Epics that can run at once |
 | --- | --- |
-| Release 0 | Epic 1 alone; then Epics 2 and 3; then Epics 4 and 5, with Epic 3 if it is still running; then Epic 6 |
+| Release 0 | Epic 1 alone; then Epics 2 and 3; then Epics 4 and 5, with Epic 3 if it is still running; then Epic 6 once Epics 2 and 3 have merged; then Epic 7 |
 | Release 1 | R1-a, R1-c, R1-d and R1-e; then R1-b, R1-f and R1-i; then R1-g and R1-h; then R1-j |
-| Release 2 | R2-a, R2-c, R2-d, R2-e and R2-h; then R2-b, R2-f, R2-i, R2-j and R2-k; then R2-g and R2-l |
+| Release 2 | R2-a, R2-c, R2-d, R2-e and R2-h; then R2-f, R2-i, R2-j and R2-k; then R2-g and R2-l |
 
 ## 6. Questions to settle before an epic starts
 
-**Q1. Does Release 0 have a database? Before Epic 3.** (a) Yes: PostgreSQL through
-Kysely holds accounts, sign-in methods, sessions and launch nonces, but no projects.
-(b) No: the launch keeps its state in memory and signed cookies, which saves a few days,
-but R1-a then redesigns accounts and the launch is rewritten around them. Recommended:
-(a). SPEC.md section 1 already makes a session a stored record, and the split between an
-account and its sign-in methods is hard to undo. It takes accounts off SPEC.md section
-2's out-of-scope list.
-
-**Q2. How are element identifiers made? Before Epic 2.** (a) A counter kept in the
-project, a sixth part of the storage form of SPEC.md section 3.6, as in the prototype.
-Identifiers stay short in `getOutline`, and replaying commands gives the same ones, but a
-save must name the version it builds on, because two writers would collide. (b) The
-caller puts each new identifier in the command, from a random source outside the core.
-Replay is exact under any interleaving and real-time editing needs no change, but every
-creating command grows a field. Either way an identifier is an opaque string, never
-parsed, so a later switch changes no saved file. Recommended: (a), because real-time
-editing waits behind Release 3's entry gate.
-
-**Q3. What does the trial launch open, and what score does it send? Before Epic 6.** (a) A
-blank project held in the browser, scored 1 with no errors and 0 otherwise, with a
-comment counting errors and warnings. (b) A fixed score, which proves only the plumbing.
-Recommended: (a), because it also proves that the rules run on the server, the point of
-one shared package (SPEC.md section 1, "Stack").
+The user settled the other questions on 18 November 2026. SPEC.md section 14.6 records
+the answers.
 
 **Q4. Which Canvas does the trial use? Start now; Epic 3 needs it.** (a) The
 institution's Canvas test or beta instance, with an LTI 1.3 developer key from its
-administrator. (b) Canvas's open-source code run locally: no approval needed, but heavy,
-and SpeedGrader may differ. Recommended: (a). The key needs the trial server's public
-HTTPS address, so hosting must be ready by the end of Epic 3.
-
-**Q5. When do student AI and the instructor MCP server come? Before Release 1 is
-planned.** (a) Assistance levels 1 and 2 in Release 2 as VISION.md has them (R2-a), and
-the MCP server, which no release names yet, late in Release 1 (R1-i). (b) Both in Release
-1, as two more lanes after R1-a, with the level set per Canvas link. (c) Both in Release
-2. Recommended: (a). The MCP server touches no student's work and helps the first live
-section's instructor build scenarios. Student AI needs a source for its level (Q6) and
-VISION.md's classroom comparison, and Release 1 already runs four lanes.
-
-**Q6. Which of VISION.md's Release 2 teaching tools stay? Before Release 2 is planned.**
-VISION.md section 10 lists assignment profiles, rubrics, comments on submissions, an
-instructor dashboard and the roster service, and section 11 wants an instructor to grade
-"without leaving Canvas". CLAUDE.md and `prototype/README.md` say the tool deals with no
-assignments, grades or class lists unless the user asks. (a) Keep VISION.md as written.
-(b) Keep only settings per Canvas link (assistance level, rule profile, starter case),
-and leave grading and rosters to Canvas. (c) Drop them all. Recommended: (b). It gives
-the AI levels and rule profiles a home without making the tool a learning management
-system.
-
-**Q7. When is the prototype retired?** (a) At the Release 1 gate, once `apps/web` covers
-its first-release screens. (b) After Release 0. Recommended: (a). It stays the reference
-for Release 1's screens, and its CI job costs little.
+administrator. (b) Canvas's open-source code run locally: no approval needed, but heavy.
+Recommended: (a). Diagramble sends no score, so the key needs only the launch. The key
+needs the trial server's public HTTPS address, so hosting must be ready by the end of
+Epic 3.

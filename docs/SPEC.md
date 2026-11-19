@@ -39,8 +39,11 @@ document wins. Section 14 records the smaller points settled the same day.
 | Data model | The entity relationship diagram, its dictionary entries and the CRUD matrix, checked against the process model, in the first release | See section 9. Not built in Release 0 |
 | Design diagrams | The physical DFD, structure chart, program specification and physical data model of chapters 9 and 10, in the second release | See section 11. Not built in Release 0 |
 | Other chapters | Checked forms for chapters 1, 3, 6 and 11. The interface structure diagram for chapter 8. A project binder for everything else. All of it exports to PDF, in the second release | See section 10. Not built in Release 0 |
-| Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again, decided on 18 November 2026 | See section 3.9. Not built in Release 0 |
-| Instructors' AI agents | A Model Context Protocol (MCP) server lets an instructor's own AI agent build scenarios and starter cases, using a personal API key, decided on 18 November 2026 | See section 7.1. Not built in Release 0 |
+| Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again, decided on 18 November 2026 | See section 3.9. Since 18 November 2026, Release 0 has a database and saves each accepted command (section 2). The project list, copying, renaming, deleting, export and import come in Release 1 |
+| Instructors' AI agents | A Model Context Protocol (MCP) server lets an instructor's own AI agent build scenarios and starter cases, using a personal API key, decided on 18 November 2026 | See section 7.1. Built in Release 1, decided on 18 November 2026 |
+| Grading and class management | None, decided on 18 November 2026. Diagramble sends Canvas no score and keeps no assignments, rubrics, roster, instructor dashboard or comments on submissions. The Canvas launch only signs a person in and opens their work. Assignment and Grade Services, Deep Linking, Names and Role Provisioning and LTI Advantage certification are dropped from every plan | Students hand in the exported PDF through Canvas (section 3.9), and the instructor grades it there |
+| Course settings | One small settings record per Canvas course, decided on 18 November 2026. The launch says which course and whether the person is an instructor. An instructor sets one AI assistance level (0 to 4) and one rule profile for the course, and every student launched from it gets them. Nothing about assignments is stored | See section 7 item 4. Not built in Release 0, except that an account may record the course it launched from |
+| Element identifiers | Made by whoever creates the item and carried in the creating command, decided on 18 November 2026 | See sections 3.2, 4.1 and 14.6 |
 | Stack | TypeScript everywhere | One shared package holds the model and rules and runs in both browser and server |
 | Server framework | Fastify (MIT), with Zod for request checking, decided on 18 November 2026 | See section 12 |
 | Canvas launch | Our own thin layer for the Learning Tools Interoperability (LTI) 1.3 launch, built on `jose` (MIT), not on ltijs, decided on 18 November 2026. The launch is critical, so it sits inside our own tests and security review. ltijs has one maintainer and brings its own Express app and database layer | See section 12 |
@@ -62,13 +65,20 @@ In scope:
 3. The three test cases in section 6, passing as automated tests.
 4. A minimal canvas that shows one model on a context diagram and its child diagrams.
 5. A minimal outline view in which a keyboard-only user can build a context diagram.
-6. A trial launch from a Canvas test course that opens a project and returns a score.
+6. A trial launch from a Canvas test course that signs the student in and opens their
+   saved project.
+7. Accounts and saving to the server, added on 18 November 2026. PostgreSQL, reached
+   through Kysely, stores accounts, sign-in methods, sessions, launch nonces and
+   projects. Each command the server accepts is saved before the next one is applied, as
+   section 3.9 describes. A student has one project for each Canvas course, and the
+   launch opens it.
 
 Out of scope: use case forms (section 8), the ERD and the CRUD matrix (section 9), the
 forms, diagram and binder of section 10, the design diagrams of the textbook's chapters 9
-and 10 (section 11), accounts, saving to the server and project files (section 3.9),
-assignment profiles, export, AI features, real-time
-editing, and visual polish.
+and 10 (section 11), the project list and copying, renaming and deleting projects,
+project files and their export and import (section 3.9), course settings (section 7
+item 4), export to PDF, AI features, real-time editing, and visual polish. Grading and
+class management are out of every release (section 1).
 
 Exit criteria are those in section 11 of the product vision under "Release 0".
 
@@ -90,13 +100,32 @@ Every element has these fields.
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `id` | Identifier | Assigned once, never reused |
+| `id` | Identifier | Assigned once, never reused. See the identifier rules below |
 | `kind` | One of the kinds below | Never changes in Release 0 |
 | `name` | Text | May be empty while the student is working. Rules report empty names |
 | `description` | Text | May be empty while the student is working. The textbook asks for one on every item, so rule DFD-13 reports an empty description |
 | `aliases` | List of text | Other names the business uses for the same thing. The textbook lists an alias among the fields of a flow, a data store, an external entity and an attribute (Figures 4-13 and 5-9). `search` looks in them. No rule in Release 0 reads them |
 | `notes` | Text | Working notes and open questions. The textbook lists notes on every kind of entry (Figures 4-13, 4-16 and 5-6 to 5-8). Never checked |
 | `origin` | `student`, `starter` or `ai` | Who created the element. Needed later for instructor review and AI disclosure |
+
+**Identifier rules,** decided on 18 November 2026:
+
+- Whoever creates an item puts its identifier in the creating command: the browser, a
+  test, an AI agent or an instructor's MCP agent (section 7.1). The core never makes one.
+- The browser makes an identifier of 10 characters drawn from lowercase letters and
+  digits, using `crypto.getRandomValues`, never `Math.random`. Tests and agents may
+  choose readable identifiers instead.
+- An identifier is unique only within one project. The database keys an item by its
+  project and its identifier together, and nothing may assume that identifiers are
+  unique across projects. A copy of a starter case may keep the case's identifiers.
+- The server refuses a creating command whose identifier is already used in the
+  project. The browser then makes a new identifier and sends the command again.
+- An identifier is an opaque string. Nothing parses it.
+
+Why: the browser and the server both apply each command, and two copies of a project can
+run at once, with two open tabs, a dropped connection, an instructor's MCP agent, or an
+AI proposal accepted later. A counter kept in the project would let two copies give out
+the same identifier.
 
 An alias is not a second name. A flow's label, a rule's message and every list show the
 `name`. Two elements may not be told apart by an alias, and an alias never takes part in
@@ -305,6 +334,10 @@ and later as tool definitions for an AI model (section 7).
 | `removeOccurrence` | Removes one occurrence, and the flows attached to it on that diagram |
 | `deleteElement` | Deletes an element everywhere. Refused for a data definition that is still carried or used as a component, unless `cascade` is set |
 | `undo`, `redo` | Steps through the log |
+
+Every command that creates an item carries the new item's `id`, made as section 3.2's
+identifier rules say. A command that creates more than one item, such as `addFlow` with a
+new data structure or `expandProcess`, carries one identifier for each.
 
 `expandProcess` leaves each inherited flow with one end attached to the outside element
 or off-diagram note, and the other end attached to the child diagram's boundary. Until the student attaches
@@ -613,15 +646,16 @@ product vision.
    Model Context Protocol server.
 3. **Findings are data.** An AI model explains a finding from its rule identifier,
    elements and values. It never decides whether a rule is broken.
-4. **The assistance level decides which tools exist.** The server builds the tool list
-   for each request.
+4. **The assistance level decides which tools exist.** The server reads the level from
+   the settings of the Canvas course the student launched from (section 1, "Course
+   settings"), and builds the tool list for each request from it.
 
    | Level | Tools offered to the AI model |
    | --- | --- |
    | 0 Off | None. No request is made |
    | 1 Explain | `getOutline`, `getElement`, `getFindings` |
    | 2 Question and hint | Level 1, plus `whereUsed` and `expandData` |
-   | 3 Critique | Level 2, plus the assignment's case text |
+   | 3 Critique | Level 2, plus the project's starter case text |
    | 4 Open practice | Level 3, plus `preview` with commands |
 
 5. **An AI model never changes the model directly.** At level 4 it proposes commands
@@ -1690,6 +1724,10 @@ project's author confirmed all eight on 17 November 2026. None affects Release 0
    the image small but lays out every document a second time. This must be settled
    before the export of section 10.8 is built.
 
+7. **Which Canvas the trial uses.** The institution's Canvas test instance needs an LTI
+   1.3 developer key from its administrator. Diagramble sends no score, so the key needs
+   only the launch. The planning note is `docs/EPICS.md` section 6.
+
 ### 14.4 Taken from Visible Analyst, and left out
 
 This follows the reading of the two tutorials (section 13). The test for each point was
@@ -1759,3 +1797,15 @@ Left for now, by the author's choice:
 
 Three exercises cannot be done as printed, because of errors in the textbook: exercises
 K and L of Chapter 9 and exercise J of Chapter 10.
+
+### 14.6 Settled on 18 November 2026
+
+The user settled these while the epics were planned (`docs/EPICS.md`).
+
+| Point | Settled as | Where |
+| --- | --- | --- |
+| A database in Release 0 | Yes. It holds accounts, sign-in methods, sessions, launch nonces and saved projects | Sections 2 and 3.9 |
+| Element identifiers | Made by the creator and carried in the creating command: 10 random lowercase letters and digits, unique within a project only | Sections 3.2 and 4.1 |
+| Grading and class management | None. No score is sent to Canvas, and there are no assignments, rubrics, roster or dashboard | Section 1 |
+| The AI assistance level | Set per Canvas course, with the rule profile | Section 1 and section 7 item 4 |
+| When AI comes | The instructors' MCP server in Release 1; student-facing AI in Release 2 | Sections 1 and 7 |
