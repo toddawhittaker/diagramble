@@ -472,7 +472,7 @@ Current versions, for reference: UML 2.5.1 (2017), XMI 2.5.1 (2015), BPMN 2.0.2 
 | Rule engine | Runs profiles and returns findings | Must be testable without any interface |
 | Views | Canvas, outline, dictionary editor, reports | Replaceable without touching meaning |
 | Learning management system adapter | LTI launch and sign-in | Protocol details stay out of the core |
-| AI gateway | Enforces the assistance level, removes identity, logs every exchange, validates output | AI can be switched off entirely and nothing else changes |
+| AI gateway | Enforces the assistance level, logs every exchange, validates output | AI can be switched off entirely and nothing else changes |
 | Export | Documents, images, schemas, model files | Derived from the model only |
 
 ### Technology, without locking in
@@ -558,7 +558,7 @@ A fixed reply structure guarantees the shape of a reply, not that its content is
 
 ### Operating facts
 
-- **Privacy.** Send no names or student identifiers to a model provider. The institution supplies the key and chooses a provider whose terms fit its data rules, including whether the provider trains on data sent through its API. Some providers offer [zero retention on request](https://platform.claude.com/docs/en/manage-claude/api-and-data-retention) for eligible features. Diagramble does not vet providers.
+- **Privacy.** The institution supplies the key and chooses a provider whose terms fit its data rules, including whether the provider trains on data sent through its API. Some providers offer [zero retention on request](https://platform.claude.com/docs/en/manage-claude/api-and-data-retention) for eligible features. Diagramble does not vet providers.
 - **Cost.** A feedback request of about 2,000 words of context costs roughly a tenth of a cent to three cents at [published prices](https://platform.claude.com/docs/en/about-claude/pricing) read on 17 November 2026, depending on the model tier. Cost is not the constraint.
 - **Speed.** No sourced figures were found. Test before promising response times.
 
@@ -614,7 +614,7 @@ React Flow asks for its attribution link to stay unless a project pays for its P
 
 ### Choosing the project's license
 
-The license exists so that educators can use Diagramble freely while textbook publishers and other for-profits cannot take the work and sell it. A permissive license such as MIT would allow exactly that, so the project uses the Business Source License 1.1: free for non-profit schools and for individuals, a paid license for for-profit use, and each version becomes AGPL-3.0-or-later four years after it is released.
+The license rests on one premise: educators use Diagramble freely, and anyone who makes money from it pays the author too, so a publisher or other for-profit cannot take the work and sell it without paying. A permissive license such as MIT would allow that, so the project uses the Business Source License 1.1: free for non-profit schools and for individuals, a paid license for for-profit use, and each version becomes AGPL-3.0-or-later four years after it is released.
 
 The full terms are in [`LICENSE`](../LICENSE), a plain summary is in [`LICENSING.md`](../LICENSING.md), and the decision and its details are in the [core specification](SPEC.md), section 1.
 

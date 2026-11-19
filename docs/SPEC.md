@@ -47,7 +47,7 @@ this document wins. Section 14 lists the points still open.
 | Server framework | Fastify (MIT), with Zod for request checking | See section 12 |
 | Canvas launch | Our own thin layer for the Learning Tools Interoperability (LTI) 1.3 launch, built on `jose` (MIT), not on ltijs. The launch is critical, so it sits inside our own tests and security review. ltijs has one maintainer and brings its own Express app and database layer | See section 12 |
 | Database access | Kysely (MIT) behind a small project-store interface of our own (load, save, append to the log) | A project is stored as one JSON document, and its command log as rows of a separate table (section 3.6). The same code can run on PostgreSQL on the server and on SQLite in a possible desktop app later (section 14.1). See section 12 |
-| AI models and agents | The Vercel AI SDK, package `ai` (Apache-2.0), for student-facing AI including agents (its tool-loop agent). Rule 1: use provider packages such as `@ai-sdk/anthropic` with the institution's own key, never bare model-name strings, which route through Vercel's hosted gateway. Rule 2: our server still builds the tool list for each request from the assistance level (section 7 item 4), and no AI model offered to a student can change the model (section 7 item 5). Rule 3: we log every step and remove student identity ourselves (section 7 item 7). The institution supplies and protects the provider key, and chooses a provider whose terms fit its data rules; Diagramble does not vet providers | See sections 7 and 12. No AI feature is built in Release 0 |
+| AI models and agents | The Vercel AI SDK, package `ai` (Apache-2.0), for student-facing AI including agents (its tool-loop agent). Rule 1: use provider packages such as `@ai-sdk/anthropic` with the institution's own key, never bare model-name strings, which route through Vercel's hosted gateway. Rule 2: our server still builds the tool list for each request from the assistance level (section 7 item 4), and no AI model offered to a student can change the model (section 7 item 5). Rule 3: we log every step (section 7 item 7). The institution supplies and protects the provider key, and chooses a provider whose terms fit its data rules; Diagramble does not vet providers | See sections 7 and 12. No AI feature is built in Release 0 |
 | Deployment | One Docker image for the app, and a Docker Compose file that adds PostgreSQL | See section 12 |
 | Sign-in | The Canvas launch from Release 0. In Release 2, three more ways: OpenID Connect (OIDC), for school Google or Microsoft accounts; LDAP directories; and email magic links limited to an allow list of addresses or to allowed domains. The administrator sets up each one in the administrator interface. An account is kept separate from the ways of signing in to it, so that a way can be added without changing accounts. Each account stores one login, which names its export files (section 3.9) | A session is a cookie that points to a record stored in the database. Administrators always need a second factor ("Administration"). For everyone else, the administrator decides for each way of signing in whether it needs a second factor, a passkey or an authenticator app. By default LDAP and magic links need one, because a password or an email account alone is weak, and OIDC does not, because the school's own provider enforces its own. The Canvas launch needs none from Diagramble, because Canvas sign-in usually requires one already |
 | Rule findings | Every rule of section 5 flags a problem in the problems panel and, by default, blocks nothing. A course's rule profile can turn a rule off, change its severity, or make it block a change | See section 5.1. The invariants of section 3.4 are always enforced, whatever the profile says |
@@ -781,13 +781,16 @@ product vision.
    before making it (section 7.1). This is why the core is pure functions over an
    unchanging model value (section 3.1).
 7. **The gateway is neutral and server-side.** It holds the institution's own key, works
-   with more than one model provider, removes student identity, and logs every request
-   and response against the project. It is built on the AI SDK under the rules in
+   with more than one model provider, and logs every request and response against the
+   project. It is built on the AI SDK under the rules in
    section 1.
    - The key and the choice of provider are the institution's responsibility. The
      institution supplies the key, protects it, and chooses a provider whose terms fit
      its data rules, including whether the provider trains on data sent through its
-     API. Some providers do. Diagramble does not vet providers.
+     API. Some providers do. Diagramble does not vet providers and does not alter what
+     students send. The administrator documentation says this plainly. Whether students
+     see a one-time notice the first time they use an AI feature is decided when the AI
+     epic is planned.
    - AI use is also counted: requests and tokens, per student and per course. The course
      dashboard may show those counts.
    - Prompt and response text is logged for safety and debugging only. It is kept under
