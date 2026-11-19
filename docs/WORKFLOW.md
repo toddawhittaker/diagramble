@@ -51,7 +51,7 @@ Two more checks run from the repository root:
 
 ```
 node scripts/check-comment-history.mjs   # comments and test titles carry no project history
-python3 scripts/check-docs-links.py      # every relative link and image in Markdown resolves
+node scripts/check-docs-links.mjs     # every relative link and image in Markdown resolves
 ```
 
 Screenshots go in `screenshots/` at the repository root, named with the date
