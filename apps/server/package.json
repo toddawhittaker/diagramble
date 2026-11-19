@@ -1,0 +1,30 @@
+{
+  "name": "@diagramble/server",
+  "private": true,
+  "type": "module",
+  "license": "BUSL-1.1",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@diagramble/cases": "*",
+    "@diagramble/model": "*",
+    "@diagramble/rules": "*",
+    "@fastify/cookie": "11.1.5",
+    "@fastify/formbody": "9.0.2",
+    "@fastify/static": "10.1.12",
+    "fastify": "5.12.8",
+    "jose": "6.2.18",
+    "kysely": "0.29.9",
+    "pg": "8.23.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "@types/pg": "8.23.1"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "diagramble",
+  "private": true,
+  "type": "module",
+  "license": "BUSL-1.1",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "node scripts/check-comment-history.mjs && node scripts/check-boundaries.mjs",
+    "test": "node --test scripts/ && npm run test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test:browser": "npm run test:browser --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "5.1.1"
+  }
+}
