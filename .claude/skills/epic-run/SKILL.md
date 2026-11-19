@@ -93,7 +93,8 @@ work it closes.
     two sentences, add its new open items at one line each, and remove
     the open items it fixed; no task lists, test counts or logs. Move
     lasting rules into SPEC.md (a decision into section 1, a settled
-    question into section 14), delete the plan, and carry a `Fixes #N`
+    question into the section it concerns, taken off section 14's open
+    points), delete the plan, and carry a `Fixes #N`
     line for each issue. Check `git diff main...epic -- docs/STATUS.md`
     shows the entry.
 12. **Epic PR into main.** Cite the SPEC.md sections and how it was

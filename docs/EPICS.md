@@ -266,8 +266,7 @@ section 3.2); every kind and field of Releases 1 and 2; and the tests, which are
 from SPEC.md sections 3.4 and 6.
 
 The prototype stays the reference for Release 1's screens and is retired at the Release 1
-gate, once `apps/web` covers its first-release screens. That was the recommendation, and
-it stands as decided since nobody chose otherwise by 18 November 2026.
+gate, once `apps/web` covers its first-release screens.
 
 ## 3. Release 1 candidates
 
@@ -278,15 +277,15 @@ section 10, Level 1). SPEC.md sections 8 and 9 fix its new parts.
 | --- | --- | --- | --- |
 | R1-a | Project list | SPEC.md section 3.9: the project list, starting a new project, and copying, renaming and deleting one, over Release 0's saving | Release 0 |
 | R1-b | Project files and starter cases | Export and import with version upgrades and plain refusals (section 3.9), saving a project as a starter case (section 3.8), two shipped starter cases and symbol help (VISION.md section 10, item 17). Import is a security boundary: the security reviewer runs, and the exit includes tests built from section 3.9's "Import fails safe" list, with fuzzed and hand-crafted hostile files | R1-a |
-| R1-c | Data flow diagrams and dictionary, complete | The Release 1 commands and queries of section 4, the settings of section 3.7, the full editor, the dictionary screen, the problems panel, where-used, and safe rename and delete (VISION.md section 10, items 3, 5, 11, 12). Only Gane and Sarson symbols are drawn; other styles were deferred on 18 November 2026 | Release 0 |
+| R1-c | Data flow diagrams and dictionary, complete | The Release 1 commands and queries of section 4, the settings of section 3.7, the full editor, the dictionary screen, the problems panel, where-used, and safe rename and delete (VISION.md section 10, items 3, 5, 11, 12). Only Gane and Sarson symbols are drawn; other styles come later (SPEC.md section 14.1 item 9) | Release 0 |
 | R1-d | Use case forms | SPEC.md section 8: kinds, rules, worked-out views and the form screen | Release 0 |
 | R1-e | Entity relationship diagram and CRUD matrix | SPEC.md section 9, including the checks against the process model | Release 0 |
 | R1-f | Canvas launch for live sections | Several platform registrations and key rotation (VISION.md section 10, item 16). No score is sent | Release 0 |
-| R1-g | Project document as PDF | The Release 1 exit criterion on a PDF. Needs SPEC.md section 14.3 item 6 settled, and SPEC.md to say which part of section 10.8 comes in Release 1 | R1-c, R1-d, R1-e |
+| R1-g | Project document as PDF | The Release 1 exit criterion on a PDF. Needs SPEC.md section 14.1 item 6 settled, and SPEC.md to say which part of section 10.8 comes in Release 1 | R1-c, R1-d, R1-e |
 | R1-h | Keyboard and screen reader | The outline as a full keyboard editor for every Release 1 kind, and a screen-reader pass (VISION.md section 10, item 13) | R1-c, R1-d, R1-e |
 | R1-i | Instructor MCP server | SPEC.md section 7.1: personal API keys kept as hashes, revocable and logged, and Model Context Protocol (MCP) tools made from the command and query registry. Keys are for instructors only. While the agent edits, the instructor's open tabs on that project are read-only and say so. The architect run reads how Portikus's `packages/auth` stores API keys as hashes and ports what fits. Decided for Release 1 on 18 November 2026 | R1-a, R1-b |
 | R1-k | Retention, archiving and account deletion | SPEC.md section 1, "Data retention": an instructor archives a course, which makes it read-only while students keep their projects; a retention policy deletes old logs, analytics, AI usage records and archived courses after the periods the administrator sets in R1-l; an account can be deleted. Needed before the live course. Needs the default periods of SPEC.md section 14.3 item 8. The security reviewer runs | R1-a, R1-f, R1-l |
-| R1-l | Administrator interface and operations | SPEC.md section 1, "Administration": one system administrator per deployment, a way to make the first one (SPEC.md section 14.3 item 10), retention period settings, an operations document for backup, restore and monitoring, and their state shown in the interface (server status, last backup). Managing later ways of signing in, such as email magic links, joins it when they are built; the architect run then reads Portikus's `packages/auth` for its OpenID Connect sign-in. The security reviewer runs | R1-f |
+| R1-l | Administrator interface and operations | SPEC.md section 1, "Administration": one system administrator per deployment, a way to make the first one, retention period settings, an operations document for backup, restore and monitoring, and their state shown in the interface (server status, last backup). Managing later ways of signing in, such as email magic links, joins it when they are built; the architect run then reads Portikus's `packages/auth` for its OpenID Connect sign-in. The security reviewer runs | R1-f |
 | R1-j | Checked against the book | The exit criteria on chapters 4 and 5, on Visible Analyst's checks, and on a student finishing the starter case alone. It needs `sources/`, so it runs from the main checkout | All of the above |
 
 ## 4. Release 2 candidates
@@ -300,7 +299,7 @@ section 10, Level 2). SPEC.md sections 7, 10 and 11 fix most of it.
 | R2-c | Planning forms | System request, feasibility analysis and alternative matrix (SPEC.md sections 10.1, 10.2, 10.4) | Release 1 |
 | R2-d | Requirements and test plan | SPEC.md sections 10.3 and 10.5, with their trace links | Release 1 |
 | R2-e | Interface structure diagram | SPEC.md section 10.6 | Release 1 |
-| R2-f | Binder and attachments | SPEC.md section 10.7. Where attachment files are kept, and how the project file carries them, is hard to undo; SPEC.md section 14.3 item 12 must be settled first | R1-a, R1-b |
+| R2-f | Binder and attachments | SPEC.md section 10.7. Where attachment files are kept, and how the project file carries them, is hard to undo; SPEC.md section 14.1 must settle it first | R1-a, R1-b |
 | R2-g | Compiled PDFs | SPEC.md section 10.8 | R1-g, R2-c to R2-f |
 | R2-h | Logical and physical mode | SPEC.md section 11.1, which the three design epics need | Release 1 |
 | R2-i | Physical data flow diagram | SPEC.md section 11.2 | R2-h |
@@ -309,15 +308,15 @@ section 10, Level 2). SPEC.md sections 7, 10 and 11 fix most of it.
 | R2-l | Accessibility audit | An independent audit and a published conformance report | The screens of R2-c to R2-k |
 | R2-m | Course dashboard | Behavior analytics per Canvas course, such as time spent, worked out from the saved command log. It may show R2-a's counts of AI requests and tokens, never prompts or responses. Its class list comes from Canvas's roster service (Names and Role Provisioning Services, NRPS), fetched when the instructor opens it and not kept (SPEC.md section 1, "Grading"). The architect run reads Portikus's roster client in `packages/auth`. No grades. Students are told what it shows | Release 0's saving, R2-a, R1-k |
 
-There is no R2-b. It held Canvas settings per link and LTI Advantage certification, both
-dropped on 18 November 2026 (SPEC.md section 1, "Grading").
+There is no R2-b. Canvas settings per link and LTI Advantage certification are in no
+plan (SPEC.md section 1, "Grading").
 
 The experimental track follows R2-a: assistance levels 3 and 4, where an agent critiques
 a draft or proposes commands through `preview` for the student to accept (SPEC.md section
 7 items 4 and 5; VISION.md section 10, Level 4). Each ships alone, behind its own exit
-criteria. Group projects were deferred with no release on 18 November 2026. Other symbol styles,
+criteria. Group projects are a later goal, in no release yet. Other symbol styles,
 DeMarco and Yourdon and UML class notation, are planned but unscheduled (SPEC.md section
-14.3 item 9). SQL schema export and guided
+14.1 item 9). SQL schema export and guided
 workflows have no SPEC.md section yet, so they cannot be planned.
 
 ## 5. Lanes
@@ -338,5 +337,4 @@ Epic 1 Foundation
 
 ## 6. Questions to settle before an epic starts
 
-None are open. The user settled every question on 18 November 2026, and SPEC.md section
-14.6 records the answers.
+None are open.

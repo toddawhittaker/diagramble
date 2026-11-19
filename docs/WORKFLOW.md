@@ -68,7 +68,7 @@ checkout can read it.
   plan, because the plan goes away.
 - The epic's last task folds the plan's lasting rules into SPEC.md in a
   sentence or two each (a decision in section 1, a settled question in
-  section 14), and deletes the plan.
+  the section it concerns, taken off section 14's open points), and deletes the plan.
 - Parallel task pull requests do not edit `docs/STATUS.md`, because
   they all conflict on it. Each one puts its proposed STATUS line (one
   sentence on what it delivered, and any new open items) in its pull

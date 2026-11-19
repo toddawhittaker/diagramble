@@ -15,7 +15,7 @@ status and history go in `docs/`, cited by file and section, never here.
 | Path | What it holds |
 | --- | --- |
 | `docs/VISION.md` | Research and product vision. Wins on questions of intent. Section 11 is the release roadmap and its exit criteria |
-| `docs/SPEC.md` | The core specification. Wins on implementation detail. Section 1 holds the decisions, 2 Release 0's scope, 3 the model, 5 the rules, 6 the test cases, 12 the code layout and tools, 14 the settled and open points |
+| `docs/SPEC.md` | The core specification. Wins on implementation detail. Section 1 holds the decisions, 2 Release 0's scope, 3 the model, 5 the rules, 6 the test cases, 12 the code layout and tools, 14 the open points and the scope left out |
 | `docs/STATUS.md` | A one- or two-sentence summary of each epic, and the open items |
 | `docs/EPICS.md` | The epic plan: each epic's scope, owned directories, dependencies, and the epics that can run beside it. Its section 1 says who may edit the files that epics share |
 | `docs/WORKFLOW.md` | Local development, branches, epic plans, pull requests, CI, secret scanning |
@@ -26,6 +26,11 @@ status and history go in `docs/`, cited by file and section, never here.
 
 Before implementing any part, read the SPEC.md sections that cover it. Cite sections by
 number in prompts, commits, and reports.
+
+Documents state what is true now, in the present tense, with the reason where it matters.
+They record no dates of decisions and nothing dropped or changed; git holds history. If
+the project starts keeping architecture decision records, one would hold the reasoning
+behind a hard-to-undo choice.
 
 ## Layout and commands
 

@@ -1,12 +1,12 @@
 # Diagramble: Research and Product Vision for a Modern Systems Analysis and Design Platform
 
-17 November 2026 · Todd Whittaker
+Todd Whittaker
 
 Exported from the [working document](https://claude.ai/artifact/V3iHstjFm3RjyJhZnpGRg1) at revision 39.
 
 Decisions made after this was written are recorded in the [core specification](SPEC.md), section 1. Where the two differ, the specification wins.
 
-Revised on 17 November 2026 to fit the course textbook: Dennis, Wixom and Roth, *Systems Analysis and Design*, 8th edition. Section 16 says what the textbook changed. Revised again the same day after two Visible Analyst tutorials were read: section 3 was rewritten from them, and the feature lists in sections 7 and 10 gained what they showed was missing. This file is now ahead of the working document. Revised on 18 November 2026 for the license: the project is source-available under the Business Source License 1.1, not open source, and sections 1, 5, 6, 9, 13 and 14 were changed to match.
+It is written for the course textbook: Dennis, Wixom and Roth, *Systems Analysis and Design*, 8th edition. Section 16 says what the textbook fixes. Section 3 comes from two Visible Analyst tutorials. The project is source-available under the Business Source License 1.1, not open source.
 
 ## 1. Executive summary
 
@@ -251,7 +251,7 @@ The teaching advantage is feedback that arrives while the student is modeling an
 5. Grade the PDFs that students hand in, in Canvas, with Canvas's own tools. A student may also attach their exported project file, which the instructor imports as a new project in their own account to look at it.
 6. Archive the course when it ends. It becomes read-only for everyone, and its students keep their projects.
 
-On 18 November 2026 the user decided that Diagramble does no grading. It keeps no rubrics or comments on submissions, and sends Canvas no score. The dashboard reads the class list from Canvas's roster service each time the instructor opens it, and does not keep a copy, decided on 18 November 2026 (SPEC.md section 1, "Grading"). Students must be told what it shows. An earlier version of this workflow had grading in it; the rows it touches in sections 5, 10 and 11 are marked.
+Diagramble does no grading. It keeps no rubrics or comments on submissions, and sends Canvas no score. The dashboard reads the class list from Canvas's roster service each time the instructor opens it, and does not keep a copy (SPEC.md section 1, "Grading"). Students must be told what it shows.
 
 ### Core engine versus instructional scaffolding
 
@@ -268,7 +268,7 @@ Keeping these apart matters. The core must be correct for any user, including a 
 | Symbol and rule glossary, context help | Scaffolding | Content, not engine |
 | Restricting notations and constructs | Scaffolding built on a core feature | The palette is filtered by the profile |
 | Starter projects and case studies | Scaffolding | Content library |
-| Rubrics, comments, resubmission | Dropped on 18 November 2026 | Canvas does these |
+| Rubrics, comments, resubmission | Not done by Diagramble | Canvas does these |
 | Course dashboard of student behavior | Scaffolding | Worked out from the saved command log. No grades |
 | Learning management system launch, for sign-in only | Integration | Separate boundary from both |
 | AI assistance levels | Scaffolding | Enforced by the server, set per course |
@@ -296,7 +296,7 @@ Entity relationship misconceptions are well documented. In [one study of 200 fin
 
 ### Assessment
 
-Diagramble does not grade. On 18 November 2026 the user dropped rule-scored rubric rows, comments on submissions, reusable comments and resubmission comparison. Students hand in the exported PDF through Canvas, and the instructor grades it there.
+Diagramble does not grade. It has no rule-scored rubric rows, comments on submissions, reusable comments or resubmission comparison. Students hand in the exported PDF through Canvas, and the instructor grades it there.
 
 - **Findings come before hand-in.** The student sees and fixes what the rules catch, so the instructor's time goes to judgment.
 - **Portfolios** are exports: a project document with diagrams, dictionary and check results, as a PDF.
@@ -306,15 +306,15 @@ Diagramble does not grade. On 18 November 2026 the user dropped rule-scored rubr
 | Service | What it does for this product |
 | --- | --- |
 | [LTI 1.3 launch](https://www.imsglobal.org/spec/lti/v1p3/) | Canvas signs the user in and passes their role and course. No separate account. The course decides the rule profile and AI assistance level |
-| [Names and Role Provisioning 2.0](https://www.imsglobal.org/spec/lti-nrps/v2p0) (the roster) | The course dashboard fetches the class list when the instructor opens it, and keeps no copy. Restored on 18 November 2026 |
+| [Names and Role Provisioning 2.0](https://www.imsglobal.org/spec/lti-nrps/v2p0) (the roster) | The course dashboard fetches the class list when the instructor opens it, and keeps no copy |
 
-The launch and the roster are the only Canvas services used. On 18 November 2026 the user dropped [Deep Linking 2.0](https://www.imsglobal.org/spec/lti-dl/v2p0), [Assignment and Grade Services 2.0](https://www.imsglobal.org/spec/lti-ags/v2p0/) (score return) and LTI Advantage certification, because Diagramble does no grading. The roster was dropped the same day and then restored for the course dashboard.
+The launch and the roster are the only Canvas services used. Diagramble does not use [Deep Linking 2.0](https://www.imsglobal.org/spec/lti-dl/v2p0), [Assignment and Grade Services 2.0](https://www.imsglobal.org/spec/lti-ags/v2p0/) (score return) or LTI Advantage certification, because it does no grading.
 
 The newer [Asset Processor placement](https://developerdocs.instructure.com/services/canvas/external-tools/lti/file.document_processor) handles submitted files, so it suits a report on an exported document more than live modeling.
 
 ### Accessibility and keyboard modeling
 
-- **Legal position.** The Department of Justice rule under Title II of the Americans with Disabilities Act requires public universities to meet WCAG 2.1 Level AA. Diagramble targets WCAG 2.2 Level AA, decided on 18 November 2026, because accessibility is essential and not optional. An [interim rule of April 2026](https://campustechnology.com/articles/2026/04/27/doj-extends-deadline-for-ada-title-ii-compliance.aspx) moved the dates to 26 April 2027 for larger entities and 26 April 2028 for smaller ones. Vendor tools are not exempt.
+- **Legal position.** The Department of Justice rule under Title II of the Americans with Disabilities Act requires public universities to meet WCAG 2.1 Level AA. Diagramble targets WCAG 2.2 Level AA because accessibility is essential and not optional. An [interim rule of April 2026](https://campustechnology.com/articles/2026/04/27/doj-extends-deadline-for-ada-title-ii-compliance.aspx) moved the dates to 26 April 2027 for larger entities and 26 April 2028 for smaller ones. Vendor tools are not exempt.
 - **Design position.** WCAG 2.2 adds a rule that [every drag action needs a non-drag alternative](https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/). A drag-only canvas fails it.
 - **Approach.** Provide an outline view where every element and connection is a list item that can be created, edited and connected from the keyboard. The canvas is one view of the model and the outline is another. Research prototypes for blind users take the same route: a structured text alternative, not an audio canvas.
 - **Procurement.** Publish an Accessibility Conformance Report, the completed form of the Voluntary Product Accessibility Template.
@@ -323,7 +323,7 @@ The newer [Asset Processor placement](https://developerdocs.instructure.com/serv
 
 - **Student records.** United States universities share student records with vendors under a "school official" arrangement that needs a written agreement and limits use of the data. The exact regulatory text was not verified in this research.
 - **Security review.** Campuses usually ask for the [Higher Education Community Vendor Assessment Toolkit](https://www.educause.edu/higher-education-community-vendor-assessment-toolkit) questionnaire, and for larger purchases an independent security audit report.
-- **Data retention.** Course archiving, a retention policy for logs, analytics, AI usage records and archived courses, and account deletion are needed before the first live course, decided on 18 November 2026. The deployment's system administrator sets the periods; the defaults are open (SPEC.md section 14.3).
+- **Data retention.** Course archiving, a retention policy for logs, analytics, AI usage records and archived courses, and account deletion are needed before the first live course. The deployment's system administrator sets the periods; the defaults are open (SPEC.md section 14.1).
 - **Running cost.** The tool is free for colleges, but running it is not. Someone must host the server, and AI features cost money per request. Visible Analyst's own student token is $49 for six months. That token is the cost this project removes.
 
 ## 6. Proposed product vision
@@ -581,7 +581,7 @@ AI works on the far side of that line. It reads the model as structured text and
 
 ### Assistance levels
 
-The instructor sets one level for each Canvas course, decided on 18 November 2026. The server enforces it.
+The instructor sets one level for each Canvas course. The server enforces it.
 
 | Level | Name | What the AI may do |
 | --- | --- | --- |
@@ -594,7 +594,7 @@ The instructor sets one level for each Canvas course, decided on 18 November 202
 Three safeguards apply at every level above 0.
 
 - **Attempt first.** Help is offered about work the student has already done, not before.
-- **Disclosure.** The student sees what was used. The instructor sees counts of AI use, in requests and tokens, per student and per course, and never the prompts or responses. On 18 November 2026 the user dropped an instructor view of prompts and responses. Prompt and response text is still logged for safety and debugging, under the retention policy.
+- **Disclosure.** The student sees what was used. The instructor sees counts of AI use, in requests and tokens, per student and per course, and never the prompts or responses. Prompt and response text is logged for safety and debugging, under the retention policy.
 - **No detectors.** Integrity rests on process evidence from the operation log, which is fairer than a probability score.
 
 **Assessment mode** is level 0 plus a locked profile. The built-in rule explanations remain, because they are fixed text and not AI.
@@ -622,7 +622,7 @@ They undermine it when they replace the student's attempt at graded work, and th
 
 Reuse permissive libraries for the canvas, layout, interface widgets and export. Build the semantic model, the rule engine, the dictionary and the accessible outline editor. No open-source DFD or ERD modeling component with real semantics was found.
 
-Licenses and versions were read from license files, the npm registry and release pages on 17 November 2026. The project is under the Business Source License 1.1, decided on 18 November 2026. That rules out any dependency under the GPL or the AGPL alone, because either would require the whole tool to use the same license.
+Licenses and versions were read from license files, the npm registry and release pages on 17 November 2026. The project is under the Business Source License 1.1. That rules out any dependency under the GPL or the AGPL alone, because either would require the whole tool to use the same license.
 
 ### Recommended components
 
@@ -657,7 +657,7 @@ Licenses and versions were read from license files, the npm registry and release
 
 1. **tldraw.** It is not open source. Production use [requires a license key](https://tldraw.dev/sdk-features/license-key), so it cannot ship inside a project that others deploy.
 2. **GoJS, yFiles and JointJS+.** Commercial and not redistributable.
-3. **EPL-2.0 libraries (elkjs, Sprotty, Sirius Web).** The Eclipse Public License asks only that changes to the library's own files be published, so it sits well with the Business Source License. elkjs is used under its EPL-2.0 option, and the core specification, section 14, has the detail. Sprotty and Sirius Web are left out for the reasons in the table above, not for their license.
+3. **EPL-2.0 libraries (elkjs, Sprotty, Sirius Web).** The Eclipse Public License asks only that changes to the library's own files be published, so it sits well with the Business Source License. elkjs is used under its EPL-2.0 option, and the core specification, section 12, has the detail. Sprotty and Sirius Web are left out for the reasons in the table above, not for their license.
 4. **GPL and AGPL code (Modelio, pgModeler, PlantUML's GPL build).** It cannot be included, because it would put the whole tool under the GPL. It can be studied.
 5. **bpmn-js and dmn-js.** The [license](https://bpmn.io/license/) forbids removing or covering the bpmn.io watermark. It matters only if BPMN is added.
 6. **libavoid-js.** LGPL-2.1 connector routing. Usable as a separate, replaceable library, with any changes to it published.
@@ -667,7 +667,7 @@ React Flow asks for its attribution link to stay unless a project pays for its P
 
 ### Choosing the project's license
 
-This section first recommended MIT, on the view that the project had no commercial goal. On 18 November 2026 the project's author decided instead that a for-profit that makes money from the tool should pay for it, and chose the Business Source License 1.1.
+A for-profit that makes money from the tool should pay for it, so the project uses the Business Source License 1.1.
 
 | Option | Gains | Costs |
 | --- | --- | --- |
@@ -702,7 +702,7 @@ Values are High, Medium or Low. Effort is a relative size: S (days to two weeks)
 | 1 | Semantic model and repository with stable identity | High | High | High | L | None |
 | 2 | Command layer with undo and an operation log | Medium | High | Medium | M | 1 |
 | 3 | DFD editor: context diagram, leveled decomposition, control flows, flows that leave the diagram, and bringing later parent flows down to a child | High | High | High | L | 1, 2 |
-| 4 | Gane and Sarson symbols. Deferred on 18 November 2026: DeMarco and Yourdon as a display setting, which may come later as a per-course choice | Medium | Medium | Low | S | 3 |
+| 4 | Gane and Sarson symbols. DeMarco and Yourdon as a display setting is a later goal, as a per-course choice | Medium | Medium | Low | S | 3 |
 | 5 | Data dictionary with composition, aliases, notes, and values with their meanings | High | High | Medium | M | 1 |
 | 6 | ERD editor in crow's-foot notation, with identifiers, modality, and independent, dependent and intersection entities | High | High | Medium | L | 1, 2 |
 | 7 | Links: flow to structure, store to entity, element to attribute | High | High | Medium | M | 3, 5, 6 |
@@ -714,7 +714,7 @@ Values are High, Medium or Low. Effort is a relative size: S (days to two weeks)
 | 13 | Outline view as a keyboard editor | Medium | High | Medium | L | 1, 2 |
 | 14 | Project document as PDF, and image export | Medium | High | Low | M | 3, 5, 6 |
 | 15 | Accounts, projects, autosave and snapshots | Low | High | Low | M | 2 |
-| 16 | Basic LTI 1.3 launch that signs the student in and opens their project. Submission and score return were dropped on 18 November 2026 | Medium | High | Medium | M | 15 |
+| 16 | Basic LTI 1.3 launch that signs the student in and opens their project. No submission or score return | Medium | High | Medium | M | 15 |
 | 17 | Two starter cases and symbol help | High | Medium | Low | S | 3, 6 |
 | 18 | Use case forms in the textbook's format, linked to processes and flows, with the event-response list and DFD fragments worked out from them | High | Medium | Medium | M | 1, 3, 5 |
 | 19 | Create, read, update, delete (CRUD) matrix of processes against entities | High | Medium | Low | S | 7 |
@@ -725,13 +725,9 @@ Items 1, 3 and 9 carry the technical risk. Item 13 is in Level 1 because accessi
 
 | Feature | Teaching value | User value | Technical complexity | Effort | Depends on |
 | --- | --- | --- | --- | --- | --- |
-| Course settings: rule profile and AI level, set per Canvas course. Replaces assignment profiles, dropped on 18 November 2026 | High | High | Medium | M | Rule engine |
+| Course settings: rule profile and AI level, set per Canvas course. | High | High | Medium | M | Rule engine |
 | Guided workflows for context diagram, decomposition and ERD | High | Medium | Medium | M | Profiles |
-| Dropped on 18 November 2026: rubrics with rule-scored rows and judgment rows | High | High | Medium | L | Rule engine, snapshots |
-| Dropped on 18 November 2026: comments on elements, reusable comments, resubmission comparison | High | High | Medium | L | Snapshots |
-| Dropped on 18 November 2026: instructor dashboard of progress and common failures | Medium | High | Medium | M | Roster |
-| Course dashboard of student behavior, such as time spent, from the saved command log, listing the class from the roster service. No grades. Added on 18 November 2026 | Medium | High | Medium | M | Saving, course settings, roster |
-| Dropped on 18 November 2026: Deep Linking and LTI certification. The roster service was restored the same day for the course dashboard | Low | High | Medium | M | Basic LTI |
+| Course dashboard of student behavior, such as time spent, from the saved command log, listing the class from the roster service. No grades. | Medium | High | Medium | M | Saving, course settings, roster |
 | Case library and instructor authoring of cases and starters | High | High | Low | M | Profiles |
 | Physical data model built from the logical ERD: tables, fields, primary keys, and foreign keys shown as a step (Chapter 10) | High | Medium | Medium | M | ERD |
 | SQL schema export in one or two dialects | Medium | Medium | Low | S | ERD |
@@ -745,8 +741,8 @@ Items 1, 3 and 9 carry the technical risk. Item 13 is in Level 1 because accessi
 | Requirements definition with trace links to use cases and processes (Chapter 3) | Medium | Medium | Low | M | Core |
 | Process descriptions: structured English and decision tables | Medium | Medium | Medium | M | DFD |
 | AI assistance levels 1 and 2: explain, question, hint | High | Medium | Medium | M | Course settings, AI gateway |
-| Deferred on 18 November 2026, with no release: group projects with turn-taking and comments | Medium | Medium | Medium | M | Accounts |
-| Deferred on 18 November 2026: Chen notation as an ERD style, which needs model changes | Medium | Low | Low | S | ERD |
+| Group projects, a later goal in no release yet, with turn-taking and comments | Medium | Medium | Medium | M | Accounts |
+| Chen notation as an ERD style, not planned, because it needs model changes | Medium | Low | Low | S | ERD |
 | Accessibility audit and published conformance report | Low | High | Medium | M | Outline view |
 
 ### Level 3: professional CASE platform
@@ -772,13 +768,11 @@ Items 1, 3 and 9 carry the technical risk. Item 13 is in Level 1 because accessi
 | AI critique of a draft against the case (assistance level 3) | High | High | High | L | AI gateway, requirements |
 | Requirements coverage suggestions | Medium | High | High | L | Trace links |
 | Class-wide misconception analysis and adaptive hints | High | Medium | High | L | Rule results over time |
-| Dropped on 18 November 2026: AI-drafted feedback for instructors to accept or reject | Medium | High | Medium | M | Rubrics |
 | Plain-language description of changes between revisions | Medium | Medium | Low | S | Snapshot comparison |
 | Decomposition suggestions | Medium | Medium | Medium | M | DFD |
 | Text to draft model with check-and-repair, for instructors and practice | Low | High | High | L | Rule engine |
 | Documentation written from a checked model | Low | Medium | Low | S | Export |
 | Model transformations, such as ERD to class diagram | Low | Medium | High | L | UML package |
-| Dropped on 18 November 2026: structural similarity detection between submissions | Low | Medium | Medium | M | Snapshots |
 | A textual model language with two-way editing | Low | Medium | High | L | Core |
 
 ### Deliberately left out of every level
@@ -801,7 +795,7 @@ A throwaway-quality prototype of the three things most likely to fail.
 | --- | --- |
 | Balancing through the dictionary gives correct results on three textbook cases, including a flow split into parts on the child diagram | This is the main differentiator and the hardest rule |
 | One element appears on two diagrams, is renamed once, and both update | Proves the model and view separation |
-| A launch from a mock LTI 1.3 platform, including one inside a frame, signs the user in and opens their saved project | Removes the main integration unknown without waiting for a Canvas developer key. The user decided on 18 November 2026 that no score is sent and that the mock replaces a real Canvas here |
+| A launch from a mock LTI 1.3 platform, including one inside a frame, signs the user in and opens their saved project | Removes the main integration unknown without waiting for a Canvas developer key. No score is sent, and the mock stands in for a real Canvas here |
 | A keyboard-only user builds a context diagram in the outline view | Shows accessibility is feasible before the canvas design hardens |
 
 ### Release 1: course-ready first release (Level 1)
@@ -815,9 +809,9 @@ A throwaway-quality prototype of the three things most likely to fail.
 | One instructor runs a full sequence of use cases, context diagram, leveled DFDs, ERD and dictionary in a live course section | The product survives real use |
 | The diagrams in Chapters 4 and 5 of the textbook can be built in the tool, and every finding they produce has been reviewed | The tool and the book must not contradict each other in front of students |
 | A project exports to a PDF that an instructor accepts as a submission document | Students hand work in through Canvas as that PDF |
-| An instructor can archive a course, a retention policy deletes old records, and an account can be deleted | Student data is not kept forever. Added on 18 November 2026 |
-| The launch works against a real Canvas, which needs a developer key from a Canvas administrator at that time | Release 0 tested only a mock platform. Added on 18 November 2026 |
-| An instructor's own AI agent builds a starter case through the Model Context Protocol (MCP) server, with a personal API key | Instructors can make scenarios quickly. Added on 18 November 2026, when the user placed the MCP server in this release |
+| An instructor can archive a course, a retention policy deletes old records, and an account can be deleted | Student data is not kept forever. |
+| The launch works against a real Canvas, which needs a developer key from a Canvas administrator at that time | Release 0 tested only a mock platform. |
+| An instructor's own AI agent builds a starter case through the Model Context Protocol (MCP) server, with a personal API key | Instructors can make scenarios quickly. |
 
 ### Release 2: complete educational environment (Level 2)
 
@@ -829,7 +823,7 @@ A throwaway-quality prototype of the three things most likely to fail.
 | AI levels 0 to 2 are enforced by the server and every exchange is logged | Assessment mode is credible |
 | One instructor runs the design sequence of Chapters 9 and 10 in a live course section: physical DFD, structure chart, program specification and physical data model | The tool covers the whole course, not only analysis |
 | Every deliverable of chapters 1 to 12 can be produced in the tool and exported to PDF, alone or in the textbook's compiled documents | A student keeps one project for the whole term and hands in from it |
-| The instructor's feedback as the tool is used shows it helps teaching | The only measure of teaching value, decided on 18 November 2026. It replaces a classroom comparison and adoption by a second course, both dropped that day |
+| The instructor's feedback as the tool is used shows it helps teaching | The only measure of teaching value. Neither a classroom comparison nor adoption by a second course is a measure |
 
 ### Release 3: professional platform (Level 3)
 
@@ -946,7 +940,7 @@ Five of the eight assumptions hold only with conditions, and three are rejected 
 
 ## 14. Key decisions and unresolved questions
 
-Seven decisions shape the build, and each has a recommendation below. Nine questions could not be settled by desk research and need a prototype, an interview or legal advice. Three of them have since been answered from the course textbook and are ticked below.
+Seven decisions shape the build, and each has a recommendation below. Nine questions could not be settled by desk research and need a prototype, an interview or legal advice. Those answered are ticked below.
 
 ### Decisions
 
@@ -957,14 +951,12 @@ Seven decisions shape the build, and each has a recommendation below. Nine quest
 | Storage shape | **A. One document per project plus an operation log.** Simple, and snapshots are trivial. Queries across projects are harder. **B. Relational tables of elements and links.** Strong queries. More schema coupling | A first. Revisit at Level 3 | How soon cross-project reporting is needed |
 | Flow identity across levels | **A. A child's boundary flow is the same element as the parent's flow.** Consistent by construction, but hides the lesson. **B. Separate elements matched by a rule.** A real check, with some duplication. **C. Both: inherited flows are shared, flows the student draws are separate** | C. Balancing compares by identity first and by dictionary composition second | Confirm against how the adopting textbook draws leveled diagrams |
 | Rule violations: block or flag | **A. Block.** The model is never wrong, and the student never sees why. **B. Flag.** The student makes the mistake and reads the explanation | B by default, with blocking as a per-rule profile setting | Instructor preference in pilots |
-| Project license | **A. MIT.** Simplest, widest reuse. Anyone may sell it. **B. AGPL-3.0.** Hosted changes must be shared, but anyone may still sell it. **C. Business Source License 1.1.** Free for non-profits and individuals, paid for for-profit use, and each version becomes AGPL-3.0-or-later after four years | Decided on 18 November 2026: C. Section 9 has the detail | Settled |
-| Hosting and running cost | **A. Each institution hosts its own copy.** No central cost. Needs local technical staff. **B. One community-hosted instance.** Easiest for instructors. Someone pays for servers and holds student data for many schools. **C. Self-hosting, with AI features billed to the institution's own model account** | C. Cost and responsibility for student data stay with the institution that benefits | Settled on 17 November 2026 for the first deployment: the project's author hosts it. Who hosts for other institutions is still open |
+| Project license | **A. MIT.** Simplest, widest reuse. Anyone may sell it. **B. AGPL-3.0.** Hosted changes must be shared, but anyone may still sell it. **C. Business Source License 1.1.** Free for non-profits and individuals, paid for for-profit use, and each version becomes AGPL-3.0-or-later after four years | C. Section 9 has the detail | Chosen |
+| Hosting and running cost | **A. Each institution hosts its own copy.** No central cost. Needs local technical staff. **B. One community-hosted instance.** Easiest for instructors. Someone pays for servers and holds student data for many schools. **C. Self-hosting, with AI features billed to the institution's own model account** | C. Cost and responsibility for student data stay with the institution that benefits | The project's author hosts the first deployment. Who hosts for other institutions is still open |
 
 ### Unresolved questions
 
 - [ ] How many courses still require Visible Analyst, and what do the others use? Interview five to ten instructors.
-- [x] What does SpeedGrader show for a submission made through an LTI tool? No longer needed: the user decided on 18 November 2026 that Diagramble sends no score.
-- [x] What does LTI certification cost, and is membership required? No longer needed: certification was dropped on 18 November 2026.
 - [ ] Does Visual Paradigm have a balancing check that its user guide does not describe? Two research passes disagreed. Test the product by hand.
 - [x] Which balancing conventions apply to data stores and external entities repeated on lower levels? The course textbook shows the parent's data stores and external entities again on the child diagram, and lets the child add flows of its own. The rules follow that.
 - [x] Should the dictionary show the classic composition notation as a text view? No. The course textbook does not use it. It describes a flow's contents as a plain list of data elements.
@@ -1062,7 +1054,7 @@ The exercises of chapters 1 to 3 and 6 to 12 were read the same day, 179 items i
 | A conversion strategy | Chapter 12, Your Turn 12-2 | A small form shows what each choice means for risk, cost and time |
 | A storage estimate from given record sizes | Chapter 10, minicase 1 | A record size can be typed, and growth can be a yearly percentage |
 
-Left for now: an architecture or network diagram for Chapter 7, the second and third normal forms, and screens drawn inside the tool for Chapter 8. Each is held as an attachment or judged by the instructor until then. Section 14.5 of the specification has the full list.
+Left for now: an architecture or network diagram for Chapter 7, the second and third normal forms, and screens drawn inside the tool for Chapter 8. Each is held as an attachment or judged by the instructor until then. Section 14.3 of the specification has the full list.
 
 ### Conventions taken from the textbook
 
