@@ -151,8 +151,11 @@ Depends on Epic 1. Runs beside Epics 2, 4 and 5. Size M.
 - PostgreSQL through Kysely, with the migration runner, for accounts, sign-in methods,
   sessions and launch nonces. The project tables are Epic 6's.
 - An account kept apart from its sign-in methods (SPEC.md section 1, "Sign-in"); an LTI
-  sign-in method keyed by the token's issuer and subject; a session cookie that points to
-  a stored session. The launch's course and whether the person is an instructor are kept
+  sign-in method keyed by the token's issuer and subject; a host-only session cookie (no
+  `Domain` attribute) that points to a stored session.
+- Every request that changes anything is refused unless its `Origin` header matches the
+  app host; `Origin: null` and a missing `Origin` are refused too (SPEC.md section 1,
+  "Host names"). Tests cover each case. The launch's course and whether the person is an instructor are kept
   only if Epic 6 needs them to find the student's project for that course.
 - No score return or Deep Linking (SPEC.md section 1, "Grading"). The roster service
   comes with the course dashboard, R2-m.
@@ -281,11 +284,11 @@ section 10, Level 1). SPEC.md sections 8 and 9 fix its new parts.
 | R1-d | Use case forms | SPEC.md section 8: kinds, rules, worked-out views and the form screen | Release 0 |
 | R1-e | Entity relationship diagram and CRUD matrix | SPEC.md section 9, including the checks against the process model | Release 0 |
 | R1-f | Canvas launch for live sections | Several platform registrations and key rotation (VISION.md section 10, item 16). No score is sent | Release 0 |
-| R1-g | Project document as PDF | The Release 1 exit criterion on a PDF. Needs SPEC.md section 14.1 item 6 settled, and SPEC.md to say which part of section 10.8 comes in Release 1 | R1-c, R1-d, R1-e |
+| R1-g | Project document as PDF | The Release 1 exit criterion on a PDF, made with the browser's own print to PDF (SPEC.md section 10.8): a print stylesheet that lays each document out as pages and scales or splits large diagrams, and a short hint to choose "Save as PDF" and turn off the browser's headers and footers. The compiled documents wait for R2-g | R1-c, R1-d, R1-e |
 | R1-h | Keyboard and screen reader | The outline as a full keyboard editor for every Release 1 kind, and a screen-reader pass (VISION.md section 10, item 13) | R1-c, R1-d, R1-e |
 | R1-i | Instructor MCP server | SPEC.md section 7.1: personal API keys kept as hashes, revocable and logged, and Model Context Protocol (MCP) tools made from the command and query registry. Keys are for instructors only. While the agent edits, the instructor's open tabs on that project are read-only and say so. The architect run reads how Portikus's `packages/auth` stores API keys as hashes and ports what fits. Decided for Release 1 on 18 November 2026 | R1-a, R1-b |
-| R1-k | Retention, archiving and account deletion | SPEC.md section 1, "Data retention": an instructor archives a course, which makes it read-only while students keep their projects; a retention policy deletes old logs, analytics, AI usage records and archived courses after the periods the administrator sets in R1-l; an account can be deleted. Needed before the live course. Needs the default periods of SPEC.md section 14.3 item 8. The security reviewer runs | R1-a, R1-f, R1-l |
-| R1-l | Administrator interface and operations | SPEC.md section 1, "Administration": one system administrator per deployment, a way to make the first one, retention period settings, an operations document for backup, restore and monitoring, and their state shown in the interface (server status, last backup). Managing later ways of signing in, such as email magic links, joins it when they are built; the architect run then reads Portikus's `packages/auth` for its OpenID Connect sign-in. The security reviewer runs | R1-f |
+| R1-k | Retention, archiving and account deletion | SPEC.md section 1, "Data retention": an instructor archives a course, which makes it read-only while students keep their projects; a retention policy deletes old logs, analytics, AI usage records and archived courses after the periods the administrator sets in R1-l; an account can be deleted. Needed before the live course. Needs the default periods of SPEC.md section 14.1 item 8. The security reviewer runs | R1-a, R1-f, R1-l |
+| R1-l | Administrator interface and operations | SPEC.md section 1, "Administration": one system administrator per deployment; the first one made by the first sign-in with the break-glass password set at install; a second factor for administrators, either a passkey or an authenticator app's time-based one-time codes, and never text messages; retention period settings, an operations document for backup, restore and monitoring, and their state shown in the interface (server status, last backup). Managing later ways of signing in, such as email magic links, joins it when they are built; the architect run then reads Portikus's `packages/auth` for its OpenID Connect sign-in. The architect run first reads Portikus's `packages/auth` for its local administrator, passkey and breached-password code. The security reviewer runs | R1-f |
 | R1-j | Checked against the book | The exit criteria on chapters 4 and 5, on Visible Analyst's checks, and on a student finishing the starter case alone. It needs `sources/`, so it runs from the main checkout | All of the above |
 
 ## 4. Release 2 candidates
@@ -299,7 +302,7 @@ section 10, Level 2). SPEC.md sections 7, 10 and 11 fix most of it.
 | R2-c | Planning forms | System request, feasibility analysis and alternative matrix (SPEC.md sections 10.1, 10.2, 10.4) | Release 1 |
 | R2-d | Requirements and test plan | SPEC.md sections 10.3 and 10.5, with their trace links | Release 1 |
 | R2-e | Interface structure diagram | SPEC.md section 10.6 | Release 1 |
-| R2-f | Binder and attachments | SPEC.md section 10.7. Where attachment files are kept, and how the project file carries them, is hard to undo; SPEC.md section 14.1 must settle it first | R1-a, R1-b |
+| R2-f | Binder and attachments | SPEC.md section 10.7: attached files kept outside the project document by content hash, the files host of SPEC.md section 1 ("Host names"), images encoded again on the server, PDFs drawn with pdf.js, web pages and zipped prototypes only in a sandboxed frame from the files host, and everything else as a download. Import is extended for the zip export file and its limits (SPEC.md section 3.9, "Import fails safe"), with tests for each limit. The security reviewer runs | R1-a, R1-b |
 | R2-g | Compiled PDFs | SPEC.md section 10.8 | R1-g, R2-c to R2-f |
 | R2-h | Logical and physical mode | SPEC.md section 11.1, which the three design epics need | Release 1 |
 | R2-i | Physical data flow diagram | SPEC.md section 11.2 | R2-h |

@@ -54,7 +54,8 @@ this document wins. Section 14 lists the points still open.
 | AI | Agent integration must be possible from the start | See section 7. No AI feature is built in Release 0 |
 | Accessibility | Essential. Students with disabilities must be able to do all their work. The target is the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA | The keyboard outline of section 2 item 5 is the first step. Every screen is held to the target |
 | Data retention | A requirement before Release 1's live course. An instructor can archive an old course, which makes it read-only for everyone while its students keep their projects. A retention policy decides how long logs, analytics, AI usage records and archived courses are kept before they are deleted. An account can be deleted | The system administrator sets the periods ("Administration" below). The default periods are open (section 14.1) |
-| Administration | An administrator interface. Each deployment has one system administrator, above instructors. The administrator sets the data retention periods, and later manages the ways of signing in, such as email magic links | Backups, restore, monitoring and health checks are described in an operations document. The administrator interface shows their state, such as the server's status and when the last backup ran. How the first administrator is created is open (section 14.3) |
+| Administration | An administrator interface. Each deployment has one system administrator, above instructors. The administrator sets the data retention periods, and later manages the ways of signing in, such as email magic links | The first administrator is created by the first sign-in with a break-glass password: a password kept for emergencies, set when the deployment is installed. Administrators must use a second factor, either a passkey or an authenticator app with time-based one-time codes. Text messages (SMS) are never offered, because they are easy to intercept. Backups, restore, monitoring and health checks are described in an operations document. The administrator interface shows their state, such as the server's status and when the last backup ran |
+| Host names | A deployment uses two host names, for example `app.diagramble.example.edu` for the app and `files.diagramble.example.edu` for users' files. Attachments are served only from the files host (section 10.7). The app's session cookie is host-only, with no `Domain` attribute, so the files host never receives it | The two hosts are the same site, so SameSite cookie rules do not protect the app from the files host. From Release 0, every request that changes anything must carry an `Origin` header that matches the app host. Anything else, including `Origin: null` or no `Origin` at all, is refused |
 | Symbol styles | Release 1 draws only the textbook's style: Gane and Sarson for data flow diagrams and the textbook's entity relationship notation | Two styles are planned for later: DeMarco and Yourdon for data flow diagrams, and the Unified Modeling Language (UML) class notation for data models. The instructor would choose one per Canvas course in the course settings of section 7 item 4 (section 14.1) |
 
 ## 2. Scope of Release 0
@@ -302,9 +303,11 @@ own copy, work on another computer or another deployment, or give the file to so
 else. It is not the way to hand work in. Students hand in the PDF of section 10.8.
 
 - The file is the storage form of section 3.6, as UTF-8 JSON, with the ending
-  `.diagramble.json`. It holds the whole project: every element, view and setting, the
-  log, and the binder's attached files. It holds nothing about the student, such as a
-  name or account.
+  `.diagramble.json`. It holds the whole project: every element, view and setting, and
+  the log. It holds nothing about the student, such as a name or account.
+- Once the binder has attachments (Release 2), the export file is a zip archive with the
+  project's JSON inside and each attached file beside it, named by its content hash. A
+  file that is the JSON alone still imports.
 - The format is documented but need not stay the same forever. A file exported by a
   major release imports into every later release for as long as that major release is
   supported. Files from Release 0 and other pre-releases need not import. There is no
@@ -342,7 +345,11 @@ else. It is not the way to hand work in. Students hand in the PDF of section 10.
     is marked as imported.
 11. Text from an imported file that reaches an AI model, whether student AI or an
     instructor's agent, is data, never instructions. It must not widen the tools offered.
-12. Attachments, when they exist, are never served inline from the app's domain.
+12. A zip file has limits on the number of entries, the size of each entry and of the
+    whole, and the compression ratio, all checked before anything is unpacked. An entry
+    whose path is absolute, contains `..`, or is a link is refused. Every attached file
+    is then checked as section 10.7 describes.
+13. Attachments are never served from the app host (section 10.7).
 
 ## 4. Commands and queries
 
@@ -1268,6 +1275,23 @@ thing.
 Nothing in a binder section is checked. A new section can start from the textbook's
 layout for that deliverable.
 
+**Attachments are kept and shown safely.** A file a student attaches may be hostile, so:
+
+1. Attached files are stored outside the project document and referenced by the hash
+   of their content.
+2. Every attachment is served only from the files host of section 1, "Host names",
+   never from the app host. A script in a file there cannot read the app's pages or
+   receive its session cookie.
+3. An image is decoded and encoded again on the server into a fresh PNG or JPEG before
+   it is shown. An SVG file is refused or turned into a bitmap, because SVG can carry
+   script.
+4. A PDF is drawn inside the app with pdf.js, with its script evaluation turned off.
+   pdf.js is kept up to date.
+5. A web page or a zipped interface prototype opens only in a sandboxed frame from the
+   files host, served with `Content-Security-Policy: sandbox` (without
+   `allow-same-origin`) and `X-Content-Type-Options: nosniff`.
+6. Every other type is offered only as a download.
+
 The migration plan has one small form inside it, for the conversion strategy. The
 student makes the three choices the textbook describes: the conversion style, the
 conversion locations and the conversion modules (Figure 12-3). The tool then shows what
@@ -1308,6 +1332,12 @@ end of each phase.
 | System specification | Recommended acquisition strategy, alternative matrix, architecture design, hardware and software specification, interface design, physical process model, program design specifications, physical data model, data storage design, CRUD matrix, repository entries | Figure 6-2 |
 | Program design document | Every structure chart, then the program specifications in module order | Page 308 |
 | Implementation documents | Test plan, documentation, migration plan | The textbook gives no outline |
+
+In Release 1, a PDF comes from the browser's own print to PDF. A print stylesheet lays
+each document out as pages, and scales a large diagram to fit a page or splits it across
+pages. A short hint tells the student to choose "Save as PDF" and to turn off the
+browser's headers and footers. The compiled documents below need a better way, which is
+still open (section 14.1 item 6).
 
 The table of contents is generated. The process model and data model are the diagrams
 with their descriptions, and the repository entries are the data dictionary. A part that
