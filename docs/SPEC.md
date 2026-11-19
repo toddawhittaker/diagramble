@@ -42,6 +42,11 @@ document wins. Section 14 records the smaller points settled the same day.
 | Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again, decided on 18 November 2026 | See section 3.9. Not built in Release 0 |
 | Instructors' AI agents | A Model Context Protocol (MCP) server lets an instructor's own AI agent build scenarios and starter cases, using a personal API key, decided on 18 November 2026 | See section 7.1. Not built in Release 0 |
 | Stack | TypeScript everywhere | One shared package holds the model and rules and runs in both browser and server |
+| Server framework | Fastify (MIT), with Zod for request checking, decided on 18 November 2026 | See section 12 |
+| Canvas launch | Our own thin layer for the Learning Tools Interoperability (LTI) 1.3 launch, built on `jose` (MIT), not on ltijs, decided on 18 November 2026. The launch is critical, so it sits inside our own tests and security review. ltijs has one maintainer and brings its own Express app and database layer | See section 12 |
+| Database access | Kysely (MIT) behind a small project-store interface of our own (load, save, append to the log), decided on 18 November 2026 | The same code can run on PostgreSQL on the server and on SQLite in a possible desktop app later (section 14.3). See section 12 |
+| AI models and agents | The Vercel AI SDK, package `ai` (Apache-2.0), for student-facing AI including agents (its tool-loop agent), decided on 18 November 2026. Rule 1: use provider packages such as `@ai-sdk/anthropic` with the institution's own key, never bare model-name strings, which route through Vercel's hosted gateway. Rule 2: our server still builds the tool list for each request from the assistance level (section 7 item 4), and an agent changes the model only by proposing through `preview` (section 7 item 5). Rule 3: we log every step and remove student identity ourselves (section 7 item 7) | See sections 7 and 12. No AI feature is built in Release 0 |
+| Deployment | One Docker image for the app, and a Docker Compose file that adds PostgreSQL, decided on 18 November 2026 | See section 12 |
 | Flow identity | Separate flow elements, each carrying a shared dictionary definition | See section 3.3 |
 | AI | Agent integration must be possible from the start | See section 7. No AI feature is built in Release 0 |
 
@@ -626,7 +631,8 @@ product vision.
    unchanging model value (section 3.1).
 7. **The gateway is neutral and server-side.** It holds the institution's own key, works
    with more than one model provider, removes student identity, and logs every request
-   and response against the project.
+   and response against the project. It is built on the AI SDK under the rules in
+   section 1.
 
 ### 7.1 Building scenarios with an instructor's own AI agent
 
@@ -1463,6 +1469,13 @@ for each month.
 | Argument schemas | Zod | MIT |
 | Tests | Vitest | MIT |
 | Database, when the server needs one | PostgreSQL | PostgreSQL License |
+| Server framework | Fastify | MIT |
+| Canvas launch | Our own layer on `jose` | MIT |
+| Database access | Kysely, behind our own project-store interface | MIT |
+| AI models and agents | Vercel AI SDK (`ai`) plus provider packages | Apache-2.0 |
+| Deployment | Docker image, and Docker Compose with PostgreSQL | Not applicable |
+
+The code in `apps/server` reaches the database only through the project-store interface.
 
 The `model` and `rules` packages must have no dependency on React, the browser or the
 server.
@@ -1655,6 +1668,9 @@ project's author confirmed all eight on 17 November 2026. None affects Release 0
 3. **The additions of section 14.4.** The author asked for the documents to be made more
    complete. The individual calls in section 14.4 are the specification's, and the
    author has not confirmed them one by one.
+4. **A desktop app.** An Electron app may come later. It could run the same server and
+   project store in-process with SQLite in place of PostgreSQL. The Canvas launch and
+   the institution's AI gateway would stay server-only. Nothing is built for it now.
 
 ### 14.4 Taken from Visible Analyst, and left out
 
