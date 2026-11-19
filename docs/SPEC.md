@@ -1477,10 +1477,16 @@ for each month.
 | Deployment | Docker image, and Docker Compose with PostgreSQL | Not applicable |
 | Linking the packages and apps | npm workspaces | Part of npm |
 | Web app build and routing | Vite and React Router | MIT |
-| Browser tests | Playwright | Apache-2.0 |
+| Browser tests | Playwright, with its default Chromium headless shell. Other engines were measured on 18 November 2026: Firefox and WebKit were no lighter, and Lightpanda and Obscura failed keyboard focus, SVG sizes or rendering | Apache-2.0 |
 | Database migrations | Kysely's migration runner | MIT |
 
 The code in `apps/server` reaches the database only through the project-store interface.
+
+Browser tests cost the most processor time and memory, so they are kept few. A check on
+one component runs in Vitest's browser mode, and a check on the model or the rules runs
+as a plain unit test. A full Playwright test is kept for a path a student follows through
+the app. Playwright runs no more workers than the machine has processor cores, and the
+suite is split across CI jobs once it grows.
 
 The `model` and `rules` packages must have no dependency on React, the browser or the
 server.

@@ -17,6 +17,7 @@ status and history go in `docs/`, cited by file and section, never here.
 | `docs/VISION.md` | Research and product vision. Wins on questions of intent. Section 11 is the release roadmap and its exit criteria |
 | `docs/SPEC.md` | The core specification. Wins on implementation detail. Section 1 holds the decisions, 2 Release 0's scope, 3 the model, 5 the rules, 6 the test cases, 12 the code layout and tools, 14 the settled and open points |
 | `docs/STATUS.md` | A one- or two-sentence summary of each epic, and the open items |
+| `docs/EPICS.md` | The epic plan: each epic's scope, owned directories, dependencies, and the epics that can run beside it. Its section 1 says who may edit the files that epics share |
 | `docs/WORKFLOW.md` | Local development, branches, epic plans, pull requests, CI, secret scanning |
 | `docs/mockups/` | The screen briefs (`BRIEFS.md`) and the Drafting Paper style (`STYLES.md`) |
 | `docs/images/` | Figures for the documents, and the logo in `brand/` |
@@ -74,6 +75,10 @@ Orchestration rules:
   and tell it to stop and report any choice the prompt leaves open.
 - Run independent agents in parallel. Never let two agents edit the same
   files; split by package or directory and merge in the main session.
+- Several epics may run at once. An epic edits only the directories
+  `docs/EPICS.md` gives it, and touches the shared files (root
+  `package.json`, the lockfile, CI, the Docker files, `docs/STATUS.md`,
+  `docs/SPEC.md`, this file) only as that file's section 1 allows.
 - A good prompt names the SPEC.md sections, the files in scope, the base
   commit, what done looks like, and what to leave alone.
 - Agent worktrees start at `main`. Tell a worktree agent the exact commit
