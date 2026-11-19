@@ -153,10 +153,12 @@ Depends on Epic 1. Runs beside Epics 2, 4 and 5. Size M.
 - An account kept apart from its sign-in methods (SPEC.md section 1, "Sign-in"); an LTI
   sign-in method keyed by the token's issuer and subject; a host-only session cookie (no
   `Domain` attribute) that points to a stored session.
-- Every request that changes anything is refused unless its `Origin` header matches the
-  app host; `Origin: null` and a missing `Origin` are refused too (SPEC.md section 1,
-  "Host names"). Tests cover each case. The launch's course and whether the person is an instructor are kept
-  only if Epic 6 needs them to find the student's project for that course.
+- Every request signed in by the session cookie that changes anything is refused
+  unless its `Origin` header matches the app host; `Origin: null` and a missing
+  `Origin` are refused too. The LTI launch and API-key requests prove themselves
+  another way (SPEC.md section 1, "Host names"). Tests cover each case.
+- The launch's course and whether the person is an instructor are kept only if Epic 6
+  needs them to find the student's project for that course.
 - No score return or Deep Linking (SPEC.md section 1, "Grading"). The roster service
   comes with the course dashboard, R2-m.
 - A mock LTI 1.3 platform in `packages/mock-lti` for development, CI and the Release 0

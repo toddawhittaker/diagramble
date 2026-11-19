@@ -165,7 +165,7 @@ The detail below comes from four documents. Two were read first: the [Operation 
 | Reports | A detailed listing of the repository with a choice of scope, types and order (pages 265 to 267). Cross-reference and custom reports are in the 2002 manual | Modernize | One generated project document, plus a dictionary export to a spreadsheet |
 | Project tools | Backup, restore, copy, delete, rename or move, import and export (page 26) | Redesign | Automatic version history and named checkpoints replace all of these |
 | Multi-user editing | Locking and access rights on a local network version | Defer | See the collaboration assessment in section 13 |
-| Assignments | Instructors create courses and assignments, and students submit to a vendor cloud server. The online help lists topics for each step | Modernize | Replace with a Canvas launch that signs the student in. Students hand in the exported PDF through Canvas, and the instructor grades there (decided on 18 November 2026) |
+| Assignments | Instructors create courses and assignments, and students submit to a vendor cloud server. The online help lists topics for each step | Modernize | Replace with a Canvas launch that signs the student in. Students hand in the exported PDF through Canvas, and the instructor grades there |
 
 ### What the tutorials have to teach around
 
