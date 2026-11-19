@@ -38,7 +38,7 @@ this document wins. Section 14 lists the points still open.
 | Data model | The entity relationship diagram, its dictionary entries and the CRUD matrix, checked against the process model, in the first release | See section 9. Not built in Release 0 |
 | Design diagrams | The physical DFD, structure chart, program specification and physical data model of chapters 9 and 10, in the second release | See section 11. Not built in Release 0 |
 | Other chapters | Checked forms for chapters 1, 3, 6 and 11. The interface structure diagram for chapter 8. A project binder for everything else. All of it exports to PDF, in the second release | See section 10. Not built in Release 0 |
-| Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again | See section 3.9. Release 0 has a database and saves each accepted command (section 2). The project list, copying, renaming, deleting, export and import come in Release 1 |
+| Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again | See section 3.9. Release 0 has a database and saves each accepted command (section 2). The project list, named checkpoints, copying, renaming, deleting, export, import and diagram images come in Release 1. The data dictionary's CSV export comes in Release 2 |
 | Instructors' AI agents | A Model Context Protocol (MCP) server lets an instructor's own AI agent build scenarios and starter cases, using a personal API key | See section 7.1. Built in Release 1 |
 | Grading | None. Diagramble sends Canvas no score and keeps no rubrics or comments on submissions. The Canvas launch only signs a person in and opens their work. Assignment and Grade Services, Deep Linking and LTI Advantage certification are in no plan. The course dashboard reads the class list from Canvas's roster service (LTI Names and Role Provisioning Services, NRPS) | Students hand in the exported PDF through Canvas (section 3.9), and may attach their project file too. The instructor grades in Canvas. A course dashboard of student behavior, without grades, is a Release 2 candidate. It fetches the class list from the roster service each time the instructor opens it, and does not copy or keep it |
 | Course settings | One small settings record per Canvas course. The launch says which course and whether the person is an instructor. An instructor sets one AI assistance level (0 to 2) and one rule profile for the course, and every student launched from it gets them. Nothing about assignments is stored | See section 7 item 4. Not built in Release 0, except that an account may record the course it launched from |
@@ -46,17 +46,17 @@ this document wins. Section 14 lists the points still open.
 | Stack | TypeScript everywhere | One shared package holds the model and rules and runs in both browser and server |
 | Server framework | Fastify (MIT), with Zod for request checking | See section 12 |
 | Canvas launch | Our own thin layer for the Learning Tools Interoperability (LTI) 1.3 launch, built on `jose` (MIT), not on ltijs. The launch is critical, so it sits inside our own tests and security review. ltijs has one maintainer and brings its own Express app and database layer | See section 12 |
-| Database access | Kysely (MIT) behind a small project-store interface of our own (load, save, append to the log) | The same code can run on PostgreSQL on the server and on SQLite in a possible desktop app later (section 14.1). See section 12 |
+| Database access | Kysely (MIT) behind a small project-store interface of our own (load, save, append to the log) | A project is stored as one JSON document, and its command log as rows of a separate table (section 3.6). The same code can run on PostgreSQL on the server and on SQLite in a possible desktop app later (section 14.1). See section 12 |
 | AI models and agents | The Vercel AI SDK, package `ai` (Apache-2.0), for student-facing AI including agents (its tool-loop agent). Rule 1: use provider packages such as `@ai-sdk/anthropic` with the institution's own key, never bare model-name strings, which route through Vercel's hosted gateway. Rule 2: our server still builds the tool list for each request from the assistance level (section 7 item 4), and no AI model offered to a student can change the model (section 7 item 5). Rule 3: we log every step and remove student identity ourselves (section 7 item 7). The institution supplies and protects the provider key, and chooses a provider whose terms fit its data rules; Diagramble does not vet providers | See sections 7 and 12. No AI feature is built in Release 0 |
 | Deployment | One Docker image for the app, and a Docker Compose file that adds PostgreSQL | See section 12 |
-| Sign-in | The Canvas launch from Release 0. In Release 2, three more ways: OpenID Connect (OIDC), for school Google or Microsoft accounts; LDAP directories; and email magic links limited to an allow list of addresses or to allowed domains. The administrator sets up each one in the administrator interface. An account is kept separate from the ways of signing in to it, so that a way can be added without changing accounts | A session is a cookie that points to a record stored in the database. Administrators always need a second factor ("Administration"). For everyone else, the administrator decides for each way of signing in whether it needs a second factor, a passkey or an authenticator app. By default LDAP and magic links need one, because a password or an email account alone is weak, and OIDC does not, because the school's own provider enforces its own. The Canvas launch needs none from Diagramble, because Canvas sign-in usually requires one already |
+| Sign-in | The Canvas launch from Release 0. In Release 2, three more ways: OpenID Connect (OIDC), for school Google or Microsoft accounts; LDAP directories; and email magic links limited to an allow list of addresses or to allowed domains. The administrator sets up each one in the administrator interface. An account is kept separate from the ways of signing in to it, so that a way can be added without changing accounts. Each account stores one login, which names its export files (section 3.9) | A session is a cookie that points to a record stored in the database. Administrators always need a second factor ("Administration"). For everyone else, the administrator decides for each way of signing in whether it needs a second factor, a passkey or an authenticator app. By default LDAP and magic links need one, because a password or an email account alone is weak, and OIDC does not, because the school's own provider enforces its own. The Canvas launch needs none from Diagramble, because Canvas sign-in usually requires one already |
 | Rule findings | Every rule of section 5 flags a problem in the problems panel and, by default, blocks nothing. A course's rule profile can turn a rule off, change its severity, or make it block a change | See section 5.1. The invariants of section 3.4 are always enforced, whatever the profile says |
 | Flow identity | Separate flow elements, each carrying a shared dictionary definition | See section 3.3 |
 | AI | Agent integration must be possible from the start | See section 7. No AI feature is built in Release 0 |
 | Accessibility | Essential. Students with disabilities must be able to do all their work. The target is the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA | The keyboard outline of section 2 item 5 is the first step. Every screen is held to the target |
-| Data retention | A requirement before Release 1's live course. An instructor can archive an old course, which makes it read-only for everyone while its students keep their projects. A retention policy decides how long logs, analytics, AI usage records and archived courses are kept before they are deleted. An account can be deleted | The system administrator sets the periods ("Administration" below). The default periods are open (section 14.1) |
+| Data retention | A requirement before Release 1's live course. An instructor can archive an old course, which makes it read-only for everyone while its students keep their projects. A retention policy decides how long logs, analytics, AI usage records, checkpoints and archived courses are kept before they are deleted. An account can be deleted | The system administrator sets the periods ("Administration" below). The default periods are open (section 14.1) |
 | Student records | Each institution that hosts Diagramble is responsible for its own compliance with the Family Educational Rights and Privacy Act (FERPA), the United States student privacy law, and for any agreements it needs | Diagramble supplies what a host needs to comply: the retention settings and account deletion of "Data retention", the rules on the AI provider of section 7 item 7, and a data inventory in the operations document ("Administration") that says what is stored, where, and for how long |
-| Administration | An administrator interface. Each deployment has one system administrator, above instructors. The administrator sets the data retention periods, and in Release 2 sets up the other ways of signing in ("Sign-in") | The first administrator is created by the first sign-in with a break-glass password: a password kept for emergencies, set when the deployment is installed. Administrators, and only administrators, must use a second factor, either a passkey or an authenticator app with time-based one-time codes. Text messages (SMS) are never offered, because they are easy to intercept. Backups, restore, monitoring, health checks and the data inventory of "Student records" are described in an operations document. The administrator interface shows their state, such as the server's status and when the last backup ran |
+| Administration | An administrator interface, built in Release 1. Each deployment has one system administrator, above instructors. The administrator sets the data retention periods, and in Release 2 sets up the other ways of signing in ("Sign-in") | The first administrator is created by the first sign-in with a break-glass password: a password kept for emergencies, set when the deployment is installed. Administrators, and only administrators, must use a second factor, either a passkey or an authenticator app with time-based one-time codes. Text messages (SMS) are never offered, because they are easy to intercept. Backups, restore, monitoring, health checks and the data inventory of "Student records" are described in an operations document. The administrator interface shows their state, such as the server's status and when the last backup ran |
 | Host names | A deployment uses two host names, for example `app.diagramble.example.edu` for the app and `files.diagramble.example.edu` for users' files. Attachments are served only from the files host (section 10.7). The app's session cookie is host-only, with no `Domain` attribute, so the files host never receives it | The two hosts are the same site, so SameSite cookie rules do not protect the app from the files host. From Release 0, every request that is signed in by the session cookie and changes anything must carry an `Origin` header that matches the app host. Anything else, including `Origin: null` or no `Origin` at all, is refused. Requests that prove themselves another way are not covered: the LTI launch carries a signed token from the platform, and the MCP server's requests carry an API key |
 | Symbol styles | Release 1 draws only the textbook's style: Gane and Sarson for data flow diagrams and the textbook's entity relationship notation | Two styles are planned for later: DeMarco and Yourdon for data flow diagrams, and the Unified Modeling Language (UML) class notation for data models. The instructor would choose one per Canvas course in the course settings of section 7 item 4 (section 14.1) |
 
@@ -122,11 +122,10 @@ Every element has these fields.
 - The browser makes an identifier of 10 characters drawn from lowercase letters and
   digits, using `crypto.getRandomValues`, never `Math.random`. Tests and agents may
   choose readable identifiers instead.
-- An identifier is unique only within one project. The database keys an item by its
-  project and its identifier together, and nothing may assume that identifiers are
-  unique across projects. A copy of a starter case may keep the case's identifiers.
-- The server refuses a creating command whose identifier is already used in the
-  project. The browser then makes a new identifier and sends the command again.
+- An identifier is unique only within one project's document (section 3.6), and
+  nothing may assume that identifiers are unique across projects. A copy of a starter case may keep the case's identifiers.
+- The server refuses a creating command whose identifier the project's document
+  already holds. The browser then makes a new identifier and sends the command again.
 - An identifier is an opaque string. Nothing parses it.
 
 Why: the browser and the server both apply each command, and two copies of a project can
@@ -220,9 +219,19 @@ the model as "unplaced". Deleting the element is a separate command.
 ### 3.6 Storage form
 
 A project is one JSON document with five parts: `schemaVersion`, `settings`
-(section 3.7), `elements`, `views` and `log`. Elements are stored in a map keyed by `id`. The log is the ordered list of
-commands applied, each with its resulting changes in JSON Patch form (RFC 6902).
-Section 7 depends on this form being stable and documented.
+(section 3.7), `elements`, `views` and `log`. Elements are stored in a map keyed by
+`id`. The log is the ordered list of commands applied, each with its resulting changes
+in JSON Patch form (RFC 6902). Section 7 depends on this form being stable and
+documented.
+
+On the server the log is kept apart from the rest:
+
+- The database holds each project as one JSON document: this storage form without its
+  `log`. Loading a project is one read, and saving it is one write.
+- Every accepted command is also a row of a separate command-log table, keyed by project
+  and kept in order. The course dashboard's analytics read this table.
+- An exported file (section 3.9) holds the whole storage form, with the `log` written in
+  from the command-log table.
 
 ### 3.7 Project settings
 
@@ -234,6 +243,11 @@ set.
 | `topDiagramId` | A diagram. The context diagram by default | The highest diagram that the project is expected to contain. Many of the textbook's exercises ask for a level 0 diagram alone (Chapter 4, exercises B, D, G, I, K, M, O, Q and S), and some start lower still: minicase 3 gives one process and asks for its level 1 diagram. Diagrams above the top diagram are "above the project". They stay in the model, because the hierarchy needs them (section 3.4) |
 | `showFindings` | `always` or `onRequest`. `always` by default | With `onRequest`, the findings are worked out as usual but shown only when the student asks. It suits an exercise that asks the student to find the errors in a given diagram (Chapter 4, minicase 2). Visible Analyst works this way all the time |
 
+Later sections add values that belong to the whole project rather than to one element.
+They are kept in `settings` beside these two: `overheadRate` and `months` for the
+storage estimate (section 11.6), and the requirements definition's `noneExpected` mark
+for each nonfunctional type (section 10.3).
+
 What "above the project" changes:
 
 - No rule reports a finding on a diagram above the top diagram, or on an element that
@@ -241,7 +255,7 @@ What "above the project" changes:
 - The top diagram is balanced against its parent process only when that process has at
   least one flow. An empty parent means the level above was not asked for. A parent with
   flows is a given fragment, and the student's diagram must balance with it.
-- Export leaves out the diagrams above the top diagram unless the student includes them.
+- PDF export leaves out the diagrams above the top diagram unless the student includes them.
 
 ### 3.8 Projects and starter cases
 
@@ -299,6 +313,14 @@ last changed. From it the student can open a project, start a new one (empty, or
 starter case as in section 3.8), copy one, rename one, or delete one. Deleting asks the
 student to confirm.
 
+**A student can save named checkpoints.** At any time a student can save a checkpoint of
+a project under a name of their choice. It keeps the project as it stood then. The
+project list shows each project's checkpoints, and opening one makes a new project that
+is a copy of it. A checkpoint never overwrites the current project. Checkpoints fall
+under the retention policy (section 1, "Data retention"). Saving and opening a checkpoint
+are actions of the project list on the server, like copying, not commands of section 4,
+because they do not change the model.
+
 **A project can be exported to a file and imported again.** This lets a student keep their
 own copy, work on another computer or another deployment, or give the file to someone
 else. It is not the way to hand work in. Students hand in the PDF of section 10.8.
@@ -308,10 +330,17 @@ else. It is not the way to hand work in. Students hand in the PDF of section 10.
   the log. Its contents hold nothing about the student, such as a name or account.
 - The file is named after the student's login and the project's name, as in
   `jsmith-Library Loans.diagramble.json`, so an instructor who collects many files can
-  tell them apart. The login is the one the Canvas launch supplies. Both parts are made
+  tell them apart. Both parts are made
   safe before use: path separators, control characters and characters that operating
   systems refuse are replaced, and the name is kept to a safe length. Import never reads
   anything from the file's name.
+- The login is stored with the account. It is set once, when the account is created,
+  from its first way of signing in: the Canvas login ID for a Canvas launch, which the
+  launch requests as the custom variable `$Canvas.user.loginId`; the username for LDAP;
+  the provider's preferred username for OpenID Connect; and the local part of the email
+  address, before the `@`, for a magic link. Whenever the preferred value is missing, the
+  local part of the email address is used. The login does not change when the person
+  later links another way of signing in.
 - Once the binder has attachments (Release 2), the export file is a zip archive with the
   project's JSON inside and each attached file beside it, named by its content hash. It
   is named the same way, with the ending `.diagramble.zip`. A file that is the JSON alone
@@ -358,6 +387,16 @@ else. It is not the way to hand work in. Students hand in the PDF of section 10.
     whose path is absolute, contains `..`, or is a link is refused. Every attached file
     is then checked as section 10.7 describes.
 13. Attachments are never served from the app host (section 10.7).
+
+**A diagram can be exported as an image.** From Release 1, any diagram exports as a PNG
+or an SVG image, either downloaded as a file or copied to the clipboard for pasting into
+a word processor. The clipboard always takes PNG, and takes SVG too where the browser
+allows it. Text in an SVG, whether the student typed it or it came from an imported
+file, is escaped, so it is never live markup.
+
+**The data dictionary exports as a CSV file** (comma-separated values) in Release 2, for
+review in a spreadsheet. A cell that begins with `=`, `+`, `-` or `@` is written with a
+leading apostrophe, so that a spreadsheet shows it as text and never runs it as a formula.
 
 ## 4. Commands and queries
 
@@ -864,8 +903,7 @@ section fixes their shape so that the core does not have to change when they are
 An attribute is not a new kind of element. It is a data element (section 3.3) that an
 entity owns. The data that a flow carries and the data that an entity holds are
 therefore the same elements, each with one name and one definition. That is what lets
-the tool compare the two models. The product vision listed the attribute as a kind of
-its own, linked to a data element. This section replaces that.
+the tool compare the two models.
 
 | Kind | Extra fields | Notes |
 | --- | --- | --- |
@@ -1350,7 +1388,7 @@ end of each phase.
 In Release 1, a PDF comes from the browser's own print to PDF. A print stylesheet lays
 each document out as pages, and scales a large diagram to fit a page or splits it across
 pages. A short hint tells the student to choose "Save as PDF" and to turn off the
-browser's headers and footers. The compiled documents below need a better way, which is
+browser's headers and footers. The compiled documents above need a better way, which is
 still open (section 14.1 item 3).
 
 The table of contents is generated. The process model and data model are the diagrams
@@ -1789,7 +1827,7 @@ end, as the textbook's rule that every flow has two ends requires.
    score.
 5. **The default retention periods.** The system administrator sets the periods (section
    1, "Administration"). Still open: the defaults for command logs, the dashboard's
-   analytics, AI usage records and their prompt text, and archived courses. Who may see
+   analytics, AI usage records and their prompt text, checkpoints, and archived courses. Who may see
    what also needs writing down.
 6. **Other symbol styles.** DeMarco and Yourdon for data flow diagrams, which is display
    only, and UML class notation for data models are the two planned for later (section

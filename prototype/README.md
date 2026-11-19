@@ -9,7 +9,10 @@ Everything runs in the browser. There is no backend. The project is saved in the
 browser's `localStorage`.
 
 The app is not a learning management system. Nothing in it deals with assignments,
-handing work in, grades, due dates or class lists, and no screen should add them.
+handing work in, grades or due dates, and no screen should add them. The specification
+makes two exceptions: course settings, and the Release 2 course dashboard, which shows
+behavior analytics and a class list from Canvas's roster service, and no grades
+(`docs/SPEC.md` section 1, "Grading" and "Course settings").
 
 ## Install and run
 

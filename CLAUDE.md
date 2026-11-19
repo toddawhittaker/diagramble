@@ -137,5 +137,7 @@ Orchestration rules:
 - Never copy the textbook's text, figures, cases or worked numbers into the
   project. Cite it by chapter, figure and printed page.
 - Diagramble supports the book; it is not a learning management system. Nothing
-  deals with assignments, handing work in, grades, due dates or class lists
-  unless the user asks (`prototype/README.md`).
+  deals with assignments, handing work in, grades or due dates unless the user asks.
+  The spec makes two exceptions: course settings, and the Release 2 course dashboard
+  of behavior analytics with a roster-service class list and no grades (SPEC.md
+  section 1, "Grading").

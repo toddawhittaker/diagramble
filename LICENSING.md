@@ -3,7 +3,8 @@
 *This is a summary, not the license. The legal terms are in [LICENSE](LICENSE), and where
 this page and the license differ, the license governs.*
 
-The idea: if you make money from Diagramble, the author should too.
+The idea: educators use Diagramble freely, and publishers and other for-profits cannot
+take it and sell it.
 
 ## Free
 
