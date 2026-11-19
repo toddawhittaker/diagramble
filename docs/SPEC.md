@@ -339,8 +339,9 @@ else. It is not the way to hand work in. Students hand in the PDF of section 10.
   launch requests as the custom variable `$Canvas.user.loginId`; the username for LDAP;
   the provider's preferred username for OpenID Connect; and the local part of the email
   address, before the `@`, for a magic link. Whenever the preferred value is missing, the
-  local part of the email address is used. The login does not change when the person
-  later links another way of signing in.
+  local part of the email address is used, and with no email address either, the word
+  `user` followed by the account's first eight identifier characters. The login does not
+  change when the person later links another way of signing in.
 - Once the binder has attachments (Release 2), the export file is a zip archive with the
   project's JSON inside and each attached file beside it, named by its content hash. It
   is named the same way, with the ending `.diagramble.zip`. A file that is the JSON alone
