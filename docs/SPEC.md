@@ -3,8 +3,8 @@
 Draft for review
 
 This document specifies the core of Diagramble narrowly: the semantic model, the first
-rules for data flow diagrams, and three test cases. It is the basis for the Release 0
-prototype described in the [product vision](VISION.md). Sections 8 to 11 go further.
+rules for data flow diagrams, and three test cases. It is the basis for Release 0, a rough first build that later releases keep,
+described in the [product vision](VISION.md). Sections 8 to 11 go further.
 They fix the shape of what the first and second releases add, so that the core does not
 have to change later. They are not built in Release 0.
 
@@ -40,7 +40,7 @@ this document wins. Section 14 lists the points still open.
 | Other chapters | Checked forms for chapters 1, 3, 6 and 11. The interface structure diagram for chapter 8. A project binder for everything else. All of it exports to PDF, in the second release | See section 10. Not built in Release 0 |
 | Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again | See section 3.9. Release 0 has a database and saves each accepted command (section 2). The project list, named checkpoints, copying, renaming, deleting, export, import and diagram images come in Release 1. The data dictionary's CSV export comes in Release 2 |
 | Instructors' AI agents | A Model Context Protocol (MCP) server lets an instructor's own AI agent build scenarios and starter cases, using a personal API key | See section 7.1. Built in Release 1 |
-| Grading | None. Diagramble sends Canvas no score and keeps no rubrics or comments on submissions. The Canvas launch only signs a person in and opens their work. Assignment and Grade Services, Deep Linking and LTI Advantage certification are in no plan. The course dashboard reads the class list from Canvas's roster service (LTI Names and Role Provisioning Services, NRPS) | Students hand in the exported PDF through Canvas (section 3.9), and may attach their project file too. The instructor grades in Canvas. A course dashboard of student behavior, without grades, is a Release 2 candidate. It fetches the class list from the roster service each time the instructor opens it, and does not copy or keep it |
+| Grading | None. Grading happens in Canvas. The Canvas launch only signs a person in and opens their work. Assignment and Grade Services, Deep Linking and LTI Advantage certification are in no plan. The course dashboard reads the class list from Canvas's roster service (LTI Names and Role Provisioning Services, NRPS) | Students hand in the exported PDF through Canvas (section 3.9), and may attach their project file too. The instructor grades in Canvas. A course dashboard of student behavior, without grades, is a Release 2 candidate. It fetches the class list from the roster service each time the instructor opens it, and does not copy or keep it |
 | Course settings | One small settings record per Canvas course. The launch says which course and whether the person is an instructor. An instructor sets one AI assistance level (0 to 2) and one rule profile for the course, and every student launched from it gets them. Nothing about assignments is stored | See section 7 item 4. Not built in Release 0, except that an account may record the course it launched from |
 | Element identifiers | Made by whoever creates the item and carried in the creating command | See sections 3.2 and 4.1 |
 | Stack | TypeScript everywhere | One shared package holds the model and rules and runs in both browser and server |
@@ -54,15 +54,15 @@ this document wins. Section 14 lists the points still open.
 | Flow identity | Separate flow elements, each carrying a shared dictionary definition | See section 3.3 |
 | AI | Agent integration must be possible from the start | See section 7. No AI feature is built in Release 0 |
 | Accessibility | Essential. Students with disabilities must be able to do all their work. The target is the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA | The keyboard outline of section 2 item 5 is the first step. Every screen is held to the target |
-| Data retention | A requirement before Release 1's live course. An instructor can archive an old course, which makes it read-only for everyone while its students keep their projects. A retention policy decides how long logs, analytics, AI usage records, checkpoints and archived courses are kept before they are deleted. An account can be deleted | The default period is two years for every kind of record the policy covers: command logs and snapshots, analytics, AI usage records and logged AI exchanges, checkpoints, and archived courses. The system administrator can change it ("Administration" below). Periods are counted in years, never in minutes or weeks. A snapshot at the cut point keeps a project whole (section 3.6) |
-| Student records | Each institution that hosts Diagramble is responsible for its own compliance with the Family Educational Rights and Privacy Act (FERPA), the United States student privacy law, and for any agreements it needs | Diagramble supplies what a host needs to comply: the retention settings and account deletion of "Data retention", the rules on the AI provider of section 7 item 7, and a data inventory in the operations document ("Administration") that says what is stored, where, and for how long |
-| Administration | An administrator interface, built in Release 1. Each deployment has one system administrator, above instructors. The administrator sets the data retention periods, and in Release 2 sets up the other ways of signing in ("Sign-in") | The first administrator is created by the first sign-in with a break-glass password: a password kept for emergencies, set when the deployment is installed. Administrators, and only administrators, must use a second factor, either a passkey or an authenticator app with time-based one-time codes. Text messages (SMS) are never offered, because they are easy to intercept. Backups, restore, monitoring, health checks and the data inventory of "Student records" are described in an operations document. The administrator interface shows their state, such as the server's status and when the last backup ran |
+| Data retention | A requirement before Release 1's live course. An instructor can archive an old course, which makes it read-only for everyone while its students keep their projects. A retention policy decides how long logs, analytics, AI usage records, checkpoints and archived courses are kept before they are deleted. An account can be deleted | The default period is two years for every kind of record the policy covers: command logs and snapshots, analytics, AI usage records and logged AI exchanges, the request log of API keys, checkpoints, and archived courses. The system administrator can change it ("Administration" below). Periods are counted in years. A snapshot at the cut point keeps a project whole (section 3.6) |
+| Student records | Each institution that hosts Diagramble is responsible for its own compliance with the Family Educational Rights and Privacy Act (FERPA), the United States student privacy law, and for any agreements it needs | Access is a plain role check in the app: a student works on their own projects, an instructor can see the work of students in their courses, and the system administrator can see everything. What anyone actually sees is decided by which screens the app provides. Diagramble supplies what a host needs to comply: the retention settings and account deletion of "Data retention", the rules on the AI provider of section 7 item 7, and a data inventory in the operations document ("Administration") that says what is stored, where, and for how long |
+| Administration | An administrator interface, built in Release 1. Each deployment has one system administrator, above instructors. The administrator sets the data retention periods, manages Canvas platform registrations, and in Release 2 sets up the other ways of signing in ("Sign-in") | The first administrator is created by the first sign-in with a break-glass password: a password kept for emergencies, set when the deployment is installed. Administrators, and only administrators, must use a second factor, either a passkey or an authenticator app with time-based one-time codes. Text messages (SMS) are never offered, because they are easy to intercept. Backups, restore, monitoring, health checks and the data inventory of "Student records" are described in an operations document. The administrator interface shows their state, such as the server's status and when the last backup ran |
 | Host names | A deployment uses two host names, for example `app.diagramble.example.edu` for the app and `files.diagramble.example.edu` for users' files. Attachments are served only from the files host (section 10.7). The app's session cookie is host-only, with no `Domain` attribute, so the files host never receives it | The two hosts are the same site, so SameSite cookie rules do not protect the app from the files host. From Release 0, every request that is signed in by the session cookie and changes anything must carry an `Origin` header that matches the app host. Anything else, including `Origin: null` or no `Origin` at all, is refused. Requests that prove themselves another way are not covered: the LTI launch carries a signed token from the platform, and the MCP server's requests carry an API key |
 | Symbol styles | Release 1 draws only the textbook's style: Gane and Sarson for data flow diagrams and the textbook's entity relationship notation | Two styles are planned for later: DeMarco and Yourdon for data flow diagrams, and the Unified Modeling Language (UML) class notation for data models. The instructor would choose one per Canvas course in the course settings of section 7 item 4 (section 14.1) |
 
 ## 2. Scope of Release 0
 
-Release 0 is a prototype that tests the riskiest parts. It is allowed to be rough.
+Release 0 is a rough first build that tests the riskiest parts. Later releases keep it.
 
 In scope:
 
@@ -75,8 +75,8 @@ In scope:
    user in and opens their saved project. The mock replaces a real Canvas for Release 0
    (section 12).
 7. Accounts and saving to the server. PostgreSQL, reached
-   through Kysely, stores accounts, sign-in methods, sessions, launch nonces and
-   projects. Each command the server accepts is saved before the next one is applied, as
+   through Kysely, stores accounts, sign-in methods, sessions, launch nonces,
+   projects, the command log and snapshots (section 3.6). Each command the server accepts is saved before the next one is applied, as
    section 3.9 describes. A student has one project for each Canvas course, and the
    launch opens it.
 
@@ -113,7 +113,7 @@ Every element has these fields.
 | `description` | Text | May be empty while the student is working. The textbook asks for one on every item, so rule DFD-13 reports an empty description |
 | `aliases` | List of text | Other names the business uses for the same thing. The textbook lists an alias among the fields of a flow, a data store, an external entity and an attribute (Figures 4-13 and 5-9). `search` looks in them. No rule in Release 0 reads them |
 | `notes` | Text | Working notes and open questions. The textbook lists notes on every kind of entry (Figures 4-13, 4-16 and 5-6 to 5-8). Never checked |
-| `origin` | `student`, `starter` or `ai` | Who created the element. Needed later for instructor review and AI disclosure |
+| `origin` | `student`, `starter` or `ai` | Who created the element. Needed for review of an instructor's agent's work (section 7.1) and for AI disclosure |
 
 **Identifier rules:**
 
@@ -791,8 +791,11 @@ product vision.
    - AI use is also counted: requests and tokens, per student and per course. The course
      dashboard may show those counts.
    - Prompt and response text is logged for safety and debugging only. It is kept under
-     the retention policy of section 1, "Data retention", and is never shown to
-     instructors.
+     the retention policy of section 1, "Data retention", and the app offers
+     instructors no view of it.
+8. **The AI behaves as a tutor.** At level 2 it never names a missing element. Help covers
+   only work the student has already done. The student sees what was used for each
+   reply. Each reply comes in a fixed structure that the server checks before showing it.
 
 ### 7.1 Building scenarios with an instructor's own AI agent
 
@@ -1358,6 +1361,8 @@ layout for that deliverable.
    files host, served with `Content-Security-Policy: sandbox` (without
    `allow-same-origin`) and `X-Content-Type-Options: nosniff`.
 6. Every other type is offered only as a download.
+7. The browser fetches an attachment through a short-lived signed link that the app
+   hands out, because the session cookie never reaches the files host.
 
 The migration plan has one small form inside it, for the conversion strategy. The
 student makes the three choices the textbook describes: the conversion style, the
@@ -1839,8 +1844,7 @@ end, as the textbook's rule that every flow has two ends requires.
 4. **A real Canvas before the first live course.** Release 0 launches from a mock
    platform (section 2 item 6). Before Release 1's live course, the launch must be
    confirmed against a real Canvas. That needs an LTI 1.3 developer key from a Canvas
-   administrator at that time. The key needs the launch and the roster service, and no
-   score.
+   administrator at that time. The key needs the launch and the roster service.
 5. **Other symbol styles.** DeMarco and Yourdon for data flow diagrams, which is display
    only, and UML class notation for data models are the two planned for later (section
    1, "Symbol styles"). Neither is scheduled. Chen notation is not planned; it would

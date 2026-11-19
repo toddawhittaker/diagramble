@@ -48,6 +48,7 @@ npm run build    # type-checks, then builds into dist/
 | --- | --- |
 | [`docs/VISION.md`](docs/VISION.md) | Research and product vision: why the tool exists, what it will and will not do, and the roadmap |
 | [`docs/SPEC.md`](docs/SPEC.md) | The core specification: the model, commands, rules and test cases. Where it differs from the vision, the specification wins |
+| [`docs/EPICS.md`](docs/EPICS.md) | The planned epics of each release, their dependencies and which can run at once |
 | [`docs/STATUS.md`](docs/STATUS.md) | What each piece of work delivered, and the gaps still open |
 | [`docs/WORKFLOW.md`](docs/WORKFLOW.md) | How work is branched, reviewed, checked and merged |
 | [`docs/mockups/STYLES.md`](docs/mockups/STYLES.md) | The look, "Drafting Paper", with its colours, typefaces and contrast checks |
@@ -67,10 +68,10 @@ not open source.
   (AGPL), version 3 or later, four years after it is released.
 
 [`LICENSING.md`](LICENSING.md) gives the full list in plain words. Where it and the
-license differ, the license governs.
+license differ, the license governs. A commercial license is needed for any for-profit
+hosting, including the author's.
 
 ## Contributing
 
 Outside contributions are not being accepted yet. They will need a contributor license
-agreement, so that the license terms can be kept. A commercial license is needed for any
-for-profit hosting, including the author's.
+agreement, so that the license terms can be kept.

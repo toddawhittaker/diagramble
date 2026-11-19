@@ -6,7 +6,9 @@ description: |
   their AI agents, imported project files, and export. Reports findings
   ranked by severity with a concrete failure scenario for each. Use before
   merging anything that touches the server, saving, sign-in, the Canvas
-  launch, the MCP server, import or export, or AI features. Read-only: it
+  launch, the MCP server, import or export, AI features, attachments and
+  the files host, the administrator interface, second factors, or
+  retention deletion. Read-only: it
   does not fix what it finds.
 model: claude-opus-5-5
 effort: medium
@@ -30,7 +32,8 @@ Assume every zone is hostile to its neighbours. The zones are: the
 student's browser, the server and its database, the LMS that launches
 the tool (Canvas, through LTI 1.3), an instructor's own AI agent calling
 the MCP server with a personal API key, any AI model the tool calls,
-files that students and instructors import, and the Internet.
+files that students and instructors import, attachments served from the
+files host, the administrator interface, and the Internet.
 
 Assume a student will edit requests by hand, replay them, open another
 student's project by guessing its address, import a crafted file, paste
@@ -51,7 +54,11 @@ Look for, in rough priority order:
 5. authorization decided in the browser or allowed by default;
 6. student work, names or prompts sent to an AI model, a log, or a third
    party without need; secrets in logs, config or committed files;
-7. resource exhaustion with no limit behind it.
+7. resource exhaustion with no limit behind it;
+8. an attachment that runs script on the app host, or a files-host link
+   that outlives its purpose;
+9. an administrator sign-in without its second factor, or retention
+   deletion that leaves records behind or removes the wrong ones.
 
 For every finding give: file and line, one-sentence defect, and a concrete
 scenario (input or state, then what goes wrong). Rank most severe first.

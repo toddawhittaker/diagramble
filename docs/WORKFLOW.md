@@ -131,8 +131,9 @@ different times:
 - An epic pull request, from an epic branch into `main`, is opened only
   after every task pull request for that epic has landed, code-reviewer,
   security-reviewer (when the epic touches the server, accounts, saving,
-  sign-in, the LMS launch, the MCP server or API keys, import or export, or
-  AI features) and a11y-reviewer (when the epic touches a screen) have run
+  sign-in, the LMS launch, the MCP server or API keys, import or export,
+  AI features, attachments and the files host, the administrator
+  interface, second factors, or retention deletion) and a11y-reviewer (when the epic touches a screen) have run
   over the epic branch's head, every finding they required has been fixed
   or explicitly deferred, and the checks are green locally. Only the user
   merges an epic pull request into `main`.

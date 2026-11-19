@@ -81,7 +81,8 @@ work it closes.
      code;
    - security-reviewer when the epic touches the server, accounts,
      saving, sign-in, the LMS launch, the MCP server or API keys, import
-     or export, or AI features;
+     or export, AI features, attachments and the files host, the
+     administrator interface, second factors, or retention deletion;
    - a11y-reviewer when it touches a screen or a shared component.
 10. **Fix round.** Rule on each finding: fix now through task PRs, or
     record as a STATUS open item. Land fixes the same way (step 8), also

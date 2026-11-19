@@ -8,7 +8,7 @@ It is written for the course textbook: Dennis, Wixom and Roth, *Systems Analysis
 
 ## 1. Executive summary
 
-Build a small web tool that keeps one model behind every diagram, checks that model against explicit rules, and explains each violation in plain words. That is the part of Visible Analyst that a course using the book needs, and no free or web-based tool found does it.
+Build a small web tool that keeps one model behind every diagram, checks that model against explicit rules, and explains each violation in plain words. That is the part of Visible Analyst that a course using the book needs.
 
 The product is called Diagramble, pronounced DYE-uh-GRAM-buhl with the main stress on GRAM, and its tagline is "See the system. Shape the solution." The name is coined from "diagram" and "able". Diagramming is the core activity of systems analysis and design: modeling processes, data, entities and relationships in pictures. "Able" suggests capability, accessibility and ease of use, and echoes words such as learnable, approachable and manageable. Together they mean making systems diagramming accessible and capable. The name also has a light echo of "ramble" and "scramble", which makes it sound friendly without making the tool seem like a toy. It is short and easy to say and remember.
 
@@ -23,7 +23,7 @@ CASE means Computer-Aided Software Engineering. DFD means data flow diagram. ERD
 5. **Unguarded AI harms learning, and AI grading is not reliable enough to run alone.** In one field experiment, students who practiced with plain GPT-4 scored 17% lower on a later unassisted exam than students who never had it. A guarded tutor largely removed that harm.
 6. **Nothing open source is a ready foundation.** Permissive libraries cover the canvas, layout and export. The semantic model, the rule engine and the data dictionary must be purpose-built.
 7. **Accessibility is essential.** Students with disabilities must be able to do all their work, so the target is the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA. When diagrams are views of a model, an outline view of the same model is a natural keyboard and screen-reader path.
-8. **It is a tool for educators, licensed so they can use it freely.** The Business Source License 1.1 keeps it free for non-profit schools and for anyone's own study and teaching, while publishers and other for-profits cannot take the work and sell it. Each version becomes open source, under the GNU Affero General Public License (AGPL), four years after it is released. Each school hosts its own copy, and the author maintains it.
+8. **It is a tool for educators, licensed so they can use it freely.** The Business Source License 1.1 keeps it free for educators (section 9). Each version becomes open source, under the GNU Affero General Public License (AGPL), four years after it is released. Each school hosts its own copy, and the author maintains it.
 9. **The first course sets the conventions.** The tool is built for a course that uses Dennis, Wixom and Roth and covers chapters 1 to 12. That book builds DFDs from use case forms, so the forms are in the first release. Its design chapters add physical models and structure charts, which follow in the second. The deliverables of the other chapters are served in the second release by checked forms, one more diagram and a project binder, and everything exports to PDF.
 
 ### Strongest recommendation
@@ -106,7 +106,7 @@ Several open-source projects prove that diagrams can be views of one model in a 
 - **One model with many views,** from Structurizr, Sirius Web and bpmn.io.
 - **Rules enforced while drawing, plus named rule sets,** from bpmn.io and bpmnlint.
 - **No install and no account to set up,** from the web drawing tools.
-- **AI that the instructor controls.** Commercial web tools now generate diagrams with AI. A course needs the choice to turn it off to be the instructor's (section 8).
+- **AI that the instructor controls.** The instructor decides whether a course uses AI, and how much (section 8).
 
 ### Evidence limits
 
@@ -254,7 +254,7 @@ The teaching advantage is feedback that arrives while the student is modeling an
 5. Grade the PDFs that students hand in, in Canvas, with Canvas's own tools. A student may also attach their exported project file, which the instructor imports as a new project in their own account to look at it.
 6. Archive the course when it ends. It becomes read-only for everyone, and its students keep their projects.
 
-Diagramble does no grading. It keeps no rubrics or comments on submissions, and sends Canvas no score. The dashboard reads the class list from Canvas's roster service each time the instructor opens it, and does not keep a copy (SPEC.md section 1, "Grading"). Students must be told what it shows.
+Grading, rubrics and comments happen in Canvas. The dashboard reads the class list from Canvas's roster service each time the instructor opens it, and does not keep a copy (SPEC.md section 1, "Grading"). Students must be told what it shows.
 
 ### Core engine versus instructional scaffolding
 
@@ -270,12 +270,12 @@ Keeping these apart matters. The core must be correct for any user, including a 
 | Guided workflows and first-run steps | Scaffolding | A later goal (section 11, "Later goals") |
 | Symbol and rule glossary, context help | Scaffolding | Content, not engine |
 | Starter projects and case studies | Scaffolding | Content library |
-| Rubrics, comments, resubmission | Not done by Diagramble | Canvas does these |
+| Rubrics, comments, resubmission | Canvas | Canvas does these |
 | Course dashboard of student behavior | Scaffolding | Worked out from the saved command log. No grades |
 | Learning management system launch, for sign-in only | Integration | Separate boundary from both |
 | AI assistance levels | Scaffolding | Enforced by the server, set per course |
 
-**Should an instructor be able to adjust the rules per course?** Yes, and only the rules. A course's rule profile can turn a rule off, change its severity, or make it block a change (SPEC.md section 5.1). It costs little, because the rule engine already needs named rules with severity. A profile does not hide symbols from the palette or change the wording of explanations.
+**Should an instructor be able to adjust the rules per course?** Yes, and only the rules. A course's rule profile can turn a rule off, change its severity, or make it block a change (SPEC.md section 5.1). It costs little, because the rule engine already needs named rules with severity. A profile changes only rules.
 
 ### What software can check and what needs judgment
 
@@ -298,7 +298,7 @@ Entity relationship misconceptions are well documented. In [one study of 200 fin
 
 ### Assessment
 
-Diagramble does not grade. It has no rule-scored rubric rows, comments on submissions, reusable comments or resubmission comparison. Students hand in the exported PDF through Canvas, and the instructor grades it there.
+Grading happens in Canvas. Students hand in the exported PDF through Canvas, and the instructor grades it there.
 
 - **Findings come before hand-in.** The student sees and fixes what the rules catch, so the instructor's time goes to judgment.
 - **Portfolios** are exports: a project document with diagrams, dictionary and check results, as a PDF.
@@ -310,7 +310,7 @@ Diagramble does not grade. It has no rule-scored rubric rows, comments on submis
 | [LTI 1.3 launch](https://www.imsglobal.org/spec/lti/v1p3/) | Canvas signs the user in and passes their role and course. No separate account. The course decides the rule profile and AI assistance level |
 | [Names and Role Provisioning 2.0](https://www.imsglobal.org/spec/lti-nrps/v2p0) (the roster) | The course dashboard fetches the class list when the instructor opens it, and keeps no copy |
 
-The launch and the roster are the only Canvas services used. Diagramble does not use [Deep Linking 2.0](https://www.imsglobal.org/spec/lti-dl/v2p0), [Assignment and Grade Services 2.0](https://www.imsglobal.org/spec/lti-ags/v2p0/) (score return) or LTI Advantage certification, because it does no grading.
+The launch and the roster are the only Canvas services used. 
 
 
 ### Accessibility and keyboard modeling
@@ -517,9 +517,9 @@ AI works on the far side of that line. It reads the model as structured text and
 
 | Capability | Learning value | Risk | First available |
 | --- | --- | --- | --- |
-| Explain a rule violation in plain words, using the student's own element names | High | Low. The rule engine found the error, so the AI cannot invent one | Level 2 |
-| Ask questions that probe the model ("What happens to an appointment when its client is removed?") | High | Low to medium. Quality is unmeasured | Level 2 |
-| Layered hints on request, from a nudge to a specific pointer | High | Medium. The last layer can give the answer away | Level 2 |
+| Explain a rule violation in plain words, using the student's own element names | High | Low. The rule engine found the error, so the AI cannot invent one | Release 2 |
+| Ask questions that probe the model ("What happens to an appointment when its client is removed?") | High | Low to medium. Quality is unmeasured | Release 2 |
+| Layered hints on request, from a nudge to a specific pointer | High | Medium. The last layer can give the answer away | Release 2 |
 | Compare the model with the written requirements and list what seems uncovered | Medium to high | Medium. It can miss things or invent gaps | Not planned |
 | Critique a finished draft against the case | Medium to high | Medium. Graders of this kind tend to reject valid alternatives | A later goal (assistance level 3) |
 | Describe the difference between two revisions | Medium | Low. The comparison itself is exact, and AI only words it | Not planned |
@@ -542,7 +542,7 @@ The instructor sets one level for each Canvas course. The server enforces it.
 Three safeguards apply at every level above 0.
 
 - **Attempt first.** Help is offered about work the student has already done, not before.
-- **Disclosure.** The student sees what was used. The instructor sees counts of AI use, in requests and tokens, per student and per course, and never the prompts or responses. Prompt and response text is logged for safety and debugging, under the retention policy.
+- **Disclosure.** The student sees what was used. The instructor sees counts of AI use, in requests and tokens, per student and per course, and the app offers instructors no view of prompts or responses. Prompt and response text is logged for safety and debugging, under the retention policy.
 - **No detectors.** Integrity rests on process evidence from the operation log, which is fairer than a probability score.
 
 **Assessment mode** is level 0 plus the course's rule profile. Students never change course settings, so neither can be turned off from a student's account. The built-in rule explanations remain, because they are fixed text and not AI.
@@ -614,7 +614,7 @@ React Flow asks for its attribution link to stay unless a project pays for its P
 
 ### Choosing the project's license
 
-Diagramble is built so that educators can use it freely, and so that textbook publishers and other for-profits cannot take the work and sell it. A permissive license such as MIT would allow exactly that, so the project uses the Business Source License 1.1: free for non-profit schools and for individuals, a paid license for for-profit use, and each version becomes AGPL-3.0-or-later four years after it is released.
+The license exists so that educators can use Diagramble freely while for-profit use pays for its upkeep. A permissive license such as MIT would let anyone sell it without paying, so the project uses the Business Source License 1.1: free for non-profit schools and for individuals, a paid license for for-profit use, and each version becomes AGPL-3.0-or-later four years after it is released.
 
 The full terms are in [`LICENSE`](../LICENSE), a plain summary is in [`LICENSING.md`](../LICENSING.md), and the decision and its details are in the [core specification](SPEC.md), section 1.
 
@@ -655,7 +655,7 @@ Values are High, Medium or Low. Effort is a relative size: S (days to two weeks)
 | 13 | Outline view as a keyboard editor | Medium | High | Medium | L | 1, 2 |
 | 14 | Project document as PDF, and PNG or SVG images of any diagram, downloaded or copied to the clipboard | Medium | High | Low | M | 3, 5, 6 |
 | 15 | Accounts, projects, autosave and named checkpoints | Low | High | Low | M | 2 |
-| 16 | Basic LTI 1.3 launch that signs the student in and opens their project. No submission or score return | Medium | High | Medium | M | 15 |
+| 16 | Basic LTI 1.3 launch that signs the student in and opens their project | Medium | High | Medium | M | 15 |
 | 17 | Two starter cases and symbol help | High | Medium | Low | S | 3, 6 |
 | 18 | Use case forms in the textbook's format, linked to processes and flows, with the event-response list and DFD fragments worked out from them | High | Medium | Medium | M | 1, 3, 5 |
 | 19 | Create, read, update, delete (CRUD) matrix of processes against entities | High | Medium | Low | S | 7 |
@@ -699,13 +699,13 @@ Release 1 is the course-ready product. Things wanted but in no release are liste
 
 ### Release 0: prove the risky parts
 
-A throwaway-quality prototype of the three things most likely to fail.
+A rough first build of the three things most likely to fail, which later releases keep.
 
 | Exit criterion | Why it matters |
 | --- | --- |
 | Balancing through the dictionary gives correct results on the three original test cases of the core specification, section 6, including a flow split into parts on the child diagram | It is the check the course most needs and the hardest rule |
 | One element appears on two diagrams, is renamed once, and both update | Proves the model and view separation |
-| A launch from a mock LTI 1.3 platform, including one inside a frame, signs the user in and opens their saved project | Removes the main integration unknown without waiting for a Canvas developer key. No score is sent, and the mock stands in for a real Canvas here |
+| A launch from a mock LTI 1.3 platform, including one inside a frame, signs the user in and opens their saved project | Removes the main integration unknown without waiting for a Canvas developer key. The mock stands in for a real Canvas here |
 | A keyboard-only user builds a context diagram in the outline view | Shows accessibility is feasible before the canvas design hardens |
 
 ### Release 1: course-ready first release (Level 1)
@@ -732,7 +732,7 @@ A throwaway-quality prototype of the three things most likely to fail.
 | AI levels 0 to 2 are enforced by the server and every exchange is logged | Assessment mode is credible |
 | One instructor runs the design sequence of Chapters 9 and 10 in a live course section: physical DFD, structure chart, program specification and physical data model | The tool covers the whole course, not only analysis |
 | Every deliverable of chapters 1 to 12 can be produced in the tool and exported to PDF, alone or in the textbook's compiled documents | A student keeps one project for the whole term and hands in from it |
-| The instructor's feedback as the tool is used shows it helps teaching | The only measure of teaching value. Neither a classroom comparison nor use in a second course is a measure |
+| The instructor's feedback as the tool is used shows it helps teaching | The only measure of teaching value |
 
 ### Later goals
 
@@ -845,17 +845,17 @@ Seven decisions shape the build, and each has a recommendation below.
 
 | Decision | Options, with gains and costs | Recommendation | Depends on |
 | --- | --- | --- | --- |
-| Foundation | **A. Own model and rules on a canvas library.** Light, full control of interface and accessibility. You build the model-to-view mapping. **B. Sirius Web.** Views of a model and a server come ready. Heavy Java stack, small ecosystem, less control of the student experience | A. The interface and explanations are the product, and B constrains both. B's saving is the mapping layer, which Release 0 will show to be modest or not | Whether the team's strength is web development or the Eclipse modeling stack |
-| Where rules run | **A. Browser only.** Instant, but not trustworthy on its own. **B. Server only.** Trustworthy, but slower feedback. **C. One rule library that runs in both** | C. The browser gives instant feedback and the server checks what it saves | Choosing a language that runs in both places |
+| Foundation | **A. Own model and rules on a canvas library.** Light, full control of interface and accessibility. You build the model-to-view mapping. **B. Sirius Web.** Views of a model and a server come ready. Heavy Java stack, small ecosystem, less control of the student experience | A. The interface and explanations are the product, and B constrains both. B's saving is the mapping layer, which Release 0 will show to be modest or not | Settled (SPEC.md section 1) |
+| Where rules run | **A. Browser only.** Instant, but not trustworthy on its own. **B. Server only.** Trustworthy, but slower feedback. **C. One rule library that runs in both** | C. The browser gives instant feedback and the server checks what it saves | Settled (SPEC.md section 1) |
 | Storage shape | **A. One document per project plus a command log.** Loading and saving a project is one read and one write. Queries across projects are harder. **B. Relational tables of elements and links.** Strong queries. More schema coupling | A. A project is one JSON document in the database. Every accepted command is also a row of a separate command-log table, keyed by project and in order, which the course dashboard's analytics read (core specification, section 3.6) | Settled |
 | Flow identity across levels | **A. A child's boundary flow is the same element as the parent's flow.** Consistent by construction, but hides the lesson. **B. Separate elements matched by a rule.** A real check, with some duplication | B. A flow on a parent diagram and a flow on its child are separate elements. Each flow carries exactly one dictionary definition, and the two levels balance by sharing definitions or through a definition's composition (core specification, sections 3.3 and 5.5) | Settled |
 | Rule violations: block or flag | **A. Block.** The model is never wrong, and the student never sees why. **B. Flag.** The student makes the mistake and reads the explanation | B. Every rule flags by default. A course's rule profile can turn a rule off, change its severity, or make it block a change. The model's invariants are always enforced (SPEC.md section 5.1) | Settled |
-| Project license | The Business Source License 1.1, so educators use it freely and publishers and other for-profits cannot take the work and sell it. MIT would allow that | Section 9 has the detail | Settled |
+| Project license | The Business Source License 1.1, free for educators | Section 9 has the detail | Settled |
 | Hosting and running cost | **A. Each institution hosts its own copy.** No central cost. Needs local technical staff. **B. One community-hosted instance.** Easiest for instructors. Someone pays for servers and holds student data for many schools. **C. Self-hosting, with AI features billed to the institution's own model account** | C. Each institution runs its own copy from the Docker image, so cost and responsibility for student data stay with the institution that benefits. A commercial license is needed for any for-profit hosting, including the author's. There is no community-hosted instance | Settled |
 
 ### Unresolved questions
 
-None remain open.
+The open points are in SPEC.md section 14.1.
 
 ## 15. Conclusion: what to build first, what not to build, and why
 
@@ -863,7 +863,7 @@ Build the smallest tool in which a student's use cases, DFDs, ERD and data dicti
 
 ### Build first
 
-1. **A Release 0 prototype of the three risks:** balancing through the dictionary, one element on two diagrams, and a Canvas launch that signs the student in and opens their saved project.
+1. **A rough Release 0 build of the three risks:** balancing through the dictionary, one element on two diagrams, and a Canvas launch that signs the student in and opens their saved project.
 2. **The semantic model and repository,** with stable identity, a command layer and an operation log.
 3. **Four linked views of that model:** use case forms, leveled DFDs, a crow's-foot ERD and the data dictionary.
 4. **The rule engine with about 40 rules,** each with a plain-language explanation and a fix hint.

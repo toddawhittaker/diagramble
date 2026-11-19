@@ -3,8 +3,7 @@
 *This is a summary, not the license. The legal terms are in [LICENSE](LICENSE), and where
 this page and the license differ, the license governs.*
 
-The idea: educators use Diagramble freely, and publishers and other for-profits cannot
-take it and sell it.
+The idea: educators use Diagramble freely, and for-profit use pays for its upkeep.
 
 ## Free
 
