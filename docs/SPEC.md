@@ -41,18 +41,21 @@ document wins. Section 14 records the smaller points settled the same day.
 | Other chapters | Checked forms for chapters 1, 3, 6 and 11. The interface structure diagram for chapter 8. A project binder for everything else. All of it exports to PDF, in the second release | See section 10. Not built in Release 0 |
 | Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again, decided on 18 November 2026 | See section 3.9. Since 18 November 2026, Release 0 has a database and saves each accepted command (section 2). The project list, copying, renaming, deleting, export and import come in Release 1 |
 | Instructors' AI agents | A Model Context Protocol (MCP) server lets an instructor's own AI agent build scenarios and starter cases, using a personal API key, decided on 18 November 2026 | See section 7.1. Built in Release 1, decided on 18 November 2026 |
-| Grading | None, decided on 18 November 2026. Diagramble sends Canvas no score and keeps no rubrics or comments on submissions, and does not read the Canvas roster. The Canvas launch only signs a person in and opens their work. Assignment and Grade Services, Deep Linking, Names and Role Provisioning and LTI Advantage certification are dropped from every plan | Students hand in the exported PDF through Canvas (section 3.9), and may attach their project file too. The instructor grades in Canvas. A course dashboard of student behavior, without grades, is a Release 2 candidate; its student list is the people who launched from the course |
+| Grading | None, decided on 18 November 2026. Diagramble sends Canvas no score and keeps no rubrics or comments on submissions, The Canvas launch only signs a person in and opens their work. Assignment and Grade Services, Deep Linking and LTI Advantage certification are dropped from every plan. Whether the course dashboard reads the class list from Canvas's roster service is open (section 14.3) | Students hand in the exported PDF through Canvas (section 3.9), and may attach their project file too. The instructor grades in Canvas. A course dashboard of student behavior, without grades, is a Release 2 candidate; for now its student list is the people who launched from the course |
 | Course settings | One small settings record per Canvas course, decided on 18 November 2026. The launch says which course and whether the person is an instructor. An instructor sets one AI assistance level (0 to 4) and one rule profile for the course, and every student launched from it gets them. Nothing about assignments is stored | See section 7 item 4. Not built in Release 0, except that an account may record the course it launched from |
 | Element identifiers | Made by whoever creates the item and carried in the creating command, decided on 18 November 2026 | See sections 3.2, 4.1 and 14.6 |
 | Stack | TypeScript everywhere | One shared package holds the model and rules and runs in both browser and server |
 | Server framework | Fastify (MIT), with Zod for request checking, decided on 18 November 2026 | See section 12 |
 | Canvas launch | Our own thin layer for the Learning Tools Interoperability (LTI) 1.3 launch, built on `jose` (MIT), not on ltijs, decided on 18 November 2026. The launch is critical, so it sits inside our own tests and security review. ltijs has one maintainer and brings its own Express app and database layer | See section 12 |
 | Database access | Kysely (MIT) behind a small project-store interface of our own (load, save, append to the log), decided on 18 November 2026 | The same code can run on PostgreSQL on the server and on SQLite in a possible desktop app later (section 14.3). See section 12 |
-| AI models and agents | The Vercel AI SDK, package `ai` (Apache-2.0), for student-facing AI including agents (its tool-loop agent), decided on 18 November 2026. Rule 1: use provider packages such as `@ai-sdk/anthropic` with the institution's own key, never bare model-name strings, which route through Vercel's hosted gateway. Rule 2: our server still builds the tool list for each request from the assistance level (section 7 item 4), and an agent changes the model only by proposing through `preview` (section 7 item 5). Rule 3: we log every step and remove student identity ourselves (section 7 item 7) | See sections 7 and 12. No AI feature is built in Release 0 |
+| AI models and agents | The Vercel AI SDK, package `ai` (Apache-2.0), for student-facing AI including agents (its tool-loop agent), decided on 18 November 2026. Rule 1: use provider packages such as `@ai-sdk/anthropic` with the institution's own key, never bare model-name strings, which route through Vercel's hosted gateway. Rule 2: our server still builds the tool list for each request from the assistance level (section 7 item 4), and an agent changes the model only by proposing through `preview` (section 7 item 5). Rule 3: we log every step and remove student identity ourselves (section 7 item 7). The institution supplies and protects the provider key, and chooses a provider whose terms fit its data rules; Diagramble does not vet providers, decided on 18 November 2026 | See sections 7 and 12. No AI feature is built in Release 0 |
 | Deployment | One Docker image for the app, and a Docker Compose file that adds PostgreSQL, decided on 18 November 2026 | See section 12 |
 | Sign-in | The Canvas launch only, for now, decided on 18 November 2026. An account is kept separate from the ways of signing in to it, so that other ways can be added later without changing accounts | A session is a cookie that points to a record stored in the database. Later ways of signing in are listed in section 14.3 |
 | Flow identity | Separate flow elements, each carrying a shared dictionary definition | See section 3.3 |
 | AI | Agent integration must be possible from the start | See section 7. No AI feature is built in Release 0 |
+| Accessibility | Essential, decided on 18 November 2026. Students with disabilities must be able to do all their work. The target is the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA | The keyboard outline of section 2 item 5 is the first step. Every screen is held to the target |
+| Data retention | A requirement before Release 1's live course, decided on 18 November 2026. An instructor can archive an old course, which makes it read-only for everyone while its students keep their projects. A retention policy decides how long logs, analytics, AI usage records and archived courses are kept before they are deleted. An account can be deleted | The numbers, and who sets them, are open (section 14.3) |
+| Symbol styles | Release 1 draws only the textbook's style: Gane and Sarson for data flow diagrams and the textbook's entity relationship notation, decided on 18 November 2026 | Other styles may come later, chosen per Canvas course by the instructor in the course settings of section 7 item 4. The candidates are open (section 14.3) |
 
 ## 2. Scope of Release 0
 
@@ -277,7 +280,13 @@ saved.
 - If the connection drops, the browser keeps the commands in order and sends them when
   the connection returns. Until then the top bar says the latest changes are not saved
   yet. Closing the page while changes are waiting asks the student first.
-- Undo and redo are commands like any other, so they are saved the same way.
+- Undo and redo are commands like any other, so they are saved the same way. They reach
+  only the current editing session. After a reload or a takeover, earlier edits cannot be
+  undone.
+
+**Only one tab edits a project at a time.** Every other tab showing the same project is
+read-only and says so plainly. A read-only tab offers a way to take over editing, which
+makes the tab that was editing read-only. Decided on 18 November 2026.
 
 **A student has many projects.** A project list shows each project's name and when it was
 last changed. From it the student can open a project, start a new one (empty, or from a
@@ -356,7 +365,7 @@ and later as tool definitions for an AI model (section 7).
 | `setTopDiagram`, `setShowFindings` | Change the project settings of section 3.7 |
 | `removeOccurrence` | Removes one occurrence, and the flows attached to it on that diagram |
 | `deleteElement` | Deletes an element everywhere. Refused for a data definition that is still carried or used as a component, unless `cascade` is set |
-| `undo`, `redo` | Steps through the log |
+| `undo`, `redo` | Steps through the log, within the current editing session only (section 3.9). Edits made before a reload or a takeover cannot be undone |
 
 Every command that creates an item carries the new item's `id`, made as section 3.2's
 identifier rules say. A command that creates more than one item, such as `addFlow` with a
@@ -691,6 +700,15 @@ product vision.
    with more than one model provider, removes student identity, and logs every request
    and response against the project. It is built on the AI SDK under the rules in
    section 1.
+   - The key and the choice of provider are the institution's responsibility. The
+     institution supplies the key, protects it, and chooses a provider whose terms fit
+     its data rules, including whether the provider trains on data sent through its
+     API. Some providers do. Diagramble does not vet providers.
+   - AI use is also counted: requests and tokens, per student and per course. The course
+     dashboard may show those counts.
+   - Prompt and response text is logged for safety and debugging only. It is kept under
+     the retention policy of section 1, "Data retention", and is never shown to
+     instructors.
 
 ### 7.1 Building scenarios with an instructor's own AI agent
 
@@ -1750,9 +1768,35 @@ project's author confirmed all eight on 17 November 2026. None affects Release 0
 7. **Which Canvas the trial uses.** The institution's Canvas test instance needs an LTI
    1.3 developer key from its administrator. Diagramble sends no score, so the key needs
    only the launch. The planning note is `docs/EPICS.md` section 6.
-8. **Privacy of logs and analytics.** No rule yet says how long command logs and the
-   dashboard's analytics are kept, how an account is deleted, or who may see what. This
-   must be settled before Release 1's live course.
+8. **The numbers of the retention policy.** Retention, course archiving and account
+   deletion are required before Release 1's live course (section 1, "Data retention").
+   Still open: how long command logs, the dashboard's analytics, AI usage records and
+   their prompt text, and archived courses are kept, and who sets those periods. The
+   deployment's administrator is the likely answer. Who may see what also needs writing
+   down.
+9. **Other symbol styles.** Candidates, for the user to choose among: DeMarco and Yourdon
+   for data flow diagrams, which is display only; and Chen notation and the Unified
+   Modeling Language (UML) class-diagram notation for entity relationship diagrams. Chen
+   needs model changes, because it draws attributes as separate shapes and lets
+   relationships carry attributes. A chosen style would be set per Canvas course.
+10. **An instructor's agent editing an open project.** An instructor's MCP agent (section
+    7.1) is a second writer. What happens when it edits a project that is open for
+    editing in a tab is not decided.
+11. **The roster service for the dashboard.** The course dashboard could read the class
+    list from Canvas's roster service (LTI Names and Role Provisioning Services). It would
+    then show students who have never launched, but the administrator must allow that
+    Canvas service and Diagramble would hold more student data. Otherwise it keeps
+    listing only the people who have launched.
+12. **Binder attachments: storage, display and export.** Release 2. Notes so far:
+    attachments can be shown safely if they are served from a separate origin (a domain
+    other than the app's, as many sites do for user content) with a sandboxing content
+    security policy and `nosniff`. Images can be decoded and encoded again on the server;
+    SVG is either refused or turned into a bitmap. PDFs are shown in a sandboxed frame or
+    drawn with a library. A zipped web page is served only from the separate origin.
+    Files are stored outside the project document and referenced by content hash. An
+    export file that holds attachments can no longer be plain JSON; it is probably a zip
+    with the JSON inside. That adds zip limits to "Import fails safe" (section 3.9):
+    entry counts, sizes, compression ratio and paths.
 
 ### 14.4 Taken from Visible Analyst, and left out
 
@@ -1832,6 +1876,14 @@ The user settled these while the epics were planned (`docs/EPICS.md`).
 | --- | --- | --- |
 | A database in Release 0 | Yes. It holds accounts, sign-in methods, sessions, launch nonces and saved projects | Sections 2 and 3.9 |
 | Element identifiers | Made by the creator and carried in the creating command: 10 random lowercase letters and digits, unique within a project only | Sections 3.2 and 4.1 |
-| Grading | None. No score is sent to Canvas, and there are no rubrics, submission comments or roster service. A course dashboard of behavior, without grades, may come in Release 2 | Section 1 |
+| Grading | None. No score is sent to Canvas, and there are no rubrics or submission comments. A course dashboard of behavior, without grades, may come in Release 2. Whether it reads the roster service is open | Sections 1 and 14.3 |
 | The AI assistance level | Set per Canvas course, with the rule profile | Section 1 and section 7 item 4 |
 | When AI comes | The instructors' MCP server in Release 1; student-facing AI in Release 2 | Sections 1 and 7 |
+| Data retention | Required before Release 1's live course: course archiving, a retention policy and account deletion. The periods are open | Sections 1 and 14.3 |
+| Accessibility | Essential. The target is WCAG 2.2 Level AA | Section 1 |
+| Instructors and AI prompts | Instructors never see students' prompts or responses. AI use is counted in requests and tokens, per student and per course, and the dashboard may show the counts | Section 7 item 7 |
+| AI keys and providers | The institution supplies and protects the key and chooses the provider. Diagramble does not vet providers | Sections 1 and 7 item 7 |
+| Symbol styles | Release 1 draws only the textbook's styles. Others may come later, per Canvas course | Sections 1 and 14.3 |
+| Group work | Deferred, with no release | VISION.md section 10 |
+| Several tabs on one project | One tab edits and the others are read-only, with a way to take over. Undo reaches only the current editing session | Sections 3.9 and 4.1 |
+| Release 2's measure of teaching value | The instructor's feedback as the tool is used | VISION.md section 11 |

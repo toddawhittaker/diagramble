@@ -24,7 +24,7 @@ CASE means Computer-Aided Software Engineering. DFD means data flow diagram. ERD
 4. **DFDs are still taught.** The current Dennis, Wixom and Roth (8th edition) and Kendall and Kendall (11th edition) textbooks each keep a full DFD chapter. Both have added agile and object-oriented material beside it, not in place of it.
 5. **Unguarded AI harms learning, and AI grading is not reliable enough to run alone.** In one field experiment, students who practiced with plain GPT-4 scored 17% lower on a later unassisted exam than students who never had it. A guarded tutor largely removed that harm.
 6. **Nothing open source is a ready foundation.** Permissive libraries cover the canvas, layout and export. The semantic model, the rule engine and the data dictionary must be purpose-built.
-7. **Accessibility is a legal requirement and a design advantage.** Public universities must meet the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA by April 2027 or April 2028. When diagrams are views of a model, an outline view of the same model is a natural keyboard and screen-reader path.
+7. **Accessibility is a legal requirement and a design advantage.** Public universities must meet the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA by April 2027 or April 2028. Diagramble's own target is WCAG 2.2 Level AA, because students with disabilities must be able to do all their work. When diagrams are views of a model, an outline view of the same model is a natural keyboard and screen-reader path.
 8. **The project is source-available, and it is not built as a business.** It is under the Business Source License 1.1: free for non-profit schools and for anyone's own study and teaching, with a paid license for for-profit use. Each version becomes open source, under the AGPL, four years after it is released. Its lasting value is the rule library, the explanations and the teaching content. The open questions are who hosts it beyond the first deployment and who maintains it.
 9. **The first course sets the conventions.** The tool is built for a course that uses Dennis, Wixom and Roth and covers chapters 1 to 12. That book builds DFDs from use case forms, so the forms are in the first release. Its design chapters add physical models and structure charts, which follow in the second. The deliverables of the other chapters are served in the second release by checked forms, one more diagram and a project binder, and everything exports to PDF.
 
@@ -247,10 +247,11 @@ The teaching advantage is feedback that arrives while the student is modeling an
 1. Add Diagramble to the Canvas course.
 2. Set the course's rule profile and its AI assistance level. Every student launched from that course gets both.
 3. Optionally give the class a starter case, such as a finished context diagram, as a file posted in Canvas.
-4. Watch the course dashboard: how students work, such as time spent, worked out from the saved command log. No grades are shown.
+4. Watch the course dashboard: how students work, such as time spent, worked out from the saved command log, and counts of AI requests and tokens. No grades and no AI prompts are shown.
 5. Grade the PDFs that students hand in, in Canvas, with Canvas's own tools. A student may also attach their exported project file, which the instructor imports as a new project in their own account to look at it.
+6. Archive the course when it ends. It becomes read-only for everyone, and its students keep their projects.
 
-On 18 November 2026 the user decided that Diagramble does no grading. It keeps no rubrics or comments on submissions, sends Canvas no score, and does not read the Canvas roster. The dashboard lists the people who have launched from the course, and students must be told what it shows. An earlier version of this workflow had grading in it; the rows it touches in sections 5, 10 and 11 are marked.
+On 18 November 2026 the user decided that Diagramble does no grading. It keeps no rubrics or comments on submissions, and sends Canvas no score. For now the dashboard lists the people who have launched from the course; whether it reads Canvas's roster service is an open point (SPEC.md section 14.3), and students must be told what it shows. An earlier version of this workflow had grading in it; the rows it touches in sections 5, 10 and 11 are marked.
 
 ### Core engine versus instructional scaffolding
 
@@ -312,7 +313,7 @@ The newer [Asset Processor placement](https://developerdocs.instructure.com/serv
 
 ### Accessibility and keyboard modeling
 
-- **Legal position.** The Department of Justice rule under Title II of the Americans with Disabilities Act requires public universities to meet WCAG 2.1 Level AA. An [interim rule of April 2026](https://campustechnology.com/articles/2026/04/27/doj-extends-deadline-for-ada-title-ii-compliance.aspx) moved the dates to 26 April 2027 for larger entities and 26 April 2028 for smaller ones. Vendor tools are not exempt.
+- **Legal position.** The Department of Justice rule under Title II of the Americans with Disabilities Act requires public universities to meet WCAG 2.1 Level AA. Diagramble targets WCAG 2.2 Level AA, decided on 18 November 2026, because accessibility is essential and not optional. An [interim rule of April 2026](https://campustechnology.com/articles/2026/04/27/doj-extends-deadline-for-ada-title-ii-compliance.aspx) moved the dates to 26 April 2027 for larger entities and 26 April 2028 for smaller ones. Vendor tools are not exempt.
 - **Design position.** WCAG 2.2 adds a rule that [every drag action needs a non-drag alternative](https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/). A drag-only canvas fails it.
 - **Approach.** Provide an outline view where every element and connection is a list item that can be created, edited and connected from the keyboard. The canvas is one view of the model and the outline is another. Research prototypes for blind users take the same route: a structured text alternative, not an audio canvas.
 - **Procurement.** Publish an Accessibility Conformance Report, the completed form of the Voluntary Product Accessibility Template.
@@ -321,6 +322,7 @@ The newer [Asset Processor placement](https://developerdocs.instructure.com/serv
 
 - **Student records.** United States universities share student records with vendors under a "school official" arrangement that needs a written agreement and limits use of the data. The exact regulatory text was not verified in this research.
 - **Security review.** Campuses usually ask for the [Higher Education Community Vendor Assessment Toolkit](https://www.educause.edu/higher-education-community-vendor-assessment-toolkit) questionnaire, and for larger purchases an independent security audit report.
+- **Data retention.** Course archiving, a retention policy for logs, analytics, AI usage records and archived courses, and account deletion are needed before the first live course, decided on 18 November 2026. The periods are open (SPEC.md section 14.3).
 - **Running cost.** The tool is free for colleges, but running it is not. Someone must host the server, and AI features cost money per request. Visible Analyst's own student token is $49 for six months. That token is the cost this project removes.
 
 ## 6. Proposed product vision
@@ -350,7 +352,7 @@ Diagramble is a browser-based modeling environment that understands what student
 4. **Small and correct beats broad and shallow.** A notation is added only together with its rules and its links to the rest of the model.
 5. **Scaffolding is a layer.** The engine underneath is the same for a beginner and a professional.
 6. **AI assists reasoning.** It explains and questions. It does not produce the graded work.
-7. **Keyboard and screen-reader use is a first-class path,** not a retrofit.
+7. **Keyboard and screen-reader use is a first-class path,** not a retrofit. Accessibility is essential: students with disabilities must be able to do all their work.
 
 ### Positioning against four categories
 
@@ -591,7 +593,7 @@ The instructor sets one level for each Canvas course, decided on 18 November 202
 Three safeguards apply at every level above 0.
 
 - **Attempt first.** Help is offered about work the student has already done, not before.
-- **Disclosure.** The student sees what was used, and the instructor sees a timeline of prompts, responses and edits.
+- **Disclosure.** The student sees what was used. The instructor sees counts of AI use, in requests and tokens, per student and per course, and never the prompts or responses. On 18 November 2026 the user dropped an instructor view of prompts and responses. Prompt and response text is still logged for safety and debugging, under the retention policy.
 - **No detectors.** Integrity rests on process evidence from the operation log, which is fairer than a probability score.
 
 **Assessment mode** is level 0 plus a locked profile. The built-in rule explanations remain, because they are fixed text and not AI.
@@ -607,7 +609,7 @@ A fixed reply structure guarantees the shape of a reply, not that its content is
 
 ### Operating facts
 
-- **Privacy.** Send no names or student identifiers to a model provider. Contract for no training on the data. Major providers offer this, and [zero retention on request](https://platform.claude.com/docs/en/manage-claude/api-and-data-retention) for eligible features.
+- **Privacy.** Send no names or student identifiers to a model provider. The institution supplies the key and chooses a provider whose terms fit its data rules, including whether the provider trains on data sent through its API. Some providers offer [zero retention on request](https://platform.claude.com/docs/en/manage-claude/api-and-data-retention) for eligible features. Diagramble does not vet providers.
 - **Cost.** A feedback request of about 2,000 words of context costs roughly a tenth of a cent to three cents at [published prices](https://platform.claude.com/docs/en/about-claude/pricing) read on 17 November 2026, depending on the model tier. Cost is not the constraint.
 - **Speed.** No sourced figures were found. Test before promising response times.
 
@@ -699,7 +701,7 @@ Values are High, Medium or Low. Effort is a relative size: S (days to two weeks)
 | 1 | Semantic model and repository with stable identity | High | High | High | L | None |
 | 2 | Command layer with undo and an operation log | Medium | High | Medium | M | 1 |
 | 3 | DFD editor: context diagram, leveled decomposition, control flows, flows that leave the diagram, and bringing later parent flows down to a child | High | High | High | L | 1, 2 |
-| 4 | Gane and Sarson symbols by default, with DeMarco and Yourdon as a display setting | Medium | Medium | Low | S | 3 |
+| 4 | Gane and Sarson symbols. Deferred on 18 November 2026: DeMarco and Yourdon as a display setting, which may come later as a per-course choice | Medium | Medium | Low | S | 3 |
 | 5 | Data dictionary with composition, aliases, notes, and values with their meanings | High | High | Medium | M | 1 |
 | 6 | ERD editor in crow's-foot notation, with identifiers, modality, and independent, dependent and intersection entities | High | High | Medium | L | 1, 2 |
 | 7 | Links: flow to structure, store to entity, element to attribute | High | High | Medium | M | 3, 5, 6 |
@@ -742,8 +744,8 @@ Items 1, 3 and 9 carry the technical risk. Item 13 is in Level 1 because accessi
 | Requirements definition with trace links to use cases and processes (Chapter 3) | Medium | Medium | Low | M | Core |
 | Process descriptions: structured English and decision tables | Medium | Medium | Medium | M | DFD |
 | AI assistance levels 1 and 2: explain, question, hint | High | Medium | Medium | M | Course settings, AI gateway |
-| Group projects with turn-taking and comments | Medium | Medium | Medium | M | Accounts |
-| Chen notation as an ERD display option | Medium | Low | Low | S | ERD |
+| Deferred on 18 November 2026, with no release: group projects with turn-taking and comments | Medium | Medium | Medium | M | Accounts |
+| Deferred on 18 November 2026: Chen notation as an ERD style, which needs model changes | Medium | Low | Low | S | ERD |
 | Accessibility audit and published conformance report | Low | High | Medium | M | Outline view |
 
 ### Level 3: professional CASE platform
@@ -812,6 +814,7 @@ A throwaway-quality prototype of the three things most likely to fail.
 | One instructor runs a full sequence of use cases, context diagram, leveled DFDs, ERD and dictionary in a live course section | The product survives real use |
 | The diagrams in Chapters 4 and 5 of the textbook can be built in the tool, and every finding they produce has been reviewed | The tool and the book must not contradict each other in front of students |
 | A project exports to a PDF that an instructor accepts as a submission document | Students hand work in through Canvas as that PDF |
+| An instructor can archive a course, a retention policy deletes old records, and an account can be deleted | Student data is not kept forever. Added on 18 November 2026 |
 | An instructor's own AI agent builds a starter case through the Model Context Protocol (MCP) server, with a personal API key | Instructors can make scenarios quickly. Added on 18 November 2026, when the user placed the MCP server in this release |
 
 ### Release 2: complete educational environment (Level 2)
@@ -820,12 +823,11 @@ A throwaway-quality prototype of the three things most likely to fail.
 | --- | --- |
 | An instructor sets the rule profile and AI level for a Canvas course, and every student launched from it gets them | The instructor controls the course without grading in the tool |
 | An instructor sees a course dashboard of how students worked, worked out from the saved command log, and students are told what it shows | Evidence of process without grades in the tool |
-| An independent accessibility audit supports a published conformance report at WCAG 2.1 Level AA | Purchasing gate for public universities |
+| An independent accessibility audit supports a published conformance report at WCAG 2.2 Level AA | Purchasing gate for public universities |
 | AI levels 0 to 2 are enforced by the server and every exchange is logged | Assessment mode is credible |
-| A classroom comparison shows explanations and hints do not reduce unassisted performance | Guards against the harm found in the research |
 | One instructor runs the design sequence of Chapters 9 and 10 in a live course section: physical DFD, structure chart, program specification and physical data model | The tool covers the whole course, not only analysis |
 | Every deliverable of chapters 1 to 12 can be produced in the tool and exported to PDF, alone or in the textbook's compiled documents | A student keeps one project for the whole term and hands in from it |
-| At least one course beyond the first adopts it for a second term | Evidence of value, not only of trial |
+| The instructor's feedback as the tool is used shows it helps teaching | The only measure of teaching value, decided on 18 November 2026. It replaces a classroom comparison and adoption by a second course, both dropped that day |
 
 ### Release 3: professional platform (Level 3)
 
@@ -926,7 +928,7 @@ Five of the eight assumptions hold only with conditions, and three are rejected 
 | Traditional DFDs should remain central | Yes for the first release, as a deliberate bet | Both leading textbooks keep full DFD chapters. DFDs are also the only notation where no adequate web tool exists, so they are where the product can win | DFD use in industry has faded outside security threat modeling, and no survey was found that measures the trend in teaching. Keep the architecture notation-neutral. Use case forms are in Level 1, because the course textbook builds DFDs from them |
 | UML and BPMN are needed in the first release | No | Both are well served by free tools. Adding them as shapes without rules would break the product's own principle and triple the first release | Courses built on object-oriented textbooks cannot adopt the first release. The course textbook uses neither notation. Class diagrams and BPMN wait for Level 3 |
 | Cross-diagram validation can be built incrementally | Yes, if identity and the key links come first | Rules are additive over a correct model, and student-size models need no incremental computation | It cannot be retrofitted onto stored drawings. Starting with a drawing tool "to ship sooner" would forfeit this |
-| Real-time collaboration justifies its complexity | No, not before Level 3 | It is the largest single engineering item. Shared-editing libraries do not enforce model rules. Most graded modeling work is individual | Students expect live co-editing, and group projects are common. Offer shared projects with one editor at a time, comments and full history at Level 2, then decide with usage data |
+| Real-time collaboration justifies its complexity | No, not before Level 3 | It is the largest single engineering item. Shared-editing libraries do not enforce model rules. Most graded modeling work is individual | Students expect live co-editing, and group projects are common. Offer shared projects with one editor at a time, comments and full history at Level 2, then decide with usage data. Group work was deferred with no release on 18 November 2026 |
 | Model-to-code generation is useful for the curriculum | No for program code, yes for database schemas | Visible Analyst's C and COBOL skeletons have no place in a current course. Turning an ERD into tables is taught and is cheap to build | Schema export is the only generation worth building for education. It moves to Level 2 |
 | AI-generated diagrams improve learning | No for graded work | The best experiment found shows a lasting cost when AI gives answers during practice. Language models also make cardinality and relationship errors that a beginner cannot spot | Generation has uses as worked examples and for instructors preparing cases. Keep it out of the student path by default |
 | An educational product can compete with free diagram tools | Only on what they cannot do | Free tools win on price, familiarity and collaboration. Lucidchart even has free Canvas assignments. They have no semantics, no checking and no dictionary | If instructors want only pictures, the product loses. Test this with pilot instructors before Release 1 is finished |

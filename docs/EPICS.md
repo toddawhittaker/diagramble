@@ -204,9 +204,13 @@ Epics 2 and 3. Runs beside Epics 4 and 5. Size M.
   made and the command sent again after that refusal, and a warning before the page
   closes with changes waiting. It knows nothing of the web store; Epic 7 connects it.
 - One project per student per Canvas course, made empty on first open.
+- One editing tab per project (SPEC.md section 3.9): every other tab showing it is
+  read-only and says so, and offers a takeover that makes the editing tab read-only. Undo
+  and redo reach only the current editing session.
 
 Exit: tests that a command is saved before the next is applied, that a queue held offline
-arrives in order, and that a reused identifier is refused and sent again. The save request
+arrives in order, that a reused identifier is refused and sent again, and that a second tab is read-only
+until it takes over, after which the first tab is read-only. The save request
 and the database schema are hard to undo, so the epic's architect run brings them to the
 user. The security reviewer has run.
 
@@ -217,7 +221,7 @@ to app: the serving of the web build in `apps/server`, and the launch entry in `
 Depends on Epics 4, 5 and 6. Size S.
 
 - The launch opens the web app on the student's saved project for that course, and the
-  app lists its findings.
+  app lists its findings. A read-only tab shows Epic 6's read-only notice and takeover.
 - The web store sends each accepted command through Epic 6's save queue, and the top bar
   says when the project was last saved.
 - The trial in the Canvas test course, then the release gate's whole-system review by the
@@ -262,13 +266,14 @@ section 10, Level 1). SPEC.md sections 8 and 9 fix its new parts.
 | --- | --- | --- | --- |
 | R1-a | Project list | SPEC.md section 3.9: the project list, starting a new project, and copying, renaming and deleting one, over Release 0's saving | Release 0 |
 | R1-b | Project files and starter cases | Export and import with version upgrades and plain refusals (section 3.9), saving a project as a starter case (section 3.8), two shipped starter cases and symbol help (VISION.md section 10, item 17). Import is a security boundary: the security reviewer runs, and the exit includes tests built from section 3.9's "Import fails safe" list, with fuzzed and hand-crafted hostile files | R1-a |
-| R1-c | Data flow diagrams and dictionary, complete | The Release 1 commands and queries of section 4, the settings of section 3.7, the full editor, the dictionary screen, the problems panel, where-used, safe rename and delete, and the DeMarco and Yourdon display (VISION.md section 10, items 3 to 5, 11, 12) | Release 0 |
+| R1-c | Data flow diagrams and dictionary, complete | The Release 1 commands and queries of section 4, the settings of section 3.7, the full editor, the dictionary screen, the problems panel, where-used, and safe rename and delete (VISION.md section 10, items 3, 5, 11, 12). Only Gane and Sarson symbols are drawn; other styles were deferred on 18 November 2026 | Release 0 |
 | R1-d | Use case forms | SPEC.md section 8: kinds, rules, worked-out views and the form screen | Release 0 |
 | R1-e | Entity relationship diagram and CRUD matrix | SPEC.md section 9, including the checks against the process model | Release 0 |
 | R1-f | Canvas launch for live sections | Several platform registrations and key rotation (VISION.md section 10, item 16). No score is sent | Release 0 |
 | R1-g | Project document as PDF | The Release 1 exit criterion on a PDF. Needs SPEC.md section 14.3 item 6 settled, and SPEC.md to say which part of section 10.8 comes in Release 1 | R1-c, R1-d, R1-e |
 | R1-h | Keyboard and screen reader | The outline as a full keyboard editor for every Release 1 kind, and a screen-reader pass (VISION.md section 10, item 13) | R1-c, R1-d, R1-e |
 | R1-i | Instructor MCP server | SPEC.md section 7.1: personal API keys kept as hashes, revocable and logged, and Model Context Protocol (MCP) tools made from the command and query registry. Decided for Release 1 on 18 November 2026 | R1-a, R1-b |
+| R1-k | Retention, archiving and account deletion | SPEC.md section 1, "Data retention": an instructor archives a course, which makes it read-only while students keep their projects; a retention policy deletes old logs, analytics, AI usage records and archived courses; an account can be deleted. Needed before the live course. Needs SPEC.md section 14.3 item 8 settled. The security reviewer runs | R1-a, R1-f |
 | R1-j | Checked against the book | The exit criteria on chapters 4 and 5, on Visible Analyst's checks, and on a student finishing the starter case alone. It needs `sources/`, so it runs from the main checkout | All of the above |
 
 ## 4. Release 2 candidates
@@ -278,18 +283,18 @@ section 10, Level 2). SPEC.md sections 7, 10 and 11 fix most of it.
 
 | Code | Epic | What it does | Depends on |
 | --- | --- | --- | --- |
-| R2-a | Course settings, AI gateway and assistance levels 1 and 2 | SPEC.md section 7 and section 1, "AI models and agents" and "Course settings": the screen where an instructor sets a course's level and rule profile, the server reading the level from it to build each request's tools, an AI SDK tool-loop agent using only read-only queries, every step logged and student identity removed. Meets the criterion that levels 0 to 2 are enforced and logged | Release 1 |
+| R2-a | Course settings, AI gateway and assistance levels 1 and 2 | SPEC.md section 7 and section 1, "AI models and agents" and "Course settings": the screen where an instructor sets a course's level and rule profile, the server reading the level from it to build each request's tools, an AI SDK tool-loop agent using only read-only queries, every step logged and student identity removed, and AI use counted in requests and tokens per student and per course. The institution supplies the key and chooses the provider (SPEC.md section 7 item 7). Meets the criterion that levels 0 to 2 are enforced and logged | Release 1 |
 | R2-c | Planning forms | System request, feasibility analysis and alternative matrix (SPEC.md sections 10.1, 10.2, 10.4) | Release 1 |
 | R2-d | Requirements and test plan | SPEC.md sections 10.3 and 10.5, with their trace links | Release 1 |
 | R2-e | Interface structure diagram | SPEC.md section 10.6 | Release 1 |
-| R2-f | Binder and attachments | SPEC.md section 10.7. Where attachment files are kept, and how the project file carries them, is hard to undo | R1-a, R1-b |
+| R2-f | Binder and attachments | SPEC.md section 10.7. Where attachment files are kept, and how the project file carries them, is hard to undo; SPEC.md section 14.3 item 12 must be settled first | R1-a, R1-b |
 | R2-g | Compiled PDFs | SPEC.md section 10.8 | R1-g, R2-c to R2-f |
 | R2-h | Logical and physical mode | SPEC.md section 11.1, which the three design epics need | Release 1 |
 | R2-i | Physical data flow diagram | SPEC.md section 11.2 | R2-h |
 | R2-j | Structure chart and program specification | SPEC.md sections 11.3 and 11.4 | R2-h |
 | R2-k | Physical data model and storage estimate | SPEC.md sections 11.5 and 11.6 | R2-h |
 | R2-l | Accessibility audit | An independent audit and a published conformance report | The screens of R2-c to R2-k |
-| R2-m | Course dashboard | Behavior analytics per Canvas course, such as time spent, worked out from the saved command log. Its student list is the people who launched from the course, not the roster service. No grades. Students are told what it shows. Needs SPEC.md section 14.3 item 8 settled | Release 0's saving, R2-a's course settings |
+| R2-m | Course dashboard | Behavior analytics per Canvas course, such as time spent, worked out from the saved command log. It may show R2-a's counts of AI requests and tokens, never prompts or responses. Its student list is the people who launched from the course, unless SPEC.md section 14.3 item 11 settles on the roster service. No grades. Students are told what it shows | Release 0's saving, R2-a, R1-k |
 
 There is no R2-b. It held Canvas settings per link and LTI Advantage certification, both
 dropped on 18 November 2026 (SPEC.md section 1, "Grading").
@@ -297,8 +302,9 @@ dropped on 18 November 2026 (SPEC.md section 1, "Grading").
 The experimental track follows R2-a: assistance levels 3 and 4, where an agent critiques
 a draft or proposes commands through `preview` for the student to accept (SPEC.md section
 7 items 4 and 5; VISION.md section 10, Level 4). Each ships alone, behind its own exit
-criteria. Group projects, Chen notation, SQL schema export and guided workflows have no
-SPEC.md section yet, so they cannot be planned.
+criteria. Group projects were deferred with no release on 18 November 2026. Other symbol styles,
+including Chen notation, wait on SPEC.md section 14.3 item 9. SQL schema export and guided
+workflows have no SPEC.md section yet, so they cannot be planned.
 
 ## 5. Lanes
 
@@ -313,7 +319,7 @@ Epic 1 Foundation
 | Stage | Epics that can run at once |
 | --- | --- |
 | Release 0 | Epic 1 alone; then Epics 2 and 3; then Epics 4 and 5, with Epic 3 if it is still running; then Epic 6 once Epics 2 and 3 have merged; then Epic 7 |
-| Release 1 | R1-a, R1-c, R1-d and R1-e; then R1-b, R1-f and R1-i; then R1-g and R1-h; then R1-j |
+| Release 1 | R1-a, R1-c, R1-d and R1-e; then R1-b, R1-f and R1-i; then R1-g, R1-h and R1-k; then R1-j |
 | Release 2 | R2-a, R2-c, R2-d, R2-e and R2-h; then R2-f, R2-i, R2-j, R2-k and R2-m; then R2-g and R2-l |
 
 ## 6. Questions to settle before an epic starts
