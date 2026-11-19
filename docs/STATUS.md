@@ -22,7 +22,8 @@ that is not a gap in something built goes in a GitHub issue instead.
 - **Epic 1: Foundation.** An npm workspaces root over the five parts of SPEC.md
   section 12, each with a placeholder and one test; the Release 0 libraries, pinned
   exactly; a boundary check that keeps the model, rules and cases free of React, the
-  browser and the server; and the App CI job, a required check, over all of them.
+  browser and the server; and two required CI checks over all of them, App checks
+  and App tests, the second failing below 75% test coverage.
 
 ## Open items
 
