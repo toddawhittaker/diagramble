@@ -46,7 +46,7 @@ jobs:
         with:
           node-version-file: .nvmrc
       - name: Check Markdown links and images
-        run: python3 scripts/check-docs-links.py
+        run: node scripts/check-docs-links.mjs
       - name: Check comments for project history
         run: node scripts/check-comment-history.mjs
 

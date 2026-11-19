@@ -55,7 +55,7 @@ sessions; humans run `nvm use`), and gitleaks for the pre-commit hook
 | `npm run dev --workspace @diagramble/web` | Serve the web app with Vite |
 | `npm ci`, `npm run typecheck` / `lint` / `test` / `build` / `dev` | The same checks for the prototype, run in `prototype/`; `dev` serves http://localhost:5173 |
 | `node scripts/check-comment-history.mjs` | Fails on project history in comments, repo-wide |
-| `python3 scripts/check-docs-links.py` | Fails on a broken relative link or image in Markdown |
+| `node scripts/check-docs-links.mjs` | Fails on a broken relative link or image in Markdown |
 
 ## How work gets done here
 

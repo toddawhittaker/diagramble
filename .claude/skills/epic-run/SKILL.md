@@ -50,7 +50,7 @@ work it closes.
    `gh pr view <n> --json files` that the files it claims are in the PR,
    and rule on anything it did outside its file list. Before pushing any
    edit of your own, run `node scripts/check-comment-history.mjs` and
-   `python3 scripts/check-docs-links.py`.
+   `node scripts/check-docs-links.mjs`.
 8. **Land by auto-merge.** The repository allows auto-merge. Once a task
    PR passes step 7, run `gh pr merge <n> --auto --squash --delete-branch`.
    GitHub merges it when its CI is green. The epic rulesets do not require
@@ -151,7 +151,7 @@ docs/EPIC-<n>.md on the epic branch; read your task's row.
   at the root, the whole test suite (`npm test`), not just the changed
   files, and `npm run typecheck`, `npm run lint` and `npm run build`. Run
   the same checks in `prototype/` only when the task touches it. For a
-  change to any Markdown file, run `python3 scripts/check-docs-links.py`
+  change to any Markdown file, run `node scripts/check-docs-links.mjs`
   from the repository root.
 - A failure near your code is yours until it is shown to fail the same way
   on the base without your change. "Passes when run alone" does not prove
