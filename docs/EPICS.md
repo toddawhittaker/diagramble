@@ -282,16 +282,16 @@ section 10, Level 1). SPEC.md sections 8 and 9 fix its new parts.
 | --- | --- | --- | --- |
 | R1-a | Project list | SPEC.md section 3.9: the project list, starting a new project, and copying, renaming and deleting one, over Release 0's saving | Release 0 |
 | R1-b | Project files and starter cases | Export and import with version upgrades and plain refusals (section 3.9), saving a project as a starter case (section 3.8), two shipped starter cases and symbol help (VISION.md section 10, item 17). Import is a security boundary: the security reviewer runs, and the exit includes tests built from section 3.9's "Import fails safe" list, with fuzzed and hand-crafted hostile files | R1-a |
-| R1-c | Data flow diagrams and dictionary, complete | The Release 1 commands and queries of section 4, the settings of section 3.7, the full editor, the dictionary screen, the problems panel, where-used, and safe rename and delete (VISION.md section 10, items 3, 5, 11, 12). Only Gane and Sarson symbols are drawn; other styles come later (SPEC.md section 14.1 item 9) | Release 0 |
+| R1-c | Data flow diagrams and dictionary, complete | The Release 1 commands and queries of section 4, the settings of section 3.7, the full editor, the dictionary screen, the problems panel, where-used, and safe rename and delete (VISION.md section 10, items 3, 5, 11, 12). Only Gane and Sarson symbols are drawn; other styles come later (SPEC.md section 14.1 item 7) | Release 0 |
 | R1-d | Use case forms | SPEC.md section 8: kinds, rules, worked-out views and the form screen | Release 0 |
 | R1-e | Entity relationship diagram and CRUD matrix | SPEC.md section 9, including the checks against the process model | Release 0 |
 | R1-f | Canvas launch for live sections | Several platform registrations and key rotation (VISION.md section 10, item 16). No score is sent | Release 0 |
 | R1-g | Project document as PDF | The Release 1 exit criterion on a PDF, made with the browser's own print to PDF (SPEC.md section 10.8): a print stylesheet that lays each document out as pages and scales or splits large diagrams, and a short hint to choose "Save as PDF" and turn off the browser's headers and footers. The compiled documents wait for R2-g | R1-c, R1-d, R1-e |
 | R1-h | Keyboard and screen reader | The outline as a full keyboard editor for every Release 1 kind, and a screen-reader pass (VISION.md section 10, item 13) | R1-c, R1-d, R1-e |
-| R1-i | Instructor MCP server | SPEC.md section 7.1: personal API keys kept as hashes, revocable and logged, and Model Context Protocol (MCP) tools made from the command and query registry. Keys are for instructors only. While the agent edits, the instructor's open tabs on that project are read-only and say so. The architect run reads how Portikus's `packages/auth` stores API keys as hashes and ports what fits. Decided for Release 1 on 18 November 2026 | R1-a, R1-b |
-| R1-k | Retention, archiving and account deletion | SPEC.md section 1, "Data retention": an instructor archives a course, which makes it read-only while students keep their projects; a retention policy deletes old logs, analytics, AI usage records and archived courses after the periods the administrator sets in R1-l; an account can be deleted. Needed before the live course. Needs the default periods of SPEC.md section 14.1 item 8. The security reviewer runs | R1-a, R1-f, R1-l |
-| R1-l | Administrator interface and operations | SPEC.md section 1, "Administration": one system administrator per deployment; the first one made by the first sign-in with the break-glass password set at install; a second factor for administrators, either a passkey or an authenticator app's time-based one-time codes, and never text messages; retention period settings, an operations document for backup, restore and monitoring, and their state shown in the interface (server status, last backup). Managing later ways of signing in, such as email magic links, joins it when they are built; the architect run then reads Portikus's `packages/auth` for its OpenID Connect sign-in. The architect run first reads Portikus's `packages/auth` for its local administrator, passkey and breached-password code. The security reviewer runs | R1-f |
-| R1-j | Checked against the book | The exit criteria on chapters 4 and 5, on Visible Analyst's checks, and on a student finishing the starter case alone. It needs `sources/`, so it runs from the main checkout | All of the above |
+| R1-i | Instructor MCP server | SPEC.md section 7.1: personal API keys kept as hashes, revocable and logged, and Model Context Protocol (MCP) tools made from the command and query registry. Keys are for instructors only. While the agent edits, the instructor's open tabs on that project are read-only and say so. The architect run reads how Portikus's `packages/auth` stores API keys as hashes and ports what fits | R1-a, R1-b |
+| R1-k | Retention, archiving and account deletion | SPEC.md section 1, "Data retention": an instructor archives a course, which makes it read-only while students keep their projects; a retention policy deletes old logs, analytics, AI usage records and archived courses after the periods the administrator sets in R1-l; an account can be deleted. Needed before the live course. Needs the default periods of SPEC.md section 14.1 item 6. The security reviewer runs | R1-a, R1-f, R1-l |
+| R1-l | Administrator interface and operations | SPEC.md section 1, "Administration": one system administrator per deployment; the first one made by the first sign-in with the break-glass password set at install; a second factor for administrators, either a passkey or an authenticator app's time-based one-time codes, and never text messages; retention period settings; an operations document for backup, restore and monitoring, with the data inventory of SPEC.md section 1, "Student records" (what is stored, where, and for how long); and their state shown in the interface (server status, last backup). The other ways of signing in are R2-n. The architect run reads Portikus's `packages/auth` for its local administrator, passkey and breached-password code. The security reviewer runs | R1-f |
+| R1-j | Checked against the book | The exit criteria on chapters 4 and 5 and on Visible Analyst's checks. It needs `sources/`, so it runs from the main checkout | All of the above |
 
 ## 4. Release 2 candidates
 
@@ -309,20 +309,17 @@ section 10, Level 2). SPEC.md sections 7, 10 and 11 fix most of it.
 | R2-h | Logical and physical mode | SPEC.md section 11.1, which the three design epics need | Release 1 |
 | R2-i | Physical data flow diagram | SPEC.md section 11.2 | R2-h |
 | R2-j | Structure chart and program specification | SPEC.md sections 11.3 and 11.4 | R2-h |
-| R2-k | Physical data model and storage estimate | SPEC.md sections 11.5 and 11.6 | R2-h |
+| R2-k | Physical data model, SQL schema export and storage estimate | SPEC.md sections 11.5 and 11.6, including the SQL schema export of section 11.5 in one dialect | R2-h |
 | R2-l | Accessibility audit | An independent audit and a published conformance report | The screens of R2-c to R2-k |
 | R2-m | Course dashboard | Behavior analytics per Canvas course, such as time spent, worked out from the saved command log. It may show R2-a's counts of AI requests and tokens, never prompts or responses. Its class list comes from Canvas's roster service (Names and Role Provisioning Services, NRPS), fetched when the instructor opens it and not kept (SPEC.md section 1, "Grading"). The architect run reads Portikus's roster client in `packages/auth`. No grades. Students are told what it shows | Release 0's saving, R2-a, R1-k |
+| R2-n | More ways to sign in | SPEC.md section 1, "Sign-in" and "Administration": OpenID Connect (OIDC) for school Google or Microsoft accounts, LDAP directories, and email magic links limited to an allow list of addresses or to allowed domains, each set up in R1-l's administrator interface and each a sign-in method of an existing kind of account. A second factor stays required of administrators only. The architect run reads Portikus's `packages/auth` for its OpenID Connect sign-in and ports what fits. The security reviewer runs | R1-l |
 
 There is no R2-b. Canvas settings per link and LTI Advantage certification are in no
 plan (SPEC.md section 1, "Grading").
 
-The experimental track follows R2-a: assistance levels 3 and 4, where an agent critiques
-a draft or proposes commands through `preview` for the student to accept (SPEC.md section
-7 items 4 and 5; VISION.md section 10, Level 4). Each ships alone, behind its own exit
-criteria. Group projects are a later goal, in no release yet. Other symbol styles,
-DeMarco and Yourdon and UML class notation, are planned but unscheduled (SPEC.md section
-14.1 item 9). SQL schema export and guided
-workflows have no SPEC.md section yet, so they cannot be planned.
+Things wanted but in no release, such as AI assistance level 3, guided workflows, other
+symbol styles and group work, are VISION.md section 11's "Later goals". They are not
+planned here.
 
 ## 5. Lanes
 
@@ -338,7 +335,7 @@ Epic 1 Foundation
 | --- | --- |
 | Release 0 | Epic 1 alone; then Epics 2 and 3; then Epics 4 and 5, with Epic 3 if it is still running; then Epic 6 once Epics 2 and 3 have merged; then Epic 7 |
 | Release 1 | R1-a, R1-c, R1-d and R1-e; then R1-b, R1-f and R1-i; then R1-g, R1-h and R1-l; then R1-k; then R1-j |
-| Release 2 | R2-a, R2-c, R2-d, R2-e and R2-h; then R2-f, R2-i, R2-j, R2-k and R2-m; then R2-g and R2-l |
+| Release 2 | R2-a, R2-c, R2-d, R2-e, R2-h and R2-n; then R2-f, R2-i, R2-j, R2-k and R2-m; then R2-g and R2-l |
 
 ## 6. Questions to settle before an epic starts
 

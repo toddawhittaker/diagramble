@@ -30,7 +30,7 @@ this document wins. Section 14 lists the points still open.
 | Decision | Choice | Effect |
 | --- | --- | --- |
 | License | Business Source License 1.1. Free production use for non-profit organizations (including credit-bearing tuition), individuals' own study and teaching (including students at for-profit schools), and a one-time paid setup for a non-profit that hosts the tool itself, all only with a copy obtained free or from the author. A commercial license is needed for any other use by a for-profit organization; for a company paid to run a college's courses that use it; for selling or bundling; for any recurring charge for hosting, operating, maintaining or supporting it, even to a non-profit; and for paid training that earns no academic credit. A "charge" includes indirect income such as advertising, data, revenue shares and paid bundles. Each version becomes AGPL-3.0-or-later four years after it is published. The full terms are in `LICENSE`, and a plain-language summary is in `LICENSING.md` | It is not an open source license. No dependency may be under the GPL or the AGPL alone, because those would require the whole tool to use the same license. Libraries under the Eclipse Public License are allowed. elkjs is used under its "EPL-2.0" option (section 12). Outside contributions would need a contributor license agreement, so that commercial licenses can be sold. One is written when someone wants to contribute |
-| First deployment | Hosted by the project's author | The trial launch in Release 0 runs against that deployment. Who hosts for other institutions is not decided |
+| Hosting | Self-hosting. Each institution runs its own copy from the Docker image ("Deployment" below). The project's author hosts the first deployment, and may sell commercial licenses or hosting. There is no community-hosted instance | The trial launch in Release 0 runs against the author's deployment |
 | Textbook | Dennis, Wixom and Roth, *Systems Analysis and Design*, 8th edition (Wiley, 2022) | The tool is built for this book. It sets the symbol style, the names of things, the limits and the wording of the rules. See section 13 |
 | Course coverage | Chapters 1 to 12. Chapter 13, on agile methods, is not covered | The design diagrams of chapters 9 and 10 join the roadmap in the second release. None is in Release 0 |
 | Balancing strictness | Parent data missing from the child diagram is an error. Data added on the child diagram is a warning | BAL-03 is a warning. See section 5.5 |
@@ -41,20 +41,22 @@ this document wins. Section 14 lists the points still open.
 | Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again | See section 3.9. Release 0 has a database and saves each accepted command (section 2). The project list, copying, renaming, deleting, export and import come in Release 1 |
 | Instructors' AI agents | A Model Context Protocol (MCP) server lets an instructor's own AI agent build scenarios and starter cases, using a personal API key | See section 7.1. Built in Release 1 |
 | Grading | None. Diagramble sends Canvas no score and keeps no rubrics or comments on submissions. The Canvas launch only signs a person in and opens their work. Assignment and Grade Services, Deep Linking and LTI Advantage certification are in no plan. The course dashboard reads the class list from Canvas's roster service (LTI Names and Role Provisioning Services, NRPS) | Students hand in the exported PDF through Canvas (section 3.9), and may attach their project file too. The instructor grades in Canvas. A course dashboard of student behavior, without grades, is a Release 2 candidate. It fetches the class list from the roster service each time the instructor opens it, and does not copy or keep it |
-| Course settings | One small settings record per Canvas course. The launch says which course and whether the person is an instructor. An instructor sets one AI assistance level (0 to 4) and one rule profile for the course, and every student launched from it gets them. Nothing about assignments is stored | See section 7 item 4. Not built in Release 0, except that an account may record the course it launched from |
+| Course settings | One small settings record per Canvas course. The launch says which course and whether the person is an instructor. An instructor sets one AI assistance level (0 to 2) and one rule profile for the course, and every student launched from it gets them. Nothing about assignments is stored | See section 7 item 4. Not built in Release 0, except that an account may record the course it launched from |
 | Element identifiers | Made by whoever creates the item and carried in the creating command | See sections 3.2 and 4.1 |
 | Stack | TypeScript everywhere | One shared package holds the model and rules and runs in both browser and server |
 | Server framework | Fastify (MIT), with Zod for request checking | See section 12 |
 | Canvas launch | Our own thin layer for the Learning Tools Interoperability (LTI) 1.3 launch, built on `jose` (MIT), not on ltijs. The launch is critical, so it sits inside our own tests and security review. ltijs has one maintainer and brings its own Express app and database layer | See section 12 |
 | Database access | Kysely (MIT) behind a small project-store interface of our own (load, save, append to the log) | The same code can run on PostgreSQL on the server and on SQLite in a possible desktop app later (section 14.1). See section 12 |
-| AI models and agents | The Vercel AI SDK, package `ai` (Apache-2.0), for student-facing AI including agents (its tool-loop agent). Rule 1: use provider packages such as `@ai-sdk/anthropic` with the institution's own key, never bare model-name strings, which route through Vercel's hosted gateway. Rule 2: our server still builds the tool list for each request from the assistance level (section 7 item 4), and an agent changes the model only by proposing through `preview` (section 7 item 5). Rule 3: we log every step and remove student identity ourselves (section 7 item 7). The institution supplies and protects the provider key, and chooses a provider whose terms fit its data rules; Diagramble does not vet providers | See sections 7 and 12. No AI feature is built in Release 0 |
+| AI models and agents | The Vercel AI SDK, package `ai` (Apache-2.0), for student-facing AI including agents (its tool-loop agent). Rule 1: use provider packages such as `@ai-sdk/anthropic` with the institution's own key, never bare model-name strings, which route through Vercel's hosted gateway. Rule 2: our server still builds the tool list for each request from the assistance level (section 7 item 4), and no AI model offered to a student can change the model (section 7 item 5). Rule 3: we log every step and remove student identity ourselves (section 7 item 7). The institution supplies and protects the provider key, and chooses a provider whose terms fit its data rules; Diagramble does not vet providers | See sections 7 and 12. No AI feature is built in Release 0 |
 | Deployment | One Docker image for the app, and a Docker Compose file that adds PostgreSQL | See section 12 |
-| Sign-in | The Canvas launch only, for now. An account is kept separate from the ways of signing in to it, so that other ways can be added later without changing accounts | A session is a cookie that points to a record stored in the database. Later ways of signing in are listed in section 14.1 |
+| Sign-in | The Canvas launch from Release 0. In Release 2, three more ways: OpenID Connect (OIDC), for school Google or Microsoft accounts; LDAP directories; and email magic links limited to an allow list of addresses or to allowed domains. The administrator sets up each one in the administrator interface. An account is kept separate from the ways of signing in to it, so that a way can be added without changing accounts | A session is a cookie that points to a record stored in the database. Instructors and students sign in through Canvas, whose own sign-in often already requires a second factor, so Diagramble requires a second factor of administrators only ("Administration") |
+| Rule findings | Every rule of section 5 flags a problem in the problems panel and, by default, blocks nothing. A course's rule profile can turn a rule off, change its severity, or make it block a change | See section 5.1. The invariants of section 3.4 are always enforced, whatever the profile says |
 | Flow identity | Separate flow elements, each carrying a shared dictionary definition | See section 3.3 |
 | AI | Agent integration must be possible from the start | See section 7. No AI feature is built in Release 0 |
 | Accessibility | Essential. Students with disabilities must be able to do all their work. The target is the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA | The keyboard outline of section 2 item 5 is the first step. Every screen is held to the target |
 | Data retention | A requirement before Release 1's live course. An instructor can archive an old course, which makes it read-only for everyone while its students keep their projects. A retention policy decides how long logs, analytics, AI usage records and archived courses are kept before they are deleted. An account can be deleted | The system administrator sets the periods ("Administration" below). The default periods are open (section 14.1) |
-| Administration | An administrator interface. Each deployment has one system administrator, above instructors. The administrator sets the data retention periods, and later manages the ways of signing in, such as email magic links | The first administrator is created by the first sign-in with a break-glass password: a password kept for emergencies, set when the deployment is installed. Administrators must use a second factor, either a passkey or an authenticator app with time-based one-time codes. Text messages (SMS) are never offered, because they are easy to intercept. Backups, restore, monitoring and health checks are described in an operations document. The administrator interface shows their state, such as the server's status and when the last backup ran |
+| Student records | Each institution that hosts Diagramble is responsible for its own compliance with the Family Educational Rights and Privacy Act (FERPA), the United States student privacy law, and for any agreements it needs | Diagramble supplies what a host needs to comply: the retention settings and account deletion of "Data retention", the rules on the AI provider of section 7 item 7, and a data inventory in the operations document ("Administration") that says what is stored, where, and for how long |
+| Administration | An administrator interface. Each deployment has one system administrator, above instructors. The administrator sets the data retention periods, and in Release 2 sets up the other ways of signing in ("Sign-in") | The first administrator is created by the first sign-in with a break-glass password: a password kept for emergencies, set when the deployment is installed. Administrators, and only administrators, must use a second factor, either a passkey or an authenticator app with time-based one-time codes. Text messages (SMS) are never offered, because they are easy to intercept. Backups, restore, monitoring, health checks and the data inventory of "Student records" are described in an operations document. The administrator interface shows their state, such as the server's status and when the last backup ran |
 | Host names | A deployment uses two host names, for example `app.diagramble.example.edu` for the app and `files.diagramble.example.edu` for users' files. Attachments are served only from the files host (section 10.7). The app's session cookie is host-only, with no `Domain` attribute, so the files host never receives it | The two hosts are the same site, so SameSite cookie rules do not protect the app from the files host. From Release 0, every request that is signed in by the session cookie and changes anything must carry an `Origin` header that matches the app host. Anything else, including `Origin: null` or no `Origin` at all, is refused. Requests that prove themselves another way are not covered: the LTI launch carries a signed token from the platform, and the MCP server's requests carry an API key |
 | Symbol styles | Release 1 draws only the textbook's style: Gane and Sarson for data flow diagrams and the textbook's entity relationship notation | Two styles are planned for later: DeMarco and Yourdon for data flow diagrams, and the Unified Modeling Language (UML) class notation for data models. The instructor would choose one per Canvas course in the course settings of section 7 item 4 (section 14.1) |
 
@@ -128,8 +130,7 @@ Every element has these fields.
 - An identifier is an opaque string. Nothing parses it.
 
 Why: the browser and the server both apply each command, and two copies of a project can
-run at once, with two open tabs, a dropped connection, an instructor's MCP agent, or an
-AI proposal accepted later. A counter kept in the project would let two copies give out
+run at once, with two open tabs, a dropped connection, or an instructor's MCP agent. A counter kept in the project would let two copies give out
 the same identifier.
 
 An alias is not a second name. A flow's label, a rule's message and every list show the
@@ -423,8 +424,13 @@ pieces of text: the message, the reason, and the fix. A finding is structured da
 | `diagramId` | Where to show it, if it belongs to one diagram |
 | `values` | Named values used to fill the message text |
 
-A profile is a list of rule identifiers, each `off`, `warning` or `error`. Release 0 has
-one built-in profile with the defaults below. The defaults follow the textbook's quality
+A profile is a list of rule identifiers, each `off`, `warning` or `error`, and each
+optionally marked `block`. By default every rule flags a problem in the problems panel and
+never stops a change. A rule marked `block` refuses any command whose result has a finding
+of that rule that the model before it did not have, and the refusal gives the finding's
+message, reason and fix. The invariants of section 3.4 are separate: they are always
+enforced, whatever the profile says. Release 0 has one built-in profile with the defaults
+below, and it blocks nothing. The defaults follow the textbook's quality
 checklist (Figure 4-24) and its list of common errors (Figure 4-25). Rules run on the
 whole model after every command. Student models are small, so nothing incremental is needed.
 
@@ -704,13 +710,14 @@ product vision.
    | 1 Explain | `getOutline`, `getElement`, `getFindings` |
    | 2 Question and hint | Level 1, plus `whereUsed` and `expandData` |
    | 3 Critique | Level 2, plus the project's starter case text |
-   | 4 Open practice | Level 3, plus `preview` with commands |
 
-5. **An AI model never changes the model directly.** At level 4 it proposes commands
-   through `preview`. The server runs the rules on the result. The student sees the
-   proposal with its findings and accepts or rejects it. Accepted elements are stored
-   with `origin` set to `ai`.
-6. **`preview` must be cheap.** This is why the core is pure functions over an
+   Release 2 delivers levels 0 to 2. Level 3, a critique of a complete draft against the
+   starter case text, is a later goal in no release (VISION.md section 11, "Later goals").
+
+5. **An AI model never changes a student's model.** No assistance level offers it a
+   command, and nothing it says is applied to the model.
+6. **`preview` must be cheap.** An instructor's MCP agent may use it to check a change
+   before making it (section 7.1). This is why the core is pure functions over an
    unchanging model value (section 3.1).
 7. **The gateway is neutral and server-side.** It holds the institution's own key, works
    with more than one model provider, removes student identity, and logs every request
@@ -1337,7 +1344,7 @@ In Release 1, a PDF comes from the browser's own print to PDF. A print styleshee
 each document out as pages, and scales a large diagram to fit a page or splits it across
 pages. A short hint tells the student to choose "Save as PDF" and to turn off the
 browser's headers and footers. The compiled documents below need a better way, which is
-still open (section 14.1 item 6).
+still open (section 14.1 item 4).
 
 The table of contents is generated. The process model and data model are the diagrams
 with their descriptions, and the repository entries are the data dictionary. A part that
@@ -1521,6 +1528,12 @@ Notes on the model:
 The DM rules of section 9.4 and the CRUD rules of section 9.5 run on the physical model
 as well. That covers what the textbook asks for in step 5: the data stores and data
 elements added to the physical DFD must appear as tables and fields (page 350).
+
+**SQL schema export.** The physical data model exports as SQL create-table statements,
+one per table, with each field's data type, length and whether it may be empty, the
+primary key, and a foreign key for each relationship that has one. The dialect is
+PostgreSQL's, unless the epic's architect run finds a reason for another. One dialect is
+enough to show that the data model produces a real database.
 
 In physical mode the CRUD matrix shows table and field names and includes the
 system-related processes, tables and fields, as Figure 10-11 does. It has one set of
@@ -1749,42 +1762,37 @@ end, as the textbook's rule that every flow has two ends requires.
 
 ### 14.1 Open points
 
-1. **Who hosts for other institutions.** The project's author hosts the first
-   deployment.
-2. **Recorded dependencies for normalization.** A student could record which attributes
+1. **Recorded dependencies for normalization.** A student could record which attributes
    each attribute depends on. The tool could then check the second and third normal
    forms, where it now checks only the first (section 9.3). It would make five of the
    textbook's exercises checkable, and it adds a field that most models never fill in.
-3. **The additions of section 14.2.** Each call there is the specification's own and can
+2. **The additions of section 14.2.** Each call there is the specification's own and can
    be revisited when it is built.
-4. **A desktop app.** An Electron app may come later. It could run the same server and
+3. **A desktop app.** An Electron app may come later. It could run the same server and
    project store in-process with SQLite in place of PostgreSQL. The Canvas launch and
    the institution's AI gateway would stay server-only. Nothing is built for it now.
-5. **More ways to sign in.** Besides the Canvas launch, these are wanted later: OpenID
-   Connect (OIDC), LDAP directories, and email "magic links" that are limited to an
-   allow list of addresses or to allowed domains. None is scheduled yet.
-6. **How the compiled documents' PDFs are made.** Release 1 uses the browser's own print
+4. **How the compiled documents' PDFs are made.** Release 1 uses the browser's own print
    to PDF (section 10.8). The compiled documents of section 10.8 need something better.
    Rendering pages in a headless browser gives the most faithful documents but adds a
    few hundred megabytes to the Docker image. A PDF library keeps the image small but
    lays out every document a second time. This must be settled before those documents
    are built.
-7. **A real Canvas before the first live course.** Release 0 launches from a mock
+5. **A real Canvas before the first live course.** Release 0 launches from a mock
    platform (section 2 item 6). Before Release 1's live course, the launch must be
    confirmed against a real Canvas. That needs an LTI 1.3 developer key from a Canvas
    administrator at that time. The key needs the launch and the roster service, and no
    score.
-8. **The default retention periods.** The system administrator sets the periods (section
+6. **The default retention periods.** The system administrator sets the periods (section
    1, "Administration"). Still open: the defaults for command logs, the dashboard's
    analytics, AI usage records and their prompt text, and archived courses. Who may see
    what also needs writing down.
-9. **Other symbol styles.** DeMarco and Yourdon for data flow diagrams, which is display
+7. **Other symbol styles.** DeMarco and Yourdon for data flow diagrams, which is display
    only, and UML class notation for data models are the two planned for later (section
    1, "Symbol styles"). Neither is scheduled. Chen notation is not planned; it would
    need model changes, because it draws attributes as separate shapes and lets
    relationships carry attributes.
-10. **Contributor license agreements.** One is written when someone wants to contribute
-    (section 1, "License").
+8. **Contributor license agreements.** One is written when someone wants to contribute
+   (section 1, "License").
 
 ### 14.2 Taken from Visible Analyst, and left out
 
