@@ -49,7 +49,7 @@ this document wins. Section 14 lists the points still open.
 | Database access | Kysely (MIT) behind a small project-store interface of our own (load, save, append to the log) | A project is stored as one JSON document, and its command log as rows of a separate table (section 3.6). The same code can run on PostgreSQL on the server and on SQLite in a possible desktop app later (section 14.1). See section 12 |
 | AI models and agents | The Vercel AI SDK, package `ai` (Apache-2.0), for student-facing AI including agents (its tool-loop agent). Rule 1: use provider packages such as `@ai-sdk/anthropic` with the institution's own key, never bare model-name strings, which route through Vercel's hosted gateway. Rule 2: our server still builds the tool list for each request from the assistance level (section 7 item 4), and no AI model offered to a student can change the model (section 7 item 5). Rule 3: we log every step (section 7 item 7). The institution supplies and protects the provider key, and chooses a provider whose terms fit its data rules; Diagramble does not vet providers | See sections 7 and 12. No AI feature is built in Release 0 |
 | Deployment | One Docker image for the app, and a Docker Compose file that adds PostgreSQL | See section 12 |
-| Sign-in | The Canvas launch from Release 0. In Release 2, three more ways: OpenID Connect (OIDC), for school Google or Microsoft accounts; LDAP directories; and email magic links limited to an allow list of addresses or to allowed domains. The administrator sets up each one in the administrator interface. An account is kept separate from the ways of signing in to it, so that a way can be added without changing accounts. Each account stores one login, which names its export files (section 3.9) | A session is a cookie that points to a record stored in the database. Administrators always need a second factor ("Administration"). For everyone else, the administrator decides for each way of signing in whether it needs a second factor, a passkey or an authenticator app. By default LDAP and magic links need one, because a password or an email account alone is weak, and OIDC does not, because the school's own provider enforces its own. The Canvas launch needs none from Diagramble, because Canvas sign-in usually requires one already |
+| Sign-in | A password, and the Canvas launch, from Release 0. A password works only for an account the administrator makes; nobody signs up with one. Until the administrator interface exists, a command run on the server makes these accounts. In Release 2, three more ways: OpenID Connect (OIDC), for school Google or Microsoft accounts; LDAP directories; and email magic links limited to an allow list of addresses or to allowed domains. The administrator sets up each one in the administrator interface. An account is kept separate from the ways of signing in to it, so that a way can be added without changing accounts. Each account stores one login, which names its export files (section 3.9) | A password sign-in lets a deployment collect feedback from people outside Canvas, such as faculty reviewing a preview, and it is the kind of sign-in the break-glass password uses ("Administration"). Passwords are stored as scrypt hashes, and repeated failed attempts are slowed and then refused for a while. A session is a cookie that points to a record stored in the database. Administrators always need a second factor ("Administration"). For everyone else, the administrator decides for each way of signing in whether it needs a second factor, a passkey or an authenticator app. By default passwords, LDAP and magic links need one, once second factors exist in Release 1, because a password or an email account alone is weak, and OIDC does not, because the school's own provider enforces its own. The Canvas launch needs none from Diagramble, because Canvas sign-in usually requires one already |
 | Rule findings | Every rule of section 5 flags a problem in the problems panel and, by default, blocks nothing. A course's rule profile can turn a rule off, change its severity, or make it block a change | See section 5.1. The invariants of section 3.4 are always enforced, whatever the profile says |
 | Flow identity | Separate flow elements, each carrying a shared dictionary definition | See section 3.3 |
 | AI | Agent integration must be possible from the start | See section 7. No AI feature is built in Release 0 |
@@ -79,6 +79,10 @@ In scope:
    projects, the command log and snapshots (section 3.6). Each command the server accepts is saved before the next one is applied, as
    section 3.9 describes. A student has one project for each Canvas course, and the
    launch opens it.
+8. A sign-in with a password, for accounts made by a command run on the server. Every
+   page needs a session. Until the web app has its own screens, the server serves the
+   prototype's build behind this sign-in, so that a deployed preview can collect
+   feedback from faculty.
 
 Out of scope: use case forms (section 8), the ERD and the CRUD matrix (section 9), the
 forms, diagram and binder of section 10, the design diagrams of the textbook's chapters 9
@@ -350,7 +354,8 @@ else. It is not the way to hand work in. Students hand in the PDF of section 10.
   anything from the file's name.
 - The login is stored with the account. It is set once, when the account is created,
   from its first way of signing in: the Canvas login ID for a Canvas launch, which the
-  launch requests as the custom variable `$Canvas.user.loginId`; the username for LDAP;
+  launch requests as the custom variable `$Canvas.user.loginId`; the username for a
+  password or for LDAP;
   the provider's preferred username for OpenID Connect; and the local part of the email
   address, before the `@`, for a magic link. Whenever the preferred value is missing, the
   local part of the email address is used, and with no email address either, the word
@@ -1662,7 +1667,7 @@ for each month.
 | `packages/rules` | Rule definitions, profiles, message text | Browser and server |
 | `packages/cases` | The test cases in section 6 as command lists and expected findings | Tests |
 | `apps/web` | Canvas and outline view | Browser |
-| `apps/server` | Storage, Canvas launch, and later the AI gateway | Server |
+| `apps/server` | Storage, sign-in, Canvas launch, and later the AI gateway | Server |
 | `packages/mock-lti` | A mock LTI 1.3 platform: people and courses to launch as, launching inside a frame, a roster service, and signed launches with deliberate defects for negative tests. A development and test tool, never in the Docker image | Development, CI and the Release 0 trial |
 
 | Need | Choice | License |
