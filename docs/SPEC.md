@@ -305,10 +305,17 @@ else. It is not the way to hand work in. Students hand in the PDF of section 10.
 
 - The file is the storage form of section 3.6, as UTF-8 JSON, with the ending
   `.diagramble.json`. It holds the whole project: every element, view and setting, and
-  the log. It holds nothing about the student, such as a name or account.
+  the log. Its contents hold nothing about the student, such as a name or account.
+- The file is named after the student's login and the project's name, as in
+  `jsmith-Library Loans.diagramble.json`, so an instructor who collects many files can
+  tell them apart. The login is the one the Canvas launch supplies. Both parts are made
+  safe before use: path separators, control characters and characters that operating
+  systems refuse are replaced, and the name is kept to a safe length. Import never reads
+  anything from the file's name.
 - Once the binder has attachments (Release 2), the export file is a zip archive with the
-  project's JSON inside and each attached file beside it, named by its content hash. A
-  file that is the JSON alone still imports.
+  project's JSON inside and each attached file beside it, named by its content hash. It
+  is named the same way, with the ending `.diagramble.zip`. A file that is the JSON alone
+  still imports.
 - The format is documented but need not stay the same forever. A file exported by a
   major release imports into every later release for as long as that major release is
   supported. Files from Release 0 and other pre-releases need not import. There is no
@@ -1344,7 +1351,7 @@ In Release 1, a PDF comes from the browser's own print to PDF. A print styleshee
 each document out as pages, and scales a large diagram to fit a page or splits it across
 pages. A short hint tells the student to choose "Save as PDF" and to turn off the
 browser's headers and footers. The compiled documents below need a better way, which is
-still open (section 14.1 item 4).
+still open (section 14.1 item 3).
 
 The table of contents is generated. The process model and data model are the diagrams
 with their descriptions, and the repository entries are the data dictionary. A part that
@@ -1766,32 +1773,30 @@ end, as the textbook's rule that every flow has two ends requires.
    each attribute depends on. The tool could then check the second and third normal
    forms, where it now checks only the first (section 9.3). It would make five of the
    textbook's exercises checkable, and it adds a field that most models never fill in.
-2. **The additions of section 14.2.** Each call there is the specification's own and can
-   be revisited when it is built.
-3. **A desktop app.** An Electron app may come later. It could run the same server and
+2. **A desktop app.** An Electron app may come later. It could run the same server and
    project store in-process with SQLite in place of PostgreSQL. The Canvas launch and
    the institution's AI gateway would stay server-only. Nothing is built for it now.
-4. **How the compiled documents' PDFs are made.** Release 1 uses the browser's own print
+3. **How the compiled documents' PDFs are made.** Release 1 uses the browser's own print
    to PDF (section 10.8). The compiled documents of section 10.8 need something better.
    Rendering pages in a headless browser gives the most faithful documents but adds a
    few hundred megabytes to the Docker image. A PDF library keeps the image small but
    lays out every document a second time. This must be settled before those documents
    are built.
-5. **A real Canvas before the first live course.** Release 0 launches from a mock
+4. **A real Canvas before the first live course.** Release 0 launches from a mock
    platform (section 2 item 6). Before Release 1's live course, the launch must be
    confirmed against a real Canvas. That needs an LTI 1.3 developer key from a Canvas
    administrator at that time. The key needs the launch and the roster service, and no
    score.
-6. **The default retention periods.** The system administrator sets the periods (section
+5. **The default retention periods.** The system administrator sets the periods (section
    1, "Administration"). Still open: the defaults for command logs, the dashboard's
    analytics, AI usage records and their prompt text, and archived courses. Who may see
    what also needs writing down.
-7. **Other symbol styles.** DeMarco and Yourdon for data flow diagrams, which is display
+6. **Other symbol styles.** DeMarco and Yourdon for data flow diagrams, which is display
    only, and UML class notation for data models are the two planned for later (section
    1, "Symbol styles"). Neither is scheduled. Chen notation is not planned; it would
    need model changes, because it draws attributes as separate shapes and lets
    relationships carry attributes.
-8. **Contributor license agreements.** One is written when someone wants to contribute
+7. **Contributor license agreements.** One is written when someone wants to contribute
    (section 1, "License").
 
 ### 14.2 Taken from Visible Analyst, and left out
