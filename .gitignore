@@ -8,3 +8,12 @@ screenshots/
 # Claude Code: agents' worktrees and each person's own settings.
 .claude/worktrees/
 .claude/settings.local.json
+
+# Installed packages, for the root workspaces and the prototype.
+node_modules/
+
+# Build output.
+dist/
+
+# Test coverage reports.
+coverage/

@@ -22,15 +22,28 @@ it](docs/images/prototype-workspace.png)
 
 ## Status
 
-The only code so far is a clickable prototype. It runs in the browser with a sample
+The real application is at an early stage: its workspaces exist, with no features yet.
+Beside it is a clickable prototype. It runs in the browser with a sample
 project, "Clinic appointments", and has no server. It covers the screens of the first and
 second releases. It is frozen and serves only as a reference for screen layout, because
 its model and rules differ from the specification. It is deleted once the real
-application has the second release's screens. The real application has not been started.
+application has the second release's screens.
 
-## Running the prototype
+## Running the code
 
-You need a current version of [Node.js](https://nodejs.org/).
+You need the version of [Node.js](https://nodejs.org/) in `.nvmrc`. The real
+application is an npm workspaces project at the repository root:
+
+```
+npm ci
+npm run typecheck
+npm run lint
+npm test
+npm run build
+npm run dev --workspace @diagramble/web   # serves the web app with Vite
+```
+
+The prototype is its own project:
 
 ```
 cd prototype

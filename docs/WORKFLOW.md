@@ -4,8 +4,38 @@
 
 The repository pins its Node version in `.nvmrc`. In a Claude Code session a
 SessionStart hook puts that version first on the path; otherwise run
-`nvm use`. The only code so far is the prototype, an npm project in
-`prototype/`:
+`nvm use`. The real application is an npm workspaces project at the repository
+root, over `packages/model`, `packages/rules`, `packages/cases`, `apps/web` and
+`apps/server`:
+
+```
+npm ci                # install exactly what package-lock.json lists
+npm run typecheck     # every workspace
+npm run lint          # the comment history check, then the boundary check
+npm test              # the scripts' tests, then every workspace's Vitest tests, each with a 75% coverage floor
+npm run build         # builds apps/web with Vite
+npm run test:browser  # the browser tests, in the workspaces that have them
+npm run dev --workspace @diagramble/web   # serves the web app with Vite
+```
+
+`npm test` measures coverage and fails when it is under 75% for lines, branches
+and functions. Node's built-in test coverage checks the scripts' own tests, over
+the scripts together. Vitest with the V8 provider checks the five workspaces, one
+root `vitest.config.ts` running them as projects: the floor applies to the whole
+and to each workspace separately, so one well-tested workspace cannot hide
+another. `apps/web/src/main.tsx` is left out because it only mounts the app; the
+browser tests cover it. `npm test` inside one workspace runs only that workspace's
+tests, without the coverage check. The prototype is exempt. Reports are written to
+`coverage/`, which Git ignores.
+
+The boundary check, `scripts/check-boundaries.mjs`, fails when `packages/model`,
+`packages/rules` or `packages/cases` import anything but their own files, their
+listed dependencies, or, in test files, Vitest and their own development
+dependencies. It also fails on any `/// <reference>` directive, which would bring
+back Node or browser types (SPEC.md section 12).
+
+The prototype is its own npm project in `prototype/`, with its own lockfile. It is
+not a workspace, and the root commands do not touch it:
 
 ```
 cd prototype
@@ -17,11 +47,11 @@ npm run lint     # the comment history check over the prototype
 npm run build    # type-checks, then builds into dist/
 ```
 
-Two checks run from the repository root:
+Two more checks run from the repository root:
 
 ```
 node scripts/check-comment-history.mjs   # comments and test titles carry no project history
-python3 scripts/check-docs-links.py      # every relative link and image in Markdown resolves
+node scripts/check-docs-links.mjs     # every relative link and image in Markdown resolves
 ```
 
 Screenshots go in `screenshots/` at the repository root, named with the date
@@ -54,8 +84,8 @@ copyright and reading the book). An agent's worktree has no `sources/`.
 - Branches are deleted on merge.
 
 Two rulesets enforce this. `main` and `epic/**` take changes only by pull
-request, with the three CI checks green (Secret scan, Docs and comments,
-Prototype). A pull request into `main` must also be up to date with it; one
+request, with the five CI checks green (Secret scan, Docs and comments,
+Prototype, App checks and App tests). A pull request into `main` must also be up to date with it; one
 into an epic branch need not be.
 
 ## Epic plans
@@ -159,6 +189,13 @@ request's run on the older commit. Its jobs:
   check, from the repository root.
 - **Prototype**: `npm ci`, then typecheck, lint, the test suite and the
   build, in `prototype/`.
+- **App checks**: `npm ci` at the root, then typecheck, lint and the build. It
+  runs `docker build .` only once a `Dockerfile` exists at the root.
+- **App tests**: `npm ci` at the root, then the test suite, with a PostgreSQL
+  service whose address the tests read from `DATABASE_URL`. The test suite
+  enforces the 75% coverage floor for each workspace and for the scripts. The
+  job installs Playwright's Chromium headless shell and runs
+  `npm run test:browser` only once `apps/web/playwright.config.ts` exists.
 
 Every job has a time limit, so a hung runner cannot hold a pull request for
 hours.
@@ -179,8 +216,7 @@ allowlisted in `.gitleaks.toml`.
 
 ## Dependencies
 
-Dependabot checks the GitHub Actions monthly and groups their updates into
-one pull request. The prototype's npm packages are left out, because the
-prototype is throwaway code; the real application's packages will be added
-when it exists. The lockfile is committed. No dependency may be under the
+Dependabot checks the GitHub Actions and the root's npm packages monthly, and
+groups each one's updates into one pull request. The prototype's npm packages
+are left out, because the prototype is throwaway code. The lockfile is committed. No dependency may be under the
 GPL or the AGPL alone (SPEC.md section 1, "License").

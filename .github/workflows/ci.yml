@@ -46,7 +46,7 @@ jobs:
         with:
           node-version-file: .nvmrc
       - name: Check Markdown links and images
-        run: python3 scripts/check-docs-links.py
+        run: node scripts/check-docs-links.mjs
       - name: Check comments for project history
         run: node scripts/check-comment-history.mjs
 
@@ -69,3 +69,65 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+
+  app-checks:
+    name: App checks
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
+      # The image build waits for the file it needs.
+      - name: Build the Docker image
+        if: hashFiles('Dockerfile') != ''
+        run: docker build .
+
+  # The tests run in a job of their own, so a test or coverage failure shows
+  # as its own red check.
+  app-tests:
+    name: App tests
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    env:
+      # Throwaway credentials for the service container below; they open
+      # nothing outside this job.
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/diagramble_test
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: diagramble_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      # Fails when coverage falls below 75% (CLAUDE.md, "Testing rules").
+      - run: npm test
+      # The browser steps wait for the file they need.
+      - name: Install the browser for the browser tests
+        if: hashFiles('apps/web/playwright.config.ts') != ''
+        working-directory: apps/web
+        run: npx playwright install --with-deps --only-shell chromium
+      - name: Run the browser tests
+        if: hashFiles('apps/web/playwright.config.ts') != ''
+        run: npm run test:browser
