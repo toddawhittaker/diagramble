@@ -54,8 +54,8 @@ code, and you do not decide whether a real failure is acceptable.
   from an earlier attempt) and that `git diff <base>..HEAD` is non-empty;
   an empty diff or a stale `HEAD` means the apply did not do what you
   think, and the force-push must wait until you know what happened.
-- In a fresh worktree, use the `.nvmrc` Node and run `npm ci` in
-  `prototype/` before committing anything there, so the pre-commit hook
+- In a fresh worktree, use the `.nvmrc` Node and run `npm ci` at
+  the root (and in `prototype/` before committing anything there), so the pre-commit hook
   and the checks actually run instead of failing on a missing toolchain.
 - Run one command per Bash call. Never chain push, merge, and CI-watch
   commands with `&&` or `;`; the permission classifier denies long chains.

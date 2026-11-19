@@ -4,8 +4,26 @@
 
 The repository pins its Node version in `.nvmrc`. In a Claude Code session a
 SessionStart hook puts that version first on the path; otherwise run
-`nvm use`. The only code so far is the prototype, an npm project in
-`prototype/`:
+`nvm use`. The real application is an npm workspaces project at the repository
+root, over `packages/model`, `packages/rules`, `packages/cases`, `apps/web` and
+`apps/server`:
+
+```
+npm ci                # install exactly what package-lock.json lists
+npm run typecheck     # every workspace
+npm run lint          # the comment history check, then the boundary check
+npm test              # the scripts' own tests, then each workspace's Vitest tests
+npm run build         # builds apps/web with Vite
+npm run test:browser  # the browser tests, in the workspaces that have them
+npm run dev --workspace @diagramble/web   # serves the web app with Vite
+```
+
+The boundary check, `scripts/check-boundaries.mjs`, fails when `packages/model`,
+`packages/rules` or `packages/cases` import anything but their own files, their
+listed dependencies, or Vitest in tests (SPEC.md section 12).
+
+The prototype is its own npm project in `prototype/`, with its own lockfile. It is
+not a workspace, and the root commands do not touch it:
 
 ```
 cd prototype
@@ -17,7 +35,7 @@ npm run lint     # the comment history check over the prototype
 npm run build    # type-checks, then builds into dist/
 ```
 
-Two checks run from the repository root:
+Two more checks run from the repository root:
 
 ```
 node scripts/check-comment-history.mjs   # comments and test titles carry no project history
@@ -54,8 +72,8 @@ copyright and reading the book). An agent's worktree has no `sources/`.
 - Branches are deleted on merge.
 
 Two rulesets enforce this. `main` and `epic/**` take changes only by pull
-request, with the three CI checks green (Secret scan, Docs and comments,
-Prototype). A pull request into `main` must also be up to date with it; one
+request, with the four CI checks green (Secret scan, Docs and comments,
+Prototype and App). A pull request into `main` must also be up to date with it; one
 into an epic branch need not be.
 
 ## Epic plans
@@ -159,6 +177,11 @@ request's run on the older commit. Its jobs:
   check, from the repository root.
 - **Prototype**: `npm ci`, then typecheck, lint, the test suite and the
   build, in `prototype/`.
+- **App**: `npm ci` at the root, then typecheck, lint, the test suite and the
+  build, with a PostgreSQL service whose address the tests read from
+  `DATABASE_URL`. It installs Playwright's Chromium headless shell and runs
+  `npm run test:browser` only once `apps/web/playwright.config.ts` exists, and
+  it runs `docker build .` only once a `Dockerfile` exists at the root.
 
 Every job has a time limit, so a hung runner cannot hold a pull request for
 hours.
@@ -179,8 +202,7 @@ allowlisted in `.gitleaks.toml`.
 
 ## Dependencies
 
-Dependabot checks the GitHub Actions monthly and groups their updates into
-one pull request. The prototype's npm packages are left out, because the
-prototype is throwaway code; the real application's packages will be added
-when it exists. The lockfile is committed. No dependency may be under the
+Dependabot checks the GitHub Actions and the root's npm packages monthly, and
+groups each one's updates into one pull request. The prototype's npm packages
+are left out, because the prototype is throwaway code. The lockfile is committed. No dependency may be under the
 GPL or the AGPL alone (SPEC.md section 1, "License").
