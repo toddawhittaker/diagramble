@@ -10,29 +10,29 @@ It is written for the course textbook: Dennis, Wixom and Roth, *Systems Analysis
 
 ## 1. Executive summary
 
-Build a small web tool that keeps one model behind every diagram, checks that model against explicit rules, and explains each violation in plain words. That is the part of Visible Analyst that matters, and no free or web-based tool offers it.
+Build a small web tool that keeps one model behind every diagram, checks that model against explicit rules, and explains each violation in plain words. That is the part of Visible Analyst that a course using the book needs, and no free or web-based tool found does it.
 
-The product is called Diagramble, pronounced DYE-uh-GRAM-buhl with the main stress on GRAM, and its tagline is "See the system. Shape the solution." The name is coined from "diagram" and "able". Diagramming is the core activity of systems analysis and design: modeling processes, data, entities and relationships in pictures. "Able" suggests capability, accessibility and ease of use, and echoes words such as learnable, approachable and manageable. Together they mean making systems diagramming accessible and capable. The name also has a light echo of "ramble" and "scramble", which makes it sound friendly without making the tool seem like a toy. It was chosen because it is short, easy to say and remember, and fits both a teaching tool and a professional modeling tool.
+The product is called Diagramble, pronounced DYE-uh-GRAM-buhl with the main stress on GRAM, and its tagline is "See the system. Shape the solution." The name is coined from "diagram" and "able". Diagramming is the core activity of systems analysis and design: modeling processes, data, entities and relationships in pictures. "Able" suggests capability, accessibility and ease of use, and echoes words such as learnable, approachable and manageable. Together they mean making systems diagramming accessible and capable. The name also has a light echo of "ramble" and "scramble", which makes it sound friendly without making the tool seem like a toy. It was chosen because it is short and easy to say and remember.
 
 CASE means Computer-Aided Software Engineering. DFD means data flow diagram. ERD means entity relationship diagram.
 
 ### Key findings
 
-1. **The gap is real and narrow.** About 30 tools were researched. Only three document a check that a child DFD balances with its parent: Visible Analyst, SAP PowerDesigner and Unicom System Architect. All three are Windows desktop products. No web tool and no open-source tool does it.
+1. **Few tools check what the book teaches.** About 30 tools were studied. Only three document a check that a child DFD balances with its parent: Visible Analyst, SAP PowerDesigner and Unicom System Architect. All three are Windows desktop products. No web tool and no open-source tool does it.
 2. **Visible Analyst's value is its repository and its Analyze function, not its drawing.** Every diagram object gets a repository entry, and Analyze checks syntax, balancing, keys and the fit between the data model and the process model. Its weaknesses are Windows-only delivery, a rule set fixed at project creation, and no visible release notes.
-3. **Free diagram tools win on access and lose on meaning.** Lucidchart, draw.io and Miro need no install and cost students nothing. In all of them a process is only a circle, and nothing checks it.
+3. **Free diagram tools are easy to reach but do not know the notation.** Lucidchart, draw.io and Miro need no install and cost students nothing. In all of them a process is only a circle, and nothing checks it.
 4. **DFDs are still taught.** The current Dennis, Wixom and Roth (8th edition) and Kendall and Kendall (11th edition) textbooks each keep a full DFD chapter. Both have added agile and object-oriented material beside it, not in place of it.
 5. **Unguarded AI harms learning, and AI grading is not reliable enough to run alone.** In one field experiment, students who practiced with plain GPT-4 scored 17% lower on a later unassisted exam than students who never had it. A guarded tutor largely removed that harm.
 6. **Nothing open source is a ready foundation.** Permissive libraries cover the canvas, layout and export. The semantic model, the rule engine and the data dictionary must be purpose-built.
-7. **Accessibility is a legal requirement and a design advantage.** Public universities must meet the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA by April 2027 or April 2028. Diagramble's own target is WCAG 2.2 Level AA, because students with disabilities must be able to do all their work. When diagrams are views of a model, an outline view of the same model is a natural keyboard and screen-reader path.
-8. **The project is source-available, and it is not built as a business.** It is under the Business Source License 1.1: free for non-profit schools and for anyone's own study and teaching, with a paid license for for-profit use. Each version becomes open source, under the AGPL, four years after it is released. Its lasting value is the rule library, the explanations and the teaching content. Each institution hosts its own copy. The open question is who maintains it.
+7. **Accessibility is essential.** Students with disabilities must be able to do all their work, so the target is the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA. When diagrams are views of a model, an outline view of the same model is a natural keyboard and screen-reader path.
+8. **It is a tool for educators, licensed so they can use it freely.** The Business Source License 1.1 keeps it free for non-profit schools and for anyone's own study and teaching, while publishers and other for-profits cannot take the work and sell it. Each version becomes open source, under the GNU Affero General Public License (AGPL), four years after it is released. Each school hosts its own copy. The open question is who maintains it.
 9. **The first course sets the conventions.** The tool is built for a course that uses Dennis, Wixom and Roth and covers chapters 1 to 12. That book builds DFDs from use case forms, so the forms are in the first release. Its design chapters add physical models and structure charts, which follow in the second. The deliverables of the other chapters are served in the second release by checked forms, one more diagram and a project binder, and everything exports to PDF.
 
 ### Strongest recommendation
 
 Build first a single-user web application with six parts: a repository, use case forms, leveled DFDs, crow's-foot ERDs, a data dictionary, and about 40 deterministic rules with explanations. Add PDF export and a Canvas launch through Learning Tools Interoperability (LTI) 1.3.
 
-Do not build Unified Modeling Language (UML) diagrams, Business Process Model and Notation (BPMN), code generation, real-time collaboration or AI diagram generation in the first release. Each one adds breadth without adding the consistency checking that justifies the product.
+Do not build Unified Modeling Language (UML) diagrams, Business Process Model and Notation (BPMN), code generation, real-time collaboration or AI diagram generation in the first release. Each one adds breadth without the consistency checking that makes the tool worth using in the course.
 
 The textbook's design diagrams come in the second release: physical DFDs, structure charts and physical data models. Each is built from a first-release model.
 
@@ -42,46 +42,49 @@ The textbook's design diagrams come in the second release: physical DFDs, struct
 | --- | --- | --- |
 | What made traditional CASE tools valuable? | A shared repository, enforced notation rules, balancing, and output derived from the model | 4 |
 | Which features remain relevant? | Repository, dictionary, balancing, data-to-process checks, key analysis, generated documentation | 3 |
-| What limits existing tools for undergraduates? | Windows-only installs, heavy interfaces, cost, or no semantics at all | 2 |
+| What limits existing tools for undergraduates? | Windows-only installs, heavy interfaces, license tokens, or no semantics at all | 2 |
 | What separates a CASE tool from a diagram editor? | Element identity outside diagrams, typed connections, cross-diagram rules, where-used | 4 |
 | How do leading tools keep models consistent? | One element with many diagram occurrences, plus a rule check run over the repository | 4, 7 |
 | What do web, collaboration and AI advances enable? | Zero install, instant rule feedback, version history, guarded explanation and questioning | 7, 8 |
 | What does excellent teaching look like? | Guided steps, feedback that says why, assignment profiles, rubric-linked review | 5 |
-| What gives value beyond academia? | Traceability, schema generation, team repositories, model review | 6 |
 
-## 2. Competitive landscape
+## 2. Existing tools and what we learn from them
 
-No product combines browser delivery, a shared model, DFD balancing and a price a student can pay. The tools that check DFDs are enterprise desktop products, and the tools students can reach do not check anything.
+Many tools draw the book's diagrams, and a few check them. This section records what each kind does well, which ideas Diagramble borrows, and what a course using the book needs that each kind lacks.
 
-Each cell reflects vendor documentation read on 17 November 2026 unless marked. "Not found" means the documentation was searched and showed no such feature. It is not proof of absence. "Unverified" means the claim could not be confirmed from a primary source.
+Each cell reflects the tool's documentation read on 17 November 2026 unless marked. "Not found" means the documentation was searched and showed no such feature. It is not proof of absence. "Unverified" means the claim could not be confirmed from a primary source.
 
 ### Traditional CASE and professional modeling tools
 
-| Product | Notations | Model or drawing | Dictionary and consistency checks | Platform and collaboration | Education terms and price |
-| --- | --- | --- | --- | --- | --- |
-| [Visible Analyst](https://www.visiblesystemscorp.com/Products/Analyst) | DFD in four rule sets, ERD, structure charts, functional decomposition, seven UML diagram types, BPMN, and a Zachman Framework screen in some editions | Shared repository | Full data dictionary. Analyze checks syntax, balancing, keys, and data model against process model | Windows only. Multi-user claimed | [Student token $49 for six months](https://www.visiblesystemscorp.com/Solutions/edu_price.htm); classroom tokens $49 down to $19.95 |
-| [SAP PowerDesigner](https://infocenter.sybase.com/help/topic/com.sybase.infocenter.dc38088.1652/doc/html/rad1232026266129.html) | DFD in Gane and Sarson or Yourdon style, conceptual to physical data models, UML, BPMN | Shared within a model; shortcuts across diagrams | Documented DFD balancing under Check Model. Data objects link to data models | Windows only. Enterprise repository with check-in | No public price or academic program found. Development reported as stopped (unverified) |
-| [Unicom System Architect](https://support.unicomsi.com/manuals/systemarchitect/11482/Architecting_and_designing/StructuredAnalysisDesign.18.040.html) | Yourdon DFD, data models, enterprise frameworks | Shared repository | Balance Parent, Balance Child and Auto-Balance. Balancing expands dictionary structures down to elements | Windows only | No public price or academic terms found |
-| [Sparx Enterprise Architect](https://sparxsystems.com/enterprise_architect_user_guide/17.1/guide_books/tools_ba_data_flow_diagram.html) | DFD, UML, BPMN, SysML, ArchiMate, data models | Shared repository | Project glossary, not a typed dictionary. No DFD balancing check found | Windows client; file, database or cloud repository; [baselines and compare](https://sparxsystems.com/enterprise_architect_user_guide/16.1/modeling_fundamentals/managingbaselines.html) | [Academic seat from about 115 euros](https://www.sparxsystems.eu/?p=5262) (undated) |
-| [Visual Paradigm](https://www.visual-paradigm.com/support/documents/vpuserguide/285/2145/56977_creatingdata.html) | DFD in four styles, ERD, UML, BPMN, SysML, ArchiMate | Shared model on desktop | Glossary. [Decompose copies parent flows to the child](https://www.visual-paradigm.com/tutorials/in-out-flows.jsp). No balancing check found in the user guide | Desktop plus Visual Paradigm Online; Teamwork Server | [Academic program $1,250 to $5,000 per department per year](https://www.visual-paradigm.com/partner/academic/), with class-size and training-hour minimums |
-| [IBM Rhapsody](https://www.ibm.com/products/systems-design-rhapsody) | UML, SysML, AUTOSAR. No DFD or ERD | Shared model | Requirements traceability (claimed). Not relevant to structured analysis | Desktop | No student license found |
-| [erwin Data Modeler](https://bookshelf.erwin.com/bookshelf/public_html/12.5/Content/Release%20Notes/Data%20Modeler%20Release%20Notes/erwin%20Data%20Modeler%20Editions.html) | Data models only | One model, many views | Model and database comparison. No DFD | Windows; Mart server | No public price |
-| [Astah Professional](https://astah.net/products/compare-editions/) | DFD in two styles, ERD, UML, CRUD tables | Not confirmed | No balancing documented | Desktop (Java) | [Free student license covers the UML edition only](https://astah.net/products/academic-discount-license/); Professional academic $48 |
-| [StarUML](https://staruml.io/pricing) | UML, ERD, DFD, flowcharts | Not confirmed for DFD | No balancing documented | Desktop | $159 per device, 30% education discount |
-| [Software Ideas Modeler](https://www.softwareideas.net/dfd-data-flow-diagram) | DFD in two styles, ERD, UML, BPMN | Not confirmed | No DFD rules documented | Windows | Standard edition free for non-commercial use |
+| Product | Notations | Model or drawing | Dictionary and consistency checks | Platform and collaboration |
+| --- | --- | --- | --- | --- |
+| [Visible Analyst](https://www.visiblesystemscorp.com/Products/Analyst) | DFD in four rule sets, ERD, structure charts, functional decomposition, seven UML diagram types, BPMN, and a Zachman Framework screen in some editions | Shared repository | Full data dictionary. Analyze checks syntax, balancing, keys, and data model against process model | Windows only. Multi-user claimed |
+| [SAP PowerDesigner](https://infocenter.sybase.com/help/topic/com.sybase.infocenter.dc38088.1652/doc/html/rad1232026266129.html) | DFD in Gane and Sarson or Yourdon style, conceptual to physical data models, UML, BPMN | Shared within a model; shortcuts across diagrams | Documented DFD balancing under Check Model. Data objects link to data models | Windows only. Enterprise repository with check-in |
+| [Unicom System Architect](https://support.unicomsi.com/manuals/systemarchitect/11482/Architecting_and_designing/StructuredAnalysisDesign.18.040.html) | Yourdon DFD, data models, enterprise frameworks | Shared repository | Balance Parent, Balance Child and Auto-Balance. Balancing expands dictionary structures down to elements | Windows only |
+| [Sparx Enterprise Architect](https://sparxsystems.com/enterprise_architect_user_guide/17.1/guide_books/tools_ba_data_flow_diagram.html) | DFD, UML, BPMN, SysML, ArchiMate, data models | Shared repository | Project glossary, not a typed dictionary. No DFD balancing check found | Windows client; file, database or cloud repository; [baselines and compare](https://sparxsystems.com/enterprise_architect_user_guide/16.1/modeling_fundamentals/managingbaselines.html) |
+| [Visual Paradigm](https://www.visual-paradigm.com/support/documents/vpuserguide/285/2145/56977_creatingdata.html) | DFD in four styles, ERD, UML, BPMN, SysML, ArchiMate | Shared model on desktop | Glossary. [Decompose copies parent flows to the child](https://www.visual-paradigm.com/tutorials/in-out-flows.jsp). No balancing check found in the user guide | Desktop plus Visual Paradigm Online; Teamwork Server |
+| [IBM Rhapsody](https://www.ibm.com/products/systems-design-rhapsody) | UML, SysML, AUTOSAR. No DFD or ERD | Shared model | Requirements traceability (claimed). Not relevant to structured analysis | Desktop |
+| [erwin Data Modeler](https://bookshelf.erwin.com/bookshelf/public_html/12.5/Content/Release%20Notes/Data%20Modeler%20Release%20Notes/erwin%20Data%20Modeler%20Editions.html) | Data models only | One model, many views | Model and database comparison. No DFD | Windows; Mart server |
+| [Astah Professional](https://astah.net/products/compare-editions/) | DFD in two styles, ERD, UML, CRUD tables | Not confirmed | No balancing documented | Desktop (Java) |
+| [StarUML](https://staruml.io/pricing) | UML, ERD, DFD, flowcharts | Not confirmed for DFD | No balancing documented | Desktop |
+| [Software Ideas Modeler](https://www.softwareideas.net/dfd-data-flow-diagram) | DFD in two styles, ERD, UML, BPMN | Not confirmed | No DFD rules documented | Windows |
+
+Desktop modeling tools hold a real repository, and three of them check that a child DFD balances with its parent. System Architect balances through the data dictionary, which is the design Diagramble follows (section 4). What a course needs from them is access: all three are Windows installs, and their interfaces are built for professionals.
 
 ### Web-based diagramming and diagrams as text
 
-| Product | Notations | Model or drawing | Dictionary and consistency checks | Platform and collaboration | Education terms and price |
-| --- | --- | --- | --- | --- | --- |
-| [Lucidchart](https://lucid.co/diagram/dfd/tutorial) | DFD shapes and templates, [ERD with SQL import and export](https://help.lucid.co/hc/en-us/articles/16471565238292-Create-an-Entity-Relationship-Diagram-in-Lucidchart) | Drawing | None. Its DFD rules are a manual checklist | Browser, real-time editing. [Canvas assignments graded in SpeedGrader](https://help.lucid.co/hc/en-us/articles/14559937492756-Integrate-Lucid-with-Canvas) | [Free education account](https://lucid.co/lucidchart/education) |
-| [draw.io](https://www.drawio.com/docs/diagram-types/data-flow-diagrams/) | DFD shape library, ERD shapes, SQL insert | Drawing | None | Browser and desktop. Real-time editing only on certain storage | Free; source under Apache 2.0 |
-| [Miro](https://miro.com/diagramming/data-flow-diagram/) | DFD and ERD shape packs | Drawing | None | Browser, strongest real-time collaboration | Free education plan (limits unverified) |
-| [Mermaid and Mermaid Chart](https://mermaid.js.org/syntax/entityRelationshipDiagram.html) | About 20 text-defined types, including ER. No DFD type | One text block per diagram | Syntax errors only | Library renders anywhere; [paid editor](https://mermaid.ai/pricing) | Library MIT; editor $0 to $20 per user per month |
-| [PlantUML](https://plantuml.com/ie-diagram) | UML, ER in two notations. No DFD type | One text file per diagram | Syntax errors only | Renders through plugins and servers | Free; GPL and other variants |
-| [dbdiagram.io](https://dbdiagram.io/pricing) | ERD from text, SQL import and export | One schema | None beyond syntax | Browser | Free tier; free Pro for students for 12 months |
+| Product | Notations | Model or drawing | Dictionary and consistency checks | Platform and collaboration |
+| --- | --- | --- | --- | --- |
+| [Lucidchart](https://lucid.co/diagram/dfd/tutorial) | DFD shapes and templates, [ERD with SQL import and export](https://help.lucid.co/hc/en-us/articles/16471565238292-Create-an-Entity-Relationship-Diagram-in-Lucidchart) | Drawing | None. Its DFD rules are a manual checklist | Browser, real-time editing. [Canvas assignments graded in SpeedGrader](https://help.lucid.co/hc/en-us/articles/14559937492756-Integrate-Lucid-with-Canvas) |
+| [draw.io](https://www.drawio.com/docs/diagram-types/data-flow-diagrams/) | DFD shape library, ERD shapes, SQL insert | Drawing | None | Browser and desktop. Real-time editing only on certain storage |
+| [Miro](https://miro.com/diagramming/data-flow-diagram/) | DFD and ERD shape packs | Drawing | None | Browser, strongest real-time collaboration |
+| [Mermaid and Mermaid Chart](https://mermaid.js.org/syntax/entityRelationshipDiagram.html) | About 20 text-defined types, including ER. No DFD type | One text block per diagram | Syntax errors only | Library renders anywhere; [paid editor](https://mermaid.ai/pricing) |
+| [PlantUML](https://plantuml.com/ie-diagram) | UML, ER in two notations. No DFD type | One text file per diagram | Syntax errors only | Renders through plugins and servers |
+| [dbdiagram.io](https://dbdiagram.io/pricing) | ERD from text, SQL import and export | One schema | None beyond syntax | Browser |
 | [ERDPlus](https://erdplus.com/) | ERD in Chen or crow's foot, relational schema, star schema | Drawing with a one-click conversion to a relational schema | Not documented | Browser | Free; no license stated |
 | [Structurizr](https://docs.structurizr.com/) | C4 software architecture only | One model, many views, defined in text | Validate and inspect commands (scope unverified) | Browser and local | Open-source Lite edition |
+
+Web tools are easy to reach, need no install, and are good at shared editing. Mermaid, dbdiagram.io and Structurizr show that a diagram can be rendered from data held outside the picture. What a course needs from them is meaning: a process is only a shape, so nothing checks a DFD, and Lucidchart's own tutorial leaves the DFD rules to a checklist the reader applies by hand.
 
 ### Open-source and specialized tools
 
@@ -97,13 +100,15 @@ Each cell reflects vendor documentation read on 17 November 2026 unless marked. 
 | [Apollon and Artemis](https://docs.artemis.tum.de/instructor/exercises/modeling-exercise/) | UML and BPMN for teaching. No DFD or ERD found | Diagram data | Assessment support, not notation rules | Browser | MIT; Apollon 5.5.0 in October 2026 |
 | [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon) | Threat-model DFD | Diagram data | Threat rules, no leveling or balancing | Browser and desktop | Apache-2.0; 2.6.2 in May 2026 |
 
-### What the matrix shows
+Several open-source projects prove that diagrams can be views of one model in a browser: Sirius Web for any notation, bpmn.io for BPMN with rules enforced while drawing, and Structurizr for software architecture. None of them covers DFDs or the data dictionary, and Apollon, the one built for teaching, covers UML and BPMN only.
 
-- **Balancing is rare.** Only Visible Analyst, PowerDesigner and System Architect document it. System Architect's design is the best: it balances through the data dictionary, so a parent flow can match two child flows that together compose it.
-- **Reachable tools are drawing tools.** Every free or browser product above treats a DFD as shapes. Lucidchart's own tutorial lists the DFD rules as a checklist for the reader to apply by hand.
-- **ERDs are better served than DFDs.** Several tools import or generate SQL. Nothing comparable exists for DFDs.
-- **Shared-model designs exist on the web, but not for this subject.** Structurizr, Sirius Web and bpmn.io each prove the approach for another notation.
-- **Every commercial web tool now generates diagrams with AI.** Controls to turn it off exist only on some plans, so instructors cannot rely on them.
+### What Diagramble takes from them
+
+- **Balancing through the dictionary,** from System Architect, so a parent flow can match two child flows that together compose it.
+- **One model with many views,** from Structurizr, Sirius Web and bpmn.io.
+- **Rules enforced while drawing, plus named rule sets,** from bpmn.io and bpmnlint.
+- **No install and no account to set up,** from the web drawing tools.
+- **AI that the instructor controls.** Commercial web tools now generate diagrams with AI, and controls to turn it off exist only on some plans. A course needs that choice to be the instructor's (section 8).
 
 ### Evidence limits
 
@@ -314,36 +319,26 @@ The newer [Asset Processor placement](https://developerdocs.instructure.com/serv
 
 ### Accessibility and keyboard modeling
 
-- **Legal position.** The Department of Justice rule under Title II of the Americans with Disabilities Act requires public universities to meet WCAG 2.1 Level AA. Diagramble targets WCAG 2.2 Level AA because accessibility is essential and not optional. An [interim rule of April 2026](https://campustechnology.com/articles/2026/04/27/doj-extends-deadline-for-ada-title-ii-compliance.aspx) moved the dates to 26 April 2027 for larger entities and 26 April 2028 for smaller ones. Vendor tools are not exempt.
+- **Why.** Students with disabilities must be able to do all their work, so the target is WCAG 2.2 Level AA. The Department of Justice rule under Title II of the Americans with Disabilities Act also requires public universities to meet WCAG 2.1 Level AA, from 26 April 2027 for larger entities and 26 April 2028 for smaller ones, after an [interim rule of April 2026](https://campustechnology.com/articles/2026/04/27/doj-extends-deadline-for-ada-title-ii-compliance.aspx).
 - **Design position.** WCAG 2.2 adds a rule that [every drag action needs a non-drag alternative](https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/). A drag-only canvas fails it.
 - **Approach.** Provide an outline view where every element and connection is a list item that can be created, edited and connected from the keyboard. The canvas is one view of the model and the outline is another. Research prototypes for blind users take the same route: a structured text alternative, not an audio canvas.
-- **Procurement.** Publish an Accessibility Conformance Report, the completed form of the Voluntary Product Accessibility Template.
+- **Evidence.** An independent audit and a published conformance report show the target is met, so a student or a school can rely on it.
 
-### Institutional adoption requirements
+### What a hosting school needs
 
-- **Student records.** Each institution that hosts Diagramble is responsible for its own compliance with the Family Educational Rights and Privacy Act (FERPA), the United States student privacy law, and for any agreements it needs. Diagramble supplies what a host needs to comply: retention settings, account deletion, the rules on the AI provider (SPEC.md section 7 item 7), and a data inventory that says what is stored, where, and for how long (SPEC.md section 1, "Student records").
-- **Security review.** Campuses usually ask for the [Higher Education Community Vendor Assessment Toolkit](https://www.educause.edu/higher-education-community-vendor-assessment-toolkit) questionnaire, and for larger purchases an independent security audit report.
+- **Student records.** Each school that hosts Diagramble is responsible for its own compliance with the Family Educational Rights and Privacy Act (FERPA), the United States student privacy law. Diagramble supplies what a host needs: retention settings, account deletion, the rules on the AI provider (SPEC.md section 7 item 7), and a data inventory that says what is stored, where, and for how long (SPEC.md section 1, "Student records").
 - **Data retention.** Course archiving, a retention policy for logs, analytics, AI usage records and archived courses, and account deletion are needed before the first live course. The deployment's system administrator sets the periods; the defaults are open (SPEC.md section 14.1).
-- **Running cost.** The tool is free for colleges, but running it is not. Each institution runs its own copy on its own server, and AI features cost it money per request. Visible Analyst's own student token is $49 for six months. That token is the cost this project removes.
+- **Accessibility.** The target and the audit described above.
+- **Self-hosting.** Each school runs its own copy from one Docker image on its own server. AI features cost it money per request, billed to its own model account. Students pay nothing.
 
 ## 6. Proposed product vision
 
-Diagramble is a browser-based modeling environment that understands what students draw, checks it as they work, and explains what is wrong. Its source is public under the Business Source License 1.1. It is free for non-profit schools and for individuals, and a for-profit that makes money from it pays for a license. It is positioned as model-aware, validation-driven and education-first.
+Diagramble is a browser-based modeling tool, built by an educator for the students and instructors who use Dennis, Wixom and Roth's textbook. It understands what students draw, checks it as they work, and explains what is wrong. The tool is built for one course and that book (section 16). Where a convention is only a severity or a wording, it lives in the rule profile, so another course using the book could change it without changing the engine.
 
-### Target users
+### Who it is for
 
-| User | What they need | Release |
-| --- | --- | --- |
-| Undergraduate students in systems analysis and design, including working adults online | Any laptop, no install, clear feedback, a low price | First |
-| Instructors and course designers | Rules and AI help set per course, structural errors fixed before hand-in, evidence of student process | First and second |
-| Program and curriculum leads | One tool across course sections, accessibility and security paperwork | Second |
-| Business analysts and small teams | A light repository with traceability and schema output | Third |
-
-### Value proposition
-
-- **For students:** "Your diagrams agree with each other, and when they do not, you are told why."
-- **For instructors:** "Structural errors are found before you read the student's work, so your time goes to judgment."
-- **For institutions:** "It runs in a browser, launches from Canvas, and comes with accessibility and security documentation."
+- **Students** learning the book's methods, including working adults online. They need any laptop, no install, and feedback that says why a diagram is wrong. Their diagrams agree with each other, and when they do not, they are told why.
+- **Instructors** teaching those methods. They set the rules and the AI help for their course, and structural errors are fixed before they read the work, so their time goes to judgment.
 
 ### Product principles
 
@@ -353,54 +348,15 @@ Diagramble is a browser-based modeling environment that understands what student
 4. **Small and correct beats broad and shallow.** A notation is added only together with its rules and its links to the rest of the model.
 5. **Scaffolding is a layer.** The engine underneath is the same for a beginner and a professional.
 6. **AI assists reasoning.** It explains and questions. It does not produce the graded work.
-7. **Keyboard and screen-reader use is a first-class path,** not a retrofit. Accessibility is essential: students with disabilities must be able to do all their work.
+7. **Keyboard and screen-reader use is a first-class path,** not a retrofit, because students with disabilities must be able to do all their work.
 
-### Positioning against four categories
+### What keeps it maintainable
 
-| Compared with | Their strength | Their weakness for this audience | Diagramble's position |
-| --- | --- | --- | --- |
-| Traditional desktop CASE tools | Real repositories and balancing | Windows installs, heavy interfaces, dated or enterprise pricing | The same rigor in a browser, scoped to what a course teaches |
-| General-purpose diagramming | Free, familiar, collaborative | No semantics, so no checking and no dictionary | Not a better drawing tool. A tool that knows the notation |
-| Enterprise architecture and modeling platforms | Breadth, traceability, generation | Steep learning curve, wide scope, cost | Narrow and teachable first, with a path to professional depth |
-| AI diagram generators | Speed from a text prompt | They produce a drawing or diagram code with no checked model, and they do the student's thinking | AI output must pass the same rules as human work, and assistance is set by the instructor |
-
-### Strongest differentiators
-
-1. **DFD balancing through the data dictionary, in a browser.** No web or open-source tool was found that does this.
-2. **Checks between the process model and the data model.** Stores against entities, flow contents against attributes.
-3. **Explanations written for beginners,** attached to each rule.
-4. **Course settings** that set the rule profile and AI help for every student in a Canvas course.
-5. **An accessible outline view** that is a full editor, not a fallback.
-
-### What makes the project last
-
-The license protects against a for-profit taking the tool and selling it, so the project does not need to defend itself in the market. It still needs reasons for people to adopt it, contribute to it and keep it running.
-
-- **The rule library and its explanations.** This is the most reusable part. Publish each rule with a precise definition, tests and wording tried on students, so others can cite and extend it.
-- **Shared starter cases.** Instructors can contribute content without writing code. Code contributions need a contributor license agreement, so that commercial licenses can still be sold.
+- **The rule library and its explanations.** Each rule has a precise definition, tests and wording tried on students, so others can check and extend it.
+- **Shared starter cases.** Instructors can contribute cases without writing code. Code contributions need a contributor license agreement, because of the license in section 9.
 - **An open file format.** Student work is never locked in, and other tools can read it.
-- **Easy self-hosting.** A department should be able to run it as one package.
-- **More than one maintainer.** The research found several abandoned open-source modeling tools, such as Dia and ArgoUML. A second maintainer matters more than any feature.
-
-The canvas is the least distinctive part. It comes from the same libraries any project can use.
-
-### Can it compete with free diagram tools?
-
-Price is no longer the contest, since both are free. The contest is habit and effort, and the tool wins only where checking matters.
-
-- Free drawing tools are familiar and collaborative, and Lucidchart already offers Canvas assignments.
-- If an instructor only wants pictures in a report, draw.io is enough and always will be.
-- Free use for colleges helps with adoption. There are no license tokens, no purchase to approve, and the code can be inspected.
-
-### Who should it serve first?
-
-| Option | Gains | Costs |
-| --- | --- | --- |
-| A. One course, your own | Fastest. Every choice has a real user behind it | It may fit one textbook and one instructor too closely |
-| B. Systems analysis and design courses in general, with professional use later if contributors want it | Still focused. Decisions such as symbol styles and rule profiles stay general enough for other instructors | More cases and conventions to support |
-| C. A general CASE tool from the start | The widest audience | No focus. It repeats the breadth that made the older tools heavy |
-
-**Decision: option A first, with the way left open to option B.** The tool is built for one course and its textbook: Dennis, Wixom and Roth, 8th edition. Section 16 lists the conventions this fixes. Where a convention is only a severity or a wording, it lives in the rule profile, so another course could change it later without changing the engine. Option C spends effort on notations that free tools already serve.
+- **Easy self-hosting.** A department can run it as one package.
+- **More than one maintainer.** Several open-source modeling tools, such as Dia and ArgoUML, were abandoned. A second maintainer matters more than any feature.
 
 ## 7. Conceptual architecture
 
@@ -666,13 +622,7 @@ React Flow asks for its attribution link to stay unless a project pays for its P
 
 ### Choosing the project's license
 
-A for-profit that makes money from the tool should pay for it, so the project uses the Business Source License 1.1.
-
-| Option | Gains | Costs |
-| --- | --- | --- |
-| MIT | Simplest terms and the widest reuse | Anyone may sell it, or host it for money, and pay nothing |
-| AGPL-3.0 | Hosted versions must share their changes | Anyone may still sell it or host it for money, as long as they share their code |
-| Business Source License 1.1 (chosen) | Free for non-profit schools and for individuals. For-profit use needs a paid license. Each version becomes AGPL-3.0-or-later four years after it is released | It is not open source, so some people will not contribute. Outside code needs a contributor license agreement. GPL-only libraries are ruled out |
+Diagramble is built so that educators can use it freely, and so that textbook publishers and other for-profits cannot take the work and sell it. A permissive license such as MIT would allow exactly that, so the project uses the Business Source License 1.1: free for non-profit schools and for individuals, a paid license for for-profit use, and each version becomes AGPL-3.0-or-later four years after it is released.
 
 The full terms are in [`LICENSE`](../LICENSE), a plain summary is in [`LICENSING.md`](../LICENSING.md), and the decision and its details are in the [core specification](SPEC.md), section 1.
 
@@ -718,7 +668,7 @@ Values are High, Medium or Low. Effort is a relative size: S (days to two weeks)
 | 18 | Use case forms in the textbook's format, linked to processes and flows, with the event-response list and DFD fragments worked out from them | High | Medium | Medium | M | 1, 3, 5 |
 | 19 | Create, read, update, delete (CRUD) matrix of processes against entities | High | Medium | Low | S | 7 |
 
-Items 1, 3 and 9 carry the technical risk. Item 13 is in Level 1 because accessibility is a purchasing gate and is far harder to add later. Item 16 is deliberately minimal: launch and sign-in. Items 18 and 19 are in Level 1 because the textbook teaches both in its analysis chapters, 4 and 5.
+Items 1, 3 and 9 carry the technical risk. Item 13 is in Level 1 because students with disabilities must be able to do all their work from the first course, and accessibility is far harder to add later. Item 16 is deliberately minimal: launch and sign-in. Items 18 and 19 are in Level 1 because the textbook teaches both in its analysis chapters, 4 and 5.
 
 ### Level 2: complete educational environment
 
@@ -760,7 +710,7 @@ A throwaway-quality prototype of the three things most likely to fail.
 
 | Exit criterion | Why it matters |
 | --- | --- |
-| Balancing through the dictionary gives correct results on three textbook cases, including a flow split into parts on the child diagram | This is the main differentiator and the hardest rule |
+| Balancing through the dictionary gives correct results on three textbook cases, including a flow split into parts on the child diagram | It is the check the course most needs and the hardest rule |
 | One element appears on two diagrams, is renamed once, and both update | Proves the model and view separation |
 | A launch from a mock LTI 1.3 platform, including one inside a frame, signs the user in and opens their saved project | Removes the main integration unknown without waiting for a Canvas developer key. No score is sent, and the mock stands in for a real Canvas here |
 | A keyboard-only user builds a context diagram in the outline view | Shows accessibility is feasible before the canvas design hardens |
@@ -785,11 +735,11 @@ A throwaway-quality prototype of the three things most likely to fail.
 | --- | --- |
 | An instructor sets the rule profile and AI level for a Canvas course, and every student launched from it gets them | The instructor controls the course without grading in the tool |
 | An instructor sees a course dashboard of how students worked, worked out from the saved command log, and students are told what it shows | Evidence of process without grades in the tool |
-| An independent accessibility audit supports a published conformance report at WCAG 2.2 Level AA | Purchasing gate for public universities |
+| An independent accessibility audit supports a published conformance report at WCAG 2.2 Level AA | Students with disabilities can rely on doing all their work in it |
 | AI levels 0 to 2 are enforced by the server and every exchange is logged | Assessment mode is credible |
 | One instructor runs the design sequence of Chapters 9 and 10 in a live course section: physical DFD, structure chart, program specification and physical data model | The tool covers the whole course, not only analysis |
 | Every deliverable of chapters 1 to 12 can be produced in the tool and exported to PDF, alone or in the textbook's compiled documents | A student keeps one project for the whole term and hands in from it |
-| The instructor's feedback as the tool is used shows it helps teaching | The only measure of teaching value. Neither a classroom comparison nor adoption by a second course is a measure |
+| The instructor's feedback as the tool is used shows it helps teaching | The only measure of teaching value. Neither a classroom comparison nor use in a second course is a measure |
 
 ### Later goals
 
@@ -878,15 +828,15 @@ Five of the eight assumptions hold only with conditions, and three are rejected 
 
 | Assumption | Verdict | Reasoning | Tradeoff and alternative |
 | --- | --- | --- | --- |
-| Traditional DFDs should remain central | Yes for the first release, as a deliberate bet | Both leading textbooks keep full DFD chapters. DFDs are also the only notation where no adequate web tool exists, so they are where the product can win | DFD use in industry has faded outside security threat modeling, and no survey was found that measures the trend in teaching. Keep the architecture notation-neutral. Use case forms are in Level 1, because the course textbook builds DFDs from them |
-| UML and BPMN are needed in the first release | No | Both are well served by free tools. Adding them as shapes without rules would break the product's own principle and triple the first release | Courses built on object-oriented textbooks cannot adopt the first release. The course textbook uses neither notation. UML class notation for data models is a later goal (section 11); UML diagrams and BPMN are not planned |
+| Traditional DFDs should remain central | Yes for the first release, as a deliberate bet | Both leading textbooks keep full DFD chapters. DFDs are also the only notation where no web tool checks the diagrams, so they are where the tool helps most | DFD use in industry has faded outside security threat modeling, and no survey was found that measures the trend in teaching. Keep the architecture notation-neutral. Use case forms are in Level 1, because the course textbook builds DFDs from them |
+| UML and BPMN are needed in the first release | No | Both are well served by free tools. Adding them as shapes without rules would break the product's own principle and triple the first release | Courses built on object-oriented textbooks cannot use the first release. The course textbook uses neither notation. UML class notation for data models is a later goal (section 11); UML diagrams and BPMN are not planned |
 | Cross-diagram validation can be built incrementally | Yes, if identity and the key links come first | Rules are additive over a correct model, and student-size models need no incremental computation | It cannot be retrofitted onto stored drawings. Starting with a drawing tool "to ship sooner" would forfeit this |
 | Real-time collaboration justifies its complexity | No | It is the largest single engineering item. Shared-editing libraries do not enforce model rules. Most graded modeling work is individual | Students expect live co-editing, and group projects are common. Group work is a later goal, in no release (section 11) |
 | Model-to-code generation is useful for the curriculum | No for program code, yes for database schemas | Visible Analyst's C and COBOL skeletons have no place in a current course. Turning an ERD into tables is taught and is cheap to build | Schema export is the only generation worth building for education. It is in Level 2 |
 | AI-generated diagrams improve learning | No for graded work | The best experiment found shows a lasting cost when AI gives answers during practice. Language models also make cardinality and relationship errors that a beginner cannot spot | Generation has uses as worked examples and for instructors preparing cases. Keep it out of the student path by default |
-| An educational product can compete with free diagram tools | Only on what they cannot do | Free tools win on price, familiarity and collaboration. Lucidchart even has free Canvas assignments. They have no semantics, no checking and no dictionary | If instructors want only pictures, the product loses. Test this with pilot instructors before Release 1 is finished |
+| A checking tool is worth using when free drawing tools exist | Only for what they cannot do | Free tools are familiar and good for shared editing. They have no semantics, no checking and no dictionary | If an instructor wants only pictures in a report, a drawing tool is enough. The author's own instructor feedback during use shows whether the checking helps |
 | A unified repository is the right foundation | Yes within a project, with a shared core and notation packages. No as one flat metamodel | The three first notations reference each other constantly. Every tool that checks consistency has a repository | The difference between an element and its occurrence confuses beginners. Sensible defaults and an "unplaced" list reduce that. The core must be kept small |
-| Hidden assumption: Visible Analyst is the product to replace | Only partly | No syllabus from 2025 or 2026 requiring Visible Analyst was found, and the current Kendall edition's publisher page does not name it. One current syllabus lists Visio | The real incumbents are free drawing tools. Position against "no checking at all", not only against Visible Analyst |
+| Hidden assumption: Visible Analyst is the product to replace | Only partly | No syllabus from 2025 or 2026 requiring Visible Analyst was found, and the current Kendall edition's publisher page does not name it. One current syllabus lists Visio | Most students now draw these diagrams in free drawing tools. The tool should help a student who has had no checking at all, not only one who knew Visible Analyst |
 
 ### Evidence gaps that could change these verdicts
 
@@ -906,9 +856,9 @@ Seven decisions shape the build, and each has a recommendation below.
 | Foundation | **A. Own model and rules on a canvas library.** Light, full control of interface and accessibility. You build the model-to-view mapping. **B. Sirius Web.** Views of a model and a server come ready. Heavy Java stack, small ecosystem, less control of the student experience | A. The interface and explanations are the product, and B constrains both. B's saving is the mapping layer, which Release 0 will show to be modest or not | Whether the team's strength is web development or the Eclipse modeling stack |
 | Where rules run | **A. Browser only.** Instant, but not trustworthy on its own. **B. Server only.** Trustworthy, but slower feedback. **C. One rule library that runs in both** | C. The browser gives instant feedback and the server checks what it saves | Choosing a language that runs in both places |
 | Storage shape | **A. One document per project plus an operation log.** Simple, and snapshots are trivial. Queries across projects are harder. **B. Relational tables of elements and links.** Strong queries. More schema coupling | A | How soon cross-project reporting is needed |
-| Flow identity across levels | **A. A child's boundary flow is the same element as the parent's flow.** Consistent by construction, but hides the lesson. **B. Separate elements matched by a rule.** A real check, with some duplication. **C. Both: inherited flows are shared, flows the student draws are separate** | C. Balancing compares by identity first and by dictionary composition second | Confirm against how the adopting textbook draws leveled diagrams |
+| Flow identity across levels | **A. A child's boundary flow is the same element as the parent's flow.** Consistent by construction, but hides the lesson. **B. Separate elements matched by a rule.** A real check, with some duplication. **C. Both: inherited flows are shared, flows the student draws are separate** | C. Balancing compares by identity first and by dictionary composition second | Confirm against how the textbook draws leveled diagrams |
 | Rule violations: block or flag | **A. Block.** The model is never wrong, and the student never sees why. **B. Flag.** The student makes the mistake and reads the explanation | B. Every rule flags by default. A course's rule profile can turn a rule off, change its severity, or make it block a change. The model's invariants are always enforced (SPEC.md section 5.1) | Settled |
-| Project license | **A. MIT.** Simplest, widest reuse. Anyone may sell it. **B. AGPL-3.0.** Hosted changes must be shared, but anyone may still sell it. **C. Business Source License 1.1.** Free for non-profits and individuals, paid for for-profit use, and each version becomes AGPL-3.0-or-later after four years | C. Section 9 has the detail | Chosen |
+| Project license | The Business Source License 1.1, so educators use it freely and publishers and other for-profits cannot take the work and sell it. MIT would allow that | Section 9 has the detail | Settled |
 | Hosting and running cost | **A. Each institution hosts its own copy.** No central cost. Needs local technical staff. **B. One community-hosted instance.** Easiest for instructors. Someone pays for servers and holds student data for many schools. **C. Self-hosting, with AI features billed to the institution's own model account** | C. Each institution runs its own copy from the Docker image, so cost and responsibility for student data stay with the institution that benefits. The author may sell commercial licenses or hosting. There is no community-hosted instance | Settled |
 
 ### Unresolved questions
@@ -938,17 +888,17 @@ Build the smallest tool in which a student's use cases, DFDs, ERD and data dicti
 | AI diagram generation for students | The evidence says it harms learning on graded work |
 | AI-based grading or AI detection | Not reliable enough, and unfair when wrong |
 | Reverse engineering and multi-dialect physical models | Professional features with no teaching value |
-| A general drawing or whiteboard mode | It competes where free tools already win |
+| A general drawing or whiteboard mode | Free tools already do it well, and it checks nothing |
 | User-defined notations | Support cost without a teaching need |
 
 ### Why
 
-- **The gap is specific.** Checked, leveled DFDs tied to a data model exist only in Windows desktop tools. That is where a new product can be clearly better, not merely newer.
+- **The course needs something specific.** Checked, leveled DFDs tied to a data model exist only in Windows desktop tools. A student using the book needs them in a browser.
 - **The foundation cannot be retrofitted.** Identity, the dictionary links and the rule engine must come first. Notations, collaboration and AI can all be added later to a correct model. None of them can rescue a drawing tool.
 - **Deterministic checking is both the teaching value and the trust.** It gives the same answer every time, it can be explained, and an instructor can trust it while grading in Canvas.
-- **Narrow scope is the competitive position.** A small tool that is right about three notations is more useful to a course than a broad one that is right about none.
+- **A narrow tool can be correct.** A small tool that is right about the book's three analysis notations is more useful to a course than a broad one that is right about none.
 
-The first test of the whole thesis is cheap: build Release 0, put it in front of a few instructors, and ask whether they would adopt it for a course.
+The first test is cheap: build Release 0, use it in the author's own course, and see whether it helps students learn the book's methods.
 
 ## 16. Fit to the course textbook
 
@@ -1049,7 +999,7 @@ The textbook is copyrighted. Starter cases, test cases and help text are origina
 
 ## 17. Sources
 
-All pages were read on 17 November 2026. Several were read through automated summaries, and a few sites blocked automated reading, as noted in the sections above. Prices and version numbers should be rechecked before they are quoted elsewhere.
+All pages were read on 17 November 2026. Several were read through automated summaries, and a few sites blocked automated reading, as noted in the sections above. Version numbers should be rechecked before they are quoted elsewhere.
 
 ### Visible Analyst
 
@@ -1058,10 +1008,9 @@ All pages were read on 17 November 2026. Several were read through automated sum
 - [Entity Relationship and Data Flow Tutorial](https://resources.visiblesystemscorp.com/hubfs/VA%20Tutorial%20ERD%20and%20Dataflows.pdf)
 - Visible Analyst Tutorial, Zachman Framework Edition (2009), and the Enterprise Framework 360 Degree View tutorial. Both are vendor PDFs held locally and not linked
 - [Online help index](https://www.visiblesystemscorp.com/Products/Analyst/Docs/index.html). Most of its topic pages returned "not found"
-- [Education pricing](https://www.visiblesystemscorp.com/Solutions/edu_price.htm)
 - [Instructor page](https://www.visiblesystemscorp.com/Solutions/instructor.htm)
 
-### Professional and commercial tools
+### Professional modeling tools
 
 - [PowerDesigner data flow diagrams and balancing](https://infocenter.sybase.com/help/topic/com.sybase.infocenter.dc38088.1652/doc/html/rad1232026266129.html)
 - [System Architect structured analysis and balancing](https://support.unicomsi.com/manuals/systemarchitect/11482/Architecting_and_designing/StructuredAnalysisDesign.18.040.html)
@@ -1106,7 +1055,6 @@ All pages were read on 17 November 2026. Several were read through automated sum
 - [LTI 1.3](https://www.imsglobal.org/spec/lti/v1p3/), [Deep Linking](https://www.imsglobal.org/spec/lti-dl/v2p0), [Assignment and Grade Services](https://www.imsglobal.org/spec/lti-ags/v2p0/), [Names and Role Provisioning](https://www.imsglobal.org/spec/lti-nrps/v2p0), [certification](https://www.1edtech.org/certification/lti)
 - [Canvas document processor](https://developerdocs.instructure.com/services/canvas/external-tools/lti/file.document_processor)
 - [Title II web rule](https://www.ada.gov/resources/2024-03-08-web-rule/), [2026 deadline extension](https://campustechnology.com/articles/2026/04/27/doj-extends-deadline-for-ada-title-ii-compliance.aspx), [WCAG 2.2 changes](https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/), [conformance reports](https://www.section508.gov/sell/acr/)
-- [Vendor assessment toolkit](https://www.educause.edu/higher-education-community-vendor-assessment-toolkit)
 
 ### AI
 
