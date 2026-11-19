@@ -12,11 +12,21 @@ root, over `packages/model`, `packages/rules`, `packages/cases`, `apps/web` and
 npm ci                # install exactly what package-lock.json lists
 npm run typecheck     # every workspace
 npm run lint          # the comment history check, then the boundary check
-npm test              # the scripts' own tests, then each workspace's Vitest tests
+npm test              # the scripts' tests, then every workspace's Vitest tests, each with a 75% coverage floor
 npm run build         # builds apps/web with Vite
 npm run test:browser  # the browser tests, in the workspaces that have them
 npm run dev --workspace @diagramble/web   # serves the web app with Vite
 ```
+
+`npm test` measures coverage and fails when it is under 75% for lines, branches
+and functions. Node's built-in test coverage checks the scripts' own tests, over
+the scripts together. Vitest with the V8 provider checks the five workspaces, one
+root `vitest.config.ts` running them as projects: the floor applies to the whole
+and to each workspace separately, so one well-tested workspace cannot hide
+another. `apps/web/src/main.tsx` is left out because it only mounts the app; the
+browser tests cover it. `npm test` inside one workspace runs only that workspace's
+tests, without the coverage check. The prototype is exempt. Reports are written to
+`coverage/`, which Git ignores.
 
 The boundary check, `scripts/check-boundaries.mjs`, fails when `packages/model`,
 `packages/rules` or `packages/cases` import anything but their own files, their
@@ -181,7 +191,8 @@ request's run on the older commit. Its jobs:
   build, in `prototype/`.
 - **App**: `npm ci` at the root, then typecheck, lint, the test suite and the
   build, with a PostgreSQL service whose address the tests read from
-  `DATABASE_URL`. It installs Playwright's Chromium headless shell and runs
+  `DATABASE_URL`. The test step enforces the 75% coverage floor for each
+  workspace and for the scripts. The job installs Playwright's Chromium headless shell and runs
   `npm run test:browser` only once `apps/web/playwright.config.ts` exists, and
   it runs `docker build .` only once a `Dockerfile` exists at the root.
 

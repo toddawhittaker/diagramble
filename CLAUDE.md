@@ -113,6 +113,8 @@ Orchestration rules:
   code happens to do.
 - Write the test first when the behavior is clear enough to state; at
   minimum, a bug fix starts with a failing test that reproduces it.
+- Code in the workspaces and in `scripts/` keeps at least 75% line, branch and
+  function coverage, enforced by `npm test` and CI. The prototype is exempt.
 - Test cases and sample data are original. SPEC.md section 6 has the
   project's own cases.
 - Before a pull request: typecheck, lint, the whole test suite and the

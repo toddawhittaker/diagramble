@@ -1678,7 +1678,7 @@ for each month.
 | Layout | elkjs. Dagre (MIT) is the fallback if elkjs proves unworkable | EPL-2.0, one of its two options (below) |
 | Argument schemas | Zod | MIT |
 | Accessible widgets: dialogs, menus, trees, tables and listboxes | React Aria, unstyled, so the Drafting Paper style stays the project's own | Apache-2.0 |
-| Tests | Vitest | MIT |
+| Tests | Vitest, with its V8 coverage provider (`@vitest/coverage-v8`). Every workspace keeps at least 75% line, branch, function and statement coverage, and Node's built-in test coverage holds the scripts to 75% | MIT |
 | Database, when the server needs one | PostgreSQL | PostgreSQL License |
 | Server framework | Fastify | MIT |
 | Canvas launch | Our own layer on `jose` | MIT |
