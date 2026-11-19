@@ -17,8 +17,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const PACKAGES = ["packages/model", "packages/rules", "packages/cases"];
 const SOURCE = /\.tsx?$/;
 const TEST = /\.test\.tsx?$/;
-// `from "x"`, `import "x"` and `import("x")`.
-const SPECIFIER = /(?:\bfrom\s*|\bimport\s*\(?\s*)["']([^"']+)["']/g;
+// `from "x"`, `import "x"` and `import("x")`, with any of the three quotes, since
+// import(`x`) loads a package too.
+const SPECIFIER = /(?:\bfrom\s*|\bimport\s*\(?\s*)["'`]([^"'`]+)["'`]/g;
 
 function sourceFiles(dir) {
 	const found = [];

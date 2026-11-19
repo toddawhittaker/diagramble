@@ -19,6 +19,10 @@ that is not a gap in something built goes in a GitHub issue instead.
   sample data and the rules running in the browser. The prototype is frozen as
   a reference for screen layout and is deleted once `apps/web` has the Release 2
   screens.
+- **Epic 1: Foundation.** An npm workspaces root over the five parts of SPEC.md
+  section 12, each with a placeholder and one test; the Release 0 libraries, pinned
+  exactly; a boundary check that keeps the model, rules and cases free of React, the
+  browser and the server; and the App CI job, a required check, over all of them.
 
 ## Open items
 

@@ -1692,6 +1692,17 @@ tool under the GPL, which the Business Source License of section 1 does not allo
 lets its files be combined with code under another license, as long as changes to elkjs's
 own files are shared under EPL-2.0.
 
+The parts are npm workspaces named `@diagramble/model`, `@diagramble/rules`,
+`@diagramble/cases`, `@diagramble/web` and `@diagramble/server`. The internal packages
+export their TypeScript source and have no build step: the server runs that source with
+the Node version's type stripping, and Vite builds it into the web app.
+
+Two checks keep `packages/model`, `packages/rules` and `packages/cases` free of React,
+the browser and the server. Their TypeScript settings have no browser library and no
+Node types. And `scripts/check-boundaries.mjs`, run by `npm run lint`, lets them import
+only their own files and the packages their own `package.json` lists, because npm puts
+every workspace's packages at the root, where any workspace's imports find them.
+
 The code in `apps/server` reaches the database only through the project-store interface.
 
 Browser tests cost the most processor time and memory, so they are kept few. A check on

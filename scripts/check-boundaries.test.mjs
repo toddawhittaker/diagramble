@@ -44,6 +44,7 @@ const FAILING = [
 	["an unlisted hoisted package", 'import { Kysely } from "kysely";\n'],
 	["a relative path that escapes the package", 'export { x } from "../../outside.ts";\n'],
 	["a dynamic import", 'export const load = () => import("react");\n'],
+	["a dynamic import in backticks", "export const load = () => import(`react`);\n"],
 	["a side-effect import", 'import "react";\n'],
 	["an export from", 'export * from "react";\n'],
 ];
