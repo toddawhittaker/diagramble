@@ -36,8 +36,9 @@ behind a hard-to-undo choice.
 
 The only code so far is a throwaway clickable prototype in `prototype/`, an npm project.
 It runs in the browser with sample data and has no backend. It covers the first-release
-and second-release screens of the specification. `prototype/README.md` describes its
-parts. The real application's layout is SPEC.md section 12.
+and second-release screens of the specification. It is frozen, a reference for screen
+layout only, and is deleted once `apps/web` has the Release 2 screens.
+`prototype/README.md` describes its parts. The real application's layout is SPEC.md section 12.
 
 Prerequisites: the `.nvmrc` Node (a SessionStart hook puts it on PATH in Claude
 sessions; humans run `nvm use`), and gitleaks for the pre-commit hook

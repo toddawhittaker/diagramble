@@ -46,9 +46,9 @@ file in common. These rules make that hold.
    settled before its epic starts. When two epics add to the same section, the one merging
    second keeps both when it merges `main` in, which it must do before its epic pull
    request anyway (WORKFLOW.md, "Pull requests").
-7. **The prototype is frozen.** No epic edits `prototype/`. It is retired at the Release 1
-   gate, once `apps/web` covers its first-release screens (section 2, "What may be taken
-   from the prototype").
+7. **The prototype is frozen.** No epic edits `prototype/`. It is a reference for screen
+   layout only. It and its CI job are deleted once `apps/web` has the Release 2 screens
+   (section 2, "What may be taken from the prototype").
 
 | Shared file | Owner | Who else may edit it |
 | --- | --- | --- |
@@ -102,7 +102,7 @@ stays small. Size S.
 - The section 12 libraries for Release 0, plus four the server needs: `pg` (Kysely's
   PostgreSQL driver), `@fastify/formbody` (an LTI launch arrives as a form post),
   `@fastify/cookie` (the session cookie) and `@fastify/static` (serving the web build),
-  all MIT.
+  all MIT. React Aria (Apache-2.0) is installed in `apps/web`.
 - Dependabot for the root's npm packages, and the root commands in WORKFLOW.md, the
   `epic-run` skill and CLAUDE.md.
 
@@ -221,7 +221,9 @@ Epics 2 and 3. Runs beside Epics 4 and 5. Size M.
 - The project-store interface of SPEC.md section 12 (load, save, append to the log) on
   Kysely: each project one JSON document in a projects table, and every accepted
   command a row of a command-log table keyed by project, in order (SPEC.md section 3.6).
-  Loading and saving a project is one read and one write.
+  Loading and saving a project is one read and one write. Every few hundred commands
+  the server also stores a snapshot of the document, so any earlier state is rebuilt by
+  replaying from the nearest snapshot (SPEC.md section 3.6).
 - A save request that takes one command, checks it with the model's schema, applies it to
   the saved project, and stores it before the next. A creating command whose identifier
   is already used is refused (SPEC.md section 3.2).
@@ -283,8 +285,9 @@ These must not be copied, because they differ from SPEC.md:
 - every kind and field of Releases 1 and 2;
 - and the tests, which are written anew from SPEC.md sections 3.4 and 6.
 
-The prototype stays the reference for Release 1's screens and is retired at the Release 1
-gate, once `apps/web` covers its first-release screens.
+The prototype stays, frozen, as a reference for screen layout only, because its model and
+rules differ from SPEC.md. It and its CI job are deleted once `apps/web` has the Release 2
+screens.
 
 ## 3. Release 1 candidates
 
@@ -293,16 +296,16 @@ section 10, Level 1). SPEC.md sections 8 and 9 fix its new parts.
 
 | Code | Epic | What it does | Depends on |
 | --- | --- | --- | --- |
-| R1-a | Project list and checkpoints | SPEC.md section 3.9: the project list, starting a new project, copying, renaming and deleting one, and named checkpoints that a student saves at any time and opens later as a new copy of the project, over Release 0's saving | Release 0 |
-| R1-b | Project files and starter cases | Export and import with version upgrades and plain refusals (section 3.9), saving a project as a starter case (section 3.8), two shipped starter cases and symbol help (VISION.md section 10, item 17), and the case text shown beside the canvas (section 3.7, `caseText`). Starter cases and version upgrades cover every Release 1 kind. Import is a security boundary: the security reviewer runs, and the exit includes tests built from section 3.9's "Import fails safe" list, with fuzzed and hand-crafted hostile files | R1-a, R1-c, R1-d, R1-e |
-| R1-c | Data flow diagrams and dictionary, complete | The Release 1 commands and queries of section 4, the settings of section 3.7, the full editor, the dictionary screen, the problems panel, where-used, and safe rename and delete (VISION.md section 10, items 3, 5, 11, 12). Only Gane and Sarson symbols are drawn; other styles come later (SPEC.md section 14.1 item 6) | Release 0 |
+| R1-a | Project list and checkpoints | SPEC.md section 3.9: the project list, starting a new project, copying, renaming and deleting one, named checkpoints that a student saves at any time and opens later as a new copy of the project, and opening a project as of a past date and time, also as a new copy, by the checkpoint path, over Release 0's saving | Release 0 |
+| R1-b | Project files and starter cases | Export and import with version upgrades and plain refusals (section 3.9); the file holds the project and never the command log, and import starts a fresh log; saving a project as a starter case (section 3.8), two shipped starter cases and symbol help (VISION.md section 10, item 17), and the case text shown beside the canvas (section 3.7, `caseText`). Starter cases and version upgrades cover every Release 1 kind. Import is a security boundary: the security reviewer runs, and the exit includes tests built from section 3.9's "Import fails safe" list, with fuzzed and hand-crafted hostile files | R1-a, R1-c, R1-d, R1-e |
+| R1-c | Data flow diagrams and dictionary, complete | The Release 1 commands and queries of section 4, the settings of section 3.7, the full editor, the dictionary screen, the problems panel, where-used, and safe rename and delete (VISION.md section 10, items 3, 5, 11, 12). Only Gane and Sarson symbols are drawn; other styles come later (SPEC.md section 14.1 item 5) | Release 0 |
 | R1-d | Use case forms | SPEC.md section 8: kinds, rules, worked-out views and the form screen | Release 0 |
 | R1-e | Entity relationship diagram and CRUD matrix | SPEC.md section 9, including the checks against the process model | Release 0 |
 | R1-f | Canvas launch for live sections | Several platform registrations and key rotation (VISION.md section 10, item 16). The launch is checked against a real Canvas before the live course, with an LTI 1.3 developer key requested from a Canvas administrator for the launch and the roster service (SPEC.md section 14.1 item 4). No score is sent | Release 0 |
 | R1-g | Project document as PDF, and diagram images | Any diagram exported as a PNG or SVG image, downloaded or copied to the clipboard, with its text escaped (SPEC.md section 3.9). The Release 1 exit criterion on a PDF, made with the browser's own print to PDF (SPEC.md section 10.8): a print stylesheet that lays each document out as pages and scales or splits large diagrams, and a short hint to choose "Save as PDF" and turn off the browser's headers and footers. The compiled documents wait for R2-f | R1-c, R1-d, R1-e |
 | R1-h | Keyboard and screen reader | The outline as a full keyboard editor for every Release 1 kind, and a screen-reader pass (VISION.md section 10, item 13) | R1-c, R1-d, R1-e |
 | R1-i | Instructor MCP server | SPEC.md section 7.1: personal API keys kept as hashes, revocable and logged, and Model Context Protocol (MCP) tools made from the command and query registry. Keys are for instructors only. While the agent edits, the instructor's open tabs on that project are read-only and say so. The architect run reads how Portikus's `packages/auth` stores API keys as hashes and ports what fits | R1-a, R1-b |
-| R1-k | Retention, archiving and account deletion | SPEC.md section 1, "Data retention": an instructor archives a course, which makes it read-only while students keep their projects; a retention policy deletes old logs, analytics, AI usage records, checkpoints and archived courses after the periods the administrator sets in R1-l; an account can be deleted. Needed before the live course. Needs the default periods of SPEC.md section 14.1 item 5. The security reviewer runs | R1-a, R1-f, R1-l |
+| R1-k | Retention, archiving and account deletion | SPEC.md section 1, "Data retention": an instructor archives a course, which makes it read-only while students keep their projects; a retention policy deletes old logs, analytics, AI usage records, checkpoints and archived courses after the periods the administrator sets in R1-l, two years by default; an account can be deleted. Needed before the live course. The security reviewer runs | R1-a, R1-f, R1-l |
 | R1-l | Administrator interface and operations | SPEC.md section 1, "Administration": one system administrator per deployment; the first one made by the first sign-in with the break-glass password set at install; a second factor for administrators, either a passkey or an authenticator app's time-based one-time codes, and never text messages; retention period settings; an operations document for backup, restore and monitoring, with the data inventory of SPEC.md section 1, "Student records" (what is stored, where, and for how long); and their state shown in the interface (server status, last backup). The other ways of signing in are R2-m. The architect run reads Portikus's `packages/auth` for its local administrator, passkey and breached-password code. The security reviewer runs | R1-f |
 | R1-j | Checked against the book | The exit criteria on chapters 4 and 5 and on Visible Analyst's checks. It needs `sources/`, so it runs from the main checkout | All of the above |
 
@@ -352,7 +355,5 @@ Epic 1 Foundation
 
 ## 6. Questions to settle before an epic starts
 
-Two open points of SPEC.md section 14.1 hold back an epic:
-
-- The default retention periods (item 5) must be settled before R1-k starts.
-- How the compiled documents' PDFs are made (item 3) must be settled before R2-f starts.
+One open point of SPEC.md section 14.1 holds back an epic: how the compiled documents'
+PDFs are made (item 3) must be settled before R2-f starts.

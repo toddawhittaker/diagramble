@@ -1,9 +1,10 @@
 # Diagramble prototype
 
 A clickable prototype of Diagramble with sample data. It is throwaway code, made so the
-author can click through the app and judge whether it is worth building. The model and
-the rules behave as [the specification](../docs/SPEC.md) says. Everything else is as
-simple as it could be made.
+author can click through the app and judge whether it is worth building. It is now frozen
+and serves only as a reference for screen layout. Its model and rules differ from
+[the specification](../docs/SPEC.md). It and its CI job are deleted once the real
+application's web app has the Release 2 screens.
 
 Everything runs in the browser. There is no backend. The project is saved in the
 browser's `localStorage`.

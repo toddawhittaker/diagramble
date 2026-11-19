@@ -54,7 +54,7 @@ this document wins. Section 14 lists the points still open.
 | Flow identity | Separate flow elements, each carrying a shared dictionary definition | See section 3.3 |
 | AI | Agent integration must be possible from the start | See section 7. No AI feature is built in Release 0 |
 | Accessibility | Essential. Students with disabilities must be able to do all their work. The target is the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA | The keyboard outline of section 2 item 5 is the first step. Every screen is held to the target |
-| Data retention | A requirement before Release 1's live course. An instructor can archive an old course, which makes it read-only for everyone while its students keep their projects. A retention policy decides how long logs, analytics, AI usage records, checkpoints and archived courses are kept before they are deleted. An account can be deleted | The system administrator sets the periods ("Administration" below). The default periods are open (section 14.1) |
+| Data retention | A requirement before Release 1's live course. An instructor can archive an old course, which makes it read-only for everyone while its students keep their projects. A retention policy decides how long logs, analytics, AI usage records, checkpoints and archived courses are kept before they are deleted. An account can be deleted | The default period is two years for every kind of record the policy covers: command logs and snapshots, analytics, AI usage records and logged AI exchanges, checkpoints, and archived courses. The system administrator can change it ("Administration" below). Periods are counted in years, never in minutes or weeks. A snapshot at the cut point keeps a project whole (section 3.6) |
 | Student records | Each institution that hosts Diagramble is responsible for its own compliance with the Family Educational Rights and Privacy Act (FERPA), the United States student privacy law, and for any agreements it needs | Diagramble supplies what a host needs to comply: the retention settings and account deletion of "Data retention", the rules on the AI provider of section 7 item 7, and a data inventory in the operations document ("Administration") that says what is stored, where, and for how long |
 | Administration | An administrator interface, built in Release 1. Each deployment has one system administrator, above instructors. The administrator sets the data retention periods, and in Release 2 sets up the other ways of signing in ("Sign-in") | The first administrator is created by the first sign-in with a break-glass password: a password kept for emergencies, set when the deployment is installed. Administrators, and only administrators, must use a second factor, either a passkey or an authenticator app with time-based one-time codes. Text messages (SMS) are never offered, because they are easy to intercept. Backups, restore, monitoring, health checks and the data inventory of "Student records" are described in an operations document. The administrator interface shows their state, such as the server's status and when the last backup ran |
 | Host names | A deployment uses two host names, for example `app.diagramble.example.edu` for the app and `files.diagramble.example.edu` for users' files. Attachments are served only from the files host (section 10.7). The app's session cookie is host-only, with no `Domain` attribute, so the files host never receives it | The two hosts are the same site, so SameSite cookie rules do not protect the app from the files host. From Release 0, every request that is signed in by the session cookie and changes anything must carry an `Origin` header that matches the app host. Anything else, including `Origin: null` or no `Origin` at all, is refused. Requests that prove themselves another way are not covered: the LTI launch carries a signed token from the platform, and the MCP server's requests carry an API key |
@@ -218,20 +218,24 @@ the model as "unplaced". Deleting the element is a separate command.
 
 ### 3.6 Storage form
 
-A project is one JSON document with five parts: `schemaVersion`, `settings`
-(section 3.7), `elements`, `views` and `log`. Elements are stored in a map keyed by
-`id`. The log is the ordered list of commands applied, each with its resulting changes
-in JSON Patch form (RFC 6902). Section 7 depends on this form being stable and
-documented.
+A project is one JSON document with four parts: `schemaVersion`, `settings`
+(section 3.7), `elements` and `views`. Elements are stored in a map keyed by `id`.
+Section 7 depends on this form being stable and documented.
 
-On the server the log is kept apart from the rest:
+The command log is kept on the server, apart from the document:
 
-- The database holds each project as one JSON document: this storage form without its
-  `log`. Loading a project is one read, and saving it is one write.
-- Every accepted command is also a row of a separate command-log table, keyed by project
-  and kept in order. The course dashboard's analytics read this table.
-- An exported file (section 3.9) holds the whole storage form, with the `log` written in
-  from the command-log table.
+- The database holds each project as one JSON document in this storage form. Loading a
+  project is one read, and saving it is one write.
+- Every accepted command is a row of a separate command-log table, keyed by project and
+  kept in order, with its resulting changes in JSON Patch form (RFC 6902). The course
+  dashboard's analytics read this table.
+- Every few hundred commands, the server also stores a snapshot of the project's
+  document. Any earlier state is rebuilt by replaying commands from the nearest snapshot
+  before it.
+- The log and the snapshots fall under the retention policy (section 1, "Data
+  retention"). When retention deletes old commands, the state at the cut point is kept
+  as a snapshot, so the project stays whole.
+- An exported file (section 3.9) holds the document only, never the log.
 
 ### 3.7 Project settings
 
@@ -322,13 +326,22 @@ under the retention policy (section 1, "Data retention"). Saving and opening a c
 are actions of the project list on the server, like copying, not commands of section 4,
 because they do not change the model.
 
+**A student can open a project as of a past time.** From the project list a student can
+pick a date and time from a project's history and open the project as it stood then. This
+makes a new project that is a copy of that state, the same way opening a checkpoint does,
+and it never overwrites the current project. The state is rebuilt from the command log
+and snapshots (section 3.6), so it reaches back as far as the retention policy keeps
+them. Undo still reaches only the current editing session.
+
 **A project can be exported to a file and imported again.** This lets a student keep their
 own copy, work on another computer or another deployment, or give the file to someone
 else. It is not the way to hand work in. Students hand in the PDF of section 10.8.
 
 - The file is the storage form of section 3.6, as UTF-8 JSON, with the ending
-  `.diagramble.json`. It holds the whole project: every element, view and setting, and
-  the log. Its contents hold nothing about the student, such as a name or account.
+  `.diagramble.json`. It holds the project only: every element, view and setting, and
+  each element's `origin`. It holds no command log and no times of the student's work,
+  and nothing about the student, such as a name or account. Importing a file starts a
+  fresh log.
 - The file is named after the student's login and the project's name, as in
   `jsmith-Library Loans.diagramble.json`, so an instructor who collects many files can
   tell them apart. Both parts are made
@@ -380,8 +393,8 @@ else. It is not the way to hand work in. Students hand in the PDF of section 10.
 8. Anything that fails refuses the whole file. Nothing is partly imported. The refusal is
    a plain sentence with no internal detail.
 9. Imported text is never rendered as HTML anywhere, including the PDF export.
-10. Imported `origin` values and the log are kept but marked unverified, and the project
-    is marked as imported.
+10. Imported `origin` values are kept but marked unverified, and the project is marked
+    as imported.
 11. Text from an imported file that reaches an AI model, whether student AI or an
     instructor's agent, is data, never instructions. It must not widen the tools offered.
 12. A zip file has limits on the number of entries, the size of each entry and of the
@@ -1651,6 +1664,7 @@ for each month.
 | Canvas | React Flow | MIT |
 | Layout | elkjs. Dagre (MIT) is the fallback if elkjs proves unworkable | EPL-2.0, one of its two options (below) |
 | Argument schemas | Zod | MIT |
+| Accessible widgets: dialogs, menus, trees, tables and listboxes | React Aria, unstyled, so the Drafting Paper style stays the project's own | Apache-2.0 |
 | Tests | Vitest | MIT |
 | Database, when the server needs one | PostgreSQL | PostgreSQL License |
 | Server framework | Fastify | MIT |
@@ -1827,16 +1841,12 @@ end, as the textbook's rule that every flow has two ends requires.
    confirmed against a real Canvas. That needs an LTI 1.3 developer key from a Canvas
    administrator at that time. The key needs the launch and the roster service, and no
    score.
-5. **The default retention periods.** The system administrator sets the periods (section
-   1, "Administration"). Still open: the defaults for command logs, the dashboard's
-   analytics, AI usage records and their prompt text, checkpoints, and archived courses. Who may see
-   what also needs writing down.
-6. **Other symbol styles.** DeMarco and Yourdon for data flow diagrams, which is display
+5. **Other symbol styles.** DeMarco and Yourdon for data flow diagrams, which is display
    only, and UML class notation for data models are the two planned for later (section
    1, "Symbol styles"). Neither is scheduled. Chen notation is not planned; it would
    need model changes, because it draws attributes as separate shapes and lets
    relationships carry attributes.
-7. **Contributor license agreements.** One is written when someone wants to contribute
+6. **Contributor license agreements.** One is written when someone wants to contribute
    (section 1, "License").
 
 ### 14.2 Taken from Visible Analyst, and left out

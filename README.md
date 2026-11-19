@@ -23,9 +23,10 @@ it](docs/images/prototype-workspace.png)
 ## Status
 
 The only code so far is a clickable prototype. It runs in the browser with a sample
-project, "Clinic appointments", and has no server. The model and the rules behave as the
-specification says, and the rest is as simple as it could be made. It covers the screens
-of the first and second releases. The real application has not been started.
+project, "Clinic appointments", and has no server. It covers the screens of the first and
+second releases. It is frozen and serves only as a reference for screen layout, because
+its model and rules differ from the specification. It is deleted once the real
+application has the second release's screens. The real application has not been started.
 
 ## Running the prototype
 

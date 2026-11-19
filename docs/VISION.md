@@ -264,19 +264,18 @@ Keeping these apart matters. The core must be correct for any user, including a 
 | --- | --- | --- |
 | Semantic model, repository, dictionary | Core | Same for every user |
 | Rule engine with severity and rule profiles | Core | A profile is data, so an instructor profile and a professional profile use one mechanism |
-| Rule explanations ("why" and "how to fix") | Core | Professionals benefit too. The wording level can vary by profile |
+| Rule explanations ("why" and "how to fix") | Core | Professionals benefit too |
 | Decomposition, balancing, where-used | Core |  |
-| Named checkpoints | Core | A checkpoint is a copy of the project saved under a name |
+| Named checkpoints | Core | A checkpoint is a copy of the project saved under a name. A project can also be opened as of a past time, as a copy |
 | Guided workflows and first-run steps | Scaffolding | A later goal (section 11, "Later goals") |
 | Symbol and rule glossary, context help | Scaffolding | Content, not engine |
-| Restricting notations and constructs | Scaffolding built on a core feature | The palette is filtered by the profile |
 | Starter projects and case studies | Scaffolding | Content library |
 | Rubrics, comments, resubmission | Not done by Diagramble | Canvas does these |
 | Course dashboard of student behavior | Scaffolding | Worked out from the saved command log. No grades |
 | Learning management system launch, for sign-in only | Integration | Separate boundary from both |
 | AI assistance levels | Scaffolding | Enforced by the server, set per course |
 
-**Should an instructor be able to restrict notations, constructs and rules per course?** Yes. It is the cheapest high-value teaching feature, because the rule engine already needs named rules with severity. Week 2 can allow only a context diagram. Week 5 can turn on balancing. The research on novices supports limiting what is on screen: worked examples and reduced choice help beginners, and [the benefit fades as skill grows](https://faculty.engineering.asu.edu/mre/wp-content/uploads/sites/31/2020/02/Exp_Rev_LI06.pdf).
+**Should an instructor be able to adjust the rules per course?** Yes, and only the rules. A course's rule profile can turn a rule off, change its severity, or make it block a change (SPEC.md section 5.1). It costs little, because the rule engine already needs named rules with severity. A profile does not hide symbols from the palette or change the wording of explanations.
 
 ### What software can check and what needs judgment
 
@@ -324,7 +323,7 @@ The launch and the roster are the only Canvas services used. Diagramble does not
 ### What a hosting school needs
 
 - **Student records.** Each school that hosts Diagramble is responsible for its own compliance with the Family Educational Rights and Privacy Act (FERPA), the United States student privacy law. Diagramble supplies what a host needs: retention settings, account deletion, the rules on the AI provider (SPEC.md section 7 item 7), and a data inventory that says what is stored, where, and for how long (SPEC.md section 1, "Student records").
-- **Data retention.** Course archiving, a retention policy for logs, analytics, AI usage records, checkpoints and archived courses, and account deletion are needed before the first live course. The deployment's system administrator sets the periods; the defaults are open (SPEC.md section 14.1).
+- **Data retention.** Course archiving, a retention policy for logs, analytics, AI usage records, checkpoints and archived courses, and account deletion are needed before the first live course. Every kind of record is kept two years by default, and the deployment's system administrator can change that. Periods are counted in years (SPEC.md section 1, "Data retention").
 - **Accessibility.** The target and the audit described above.
 - **Self-hosting.** Each school runs its own copy from one Docker image on its own server. AI features cost it money per request, billed to its own model account. Students pay nothing.
 
@@ -431,7 +430,7 @@ The starting rule list for DFDs can be taken from a [published formalization of 
 ### Versioning, history and provenance
 
 - **Operation log.** Every edit is a recorded command. This gives undo, the course dashboard's summaries, and evidence of process.
-- **Checkpoints.** From the project list, a student can save a named checkpoint at any time and later open it as a new copy of the project (SPEC.md section 3.9).
+- **Checkpoints.** From the project list, a student can save a named checkpoint at any time and later open it as a new copy of the project. A student can also open a project as it stood at any past date and time, again as a new copy that never overwrites the current project (SPEC.md section 3.9). Undo reaches only the current editing session.
 - **Provenance.** Each element records who created it and whether it came from a starter model, the student, or an instructor's own AI agent. An AI model never changes a student's model.
 
 ### Collaboration
@@ -546,7 +545,7 @@ Three safeguards apply at every level above 0.
 - **Disclosure.** The student sees what was used. The instructor sees counts of AI use, in requests and tokens, per student and per course, and never the prompts or responses. Prompt and response text is logged for safety and debugging, under the retention policy.
 - **No detectors.** Integrity rests on process evidence from the operation log, which is fairer than a probability score.
 
-**Assessment mode** is level 0 plus a locked profile. The built-in rule explanations remain, because they are fixed text and not AI.
+**Assessment mode** is level 0 plus the course's rule profile. Students never change course settings, so neither can be turned off from a student's account. The built-in rule explanations remain, because they are fixed text and not AI.
 
 ### How to make AI output reliable
 
@@ -579,7 +578,7 @@ Licenses and versions were read from license files, the npm registry and release
 | --- | --- | --- | --- | --- |
 | Diagram canvas | [React Flow (xyflow)](https://github.com/xyflow/xyflow) | MIT | Very active. Renders from node and edge data you own, so the model stays outside the library. Its documentation covers keyboard and screen-reader support | No layout, no orthogonal routing, no notation shapes |
 | Automatic layout | [elkjs](https://github.com/kieler/elkjs) | EPL-2.0 or GPL-3.0-or-later | Layered layout with ports and right-angle edges, which suits DFDs and ERDs. Works on plain data | Changes to its own files must be published. Your code is unaffected |
-| Model structure checks | Zod or Ajv | MIT | Validates the shape of stored projects | Not a rule engine |
+| Model structure checks | Zod | MIT | Validates the shape of stored projects | Not a rule engine |
 | Modeling rules | Purpose-built, as plain typed functions | Own code | Rules about graphs and hierarchies are simpler to write and test as code than in a generic rules library |  |
 | Rule design pattern | [bpmnlint](https://github.com/bpmn-io/bpmnlint) | MIT | Named rules, presets, per-rule overrides, live display in the editor | Copy the design. Its rules are BPMN-specific |
 | History format | JSON Patch (RFC 6902) | Open standard | A standard way to record each change | Storage and replay are yours to build |
