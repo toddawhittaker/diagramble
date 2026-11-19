@@ -46,7 +46,7 @@ The textbook's design diagrams come in the second release: physical DFDs, struct
 | What separates a CASE tool from a diagram editor? | Element identity outside diagrams, typed connections, cross-diagram rules, where-used | 4 |
 | How do leading tools keep models consistent? | One element with many diagram occurrences, plus a rule check run over the repository | 4, 7 |
 | What do web, collaboration and AI advances enable? | Zero install, instant rule feedback, version history, guarded explanation and questioning | 7, 8 |
-| What does excellent teaching look like? | Guided steps, feedback that says why, assignment profiles, rubric-linked review | 5 |
+| What does excellent teaching look like? | Feedback that says why, a starting case, and settings the instructor controls | 5 |
 
 ## 2. Existing tools and what we learn from them
 
@@ -840,7 +840,6 @@ Five of the eight assumptions hold only with conditions, and three are rejected 
 
 ### Evidence gaps that could change these verdicts
 
-- How many courses still require Visible Analyst, and how many teach DFDs with a drawing tool.
 - How often students make each kind of DFD error. No frequency study was found.
 - Whether rule explanations and hints improve unassisted performance in this subject. The roadmap measures teaching value by instructor feedback instead (section 11, Release 2).
 - Who will maintain it. Each institution hosts its own copy and answers for its students' data, but the code needs a maintainer.
