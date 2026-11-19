@@ -47,6 +47,7 @@ document wins. Section 14 records the smaller points settled the same day.
 | Database access | Kysely (MIT) behind a small project-store interface of our own (load, save, append to the log), decided on 18 November 2026 | The same code can run on PostgreSQL on the server and on SQLite in a possible desktop app later (section 14.3). See section 12 |
 | AI models and agents | The Vercel AI SDK, package `ai` (Apache-2.0), for student-facing AI including agents (its tool-loop agent), decided on 18 November 2026. Rule 1: use provider packages such as `@ai-sdk/anthropic` with the institution's own key, never bare model-name strings, which route through Vercel's hosted gateway. Rule 2: our server still builds the tool list for each request from the assistance level (section 7 item 4), and an agent changes the model only by proposing through `preview` (section 7 item 5). Rule 3: we log every step and remove student identity ourselves (section 7 item 7) | See sections 7 and 12. No AI feature is built in Release 0 |
 | Deployment | One Docker image for the app, and a Docker Compose file that adds PostgreSQL, decided on 18 November 2026 | See section 12 |
+| Sign-in | The Canvas launch only, for now, decided on 18 November 2026. An account is kept separate from the ways of signing in to it, so that other ways can be added later without changing accounts | A session is a cookie that points to a record stored in the database. Later ways of signing in are listed in section 14.3 |
 | Flow identity | Separate flow elements, each carrying a shared dictionary definition | See section 3.3 |
 | AI | Agent integration must be possible from the start | See section 7. No AI feature is built in Release 0 |
 
@@ -1474,6 +1475,10 @@ for each month.
 | Database access | Kysely, behind our own project-store interface | MIT |
 | AI models and agents | Vercel AI SDK (`ai`) plus provider packages | Apache-2.0 |
 | Deployment | Docker image, and Docker Compose with PostgreSQL | Not applicable |
+| Linking the packages and apps | npm workspaces | Part of npm |
+| Web app build and routing | Vite and React Router | MIT |
+| Browser tests | Playwright | Apache-2.0 |
+| Database migrations | Kysely's migration runner | MIT |
 
 The code in `apps/server` reaches the database only through the project-store interface.
 
@@ -1671,6 +1676,13 @@ project's author confirmed all eight on 17 November 2026. None affects Release 0
 4. **A desktop app.** An Electron app may come later. It could run the same server and
    project store in-process with SQLite in place of PostgreSQL. The Canvas launch and
    the institution's AI gateway would stay server-only. Nothing is built for it now.
+5. **More ways to sign in.** Besides the Canvas launch, the author wants these later:
+   OpenID Connect (OIDC), LDAP directories, and email "magic links" that are limited
+   to an allow list of addresses or to allowed domains. None is scheduled yet.
+6. **How PDFs are made.** Rendering pages in a headless browser gives the most faithful
+   documents but adds a few hundred megabytes to the Docker image. A PDF library keeps
+   the image small but lays out every document a second time. This must be settled
+   before the export of section 10.8 is built.
 
 ### 14.4 Taken from Visible Analyst, and left out
 
