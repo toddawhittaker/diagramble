@@ -56,8 +56,8 @@ file in common. These rules make that hold.
 | `package-lock.json` | Epic 1 | An epic's dependency task, under rule 3 |
 | `.github/workflows/ci.yml`, `.github/dependabot.yml` | Epic 1 | No Release 0 epic |
 | A workspace's `package.json` and `tsconfig.json` | The epic that owns the workspace | Dependency tasks |
-| `Dockerfile`, `compose.yaml`, `.dockerignore` | Epic 3 | Epic 7, to serve the web app's build |
-| `packages/mock-lti` | Epic 3 | Epic 7, for the trial's people and courses |
+| `Dockerfile`, `compose.yaml`, `.dockerignore` | Epic 3 | Epic 8, to serve the web app's build in place of the prototype's |
+| `packages/mock-lti` | Epic 4 | Epic 8, for the trial's people and courses |
 | CLAUDE.md's commands table, WORKFLOW.md's "Local development" and "CI", the `epic-run` skill | Epic 1 | Fold tasks |
 | `docs/STATUS.md`, `docs/SPEC.md` | Fold tasks, by adding | For `docs/SPEC.md`, a documentation-only pull request into `main` outside any epic (rule 6) |
 
@@ -72,16 +72,16 @@ Release 0 proves the risky parts (VISION.md section 11, "Release 0"; SPEC.md sec
 
 | Exit criterion (VISION.md section 11) | SPEC.md section 2 item | Met by |
 | --- | --- | --- |
-| Balancing through the dictionary is right on three cases, one with a flow split into parts | 2, 3 | Epic 4 |
-| One element on two diagrams is renamed once, and both update | 1, 4 | Epic 2 in the model, Epic 5 on screen |
-| A launch from a mock LTI 1.3 platform, including one inside a frame, signs the user in and opens their saved project | 6, 7 | Epic 3, then Epic 6, then Epic 7 |
-| A keyboard-only user builds a context diagram in the outline view | 5 | Epic 5 |
+| Balancing through the dictionary is right on three cases, one with a flow split into parts | 2, 3 | Epic 5 |
+| One element on two diagrams is renamed once, and both update | 1, 4 | Epic 2 in the model, Epic 6 on screen |
+| A launch from a mock LTI 1.3 platform, including one inside a frame, signs the user in and opens their saved project | 6, 7 | Epic 4, then Epic 7, then Epic 8 |
+| A keyboard-only user builds a context diagram in the outline view | 5 | Epic 6 |
 
 ### Epic 1: Foundation
 
 Serves SPEC.md section 12 and WORKFLOW.md "CI". Owns the root files above and an empty
 skeleton of the five application workspaces of section 12. The sixth part,
-`packages/mock-lti`, belongs to Epic 3. Depends on nothing and runs alone, so it
+`packages/mock-lti`, belongs to Epic 4. Depends on nothing and runs alone, so it
 stays small. Size S.
 
 - An npm workspaces root over `packages/*` and `apps/*`, with `packages/model`,
@@ -112,7 +112,7 @@ and `main` is green.
 ### Epic 2: Model
 
 Serves SPEC.md sections 3.1 to 3.6, section 4 for Release 0, and section 7 items 1, 2
-and 5. It serves item 6 only through the pure `apply`; Epic 4 builds `preview`. Owns `packages/model`. Depends on Epic 1. Runs beside Epic 3. Size L.
+and 5. It serves item 6 only through the pure `apply`; Epic 5 builds `preview`. Owns `packages/model`. Depends on Epic 1. Runs beside Epics 3 and 4. Size L.
 
 - The element kinds of section 3.3 and their Zod schemas, the views of section 3.5, and
   the storage form of section 3.6 with `schemaVersion` 1 and a published JSON Schema.
@@ -122,7 +122,7 @@ and 5. It serves item 6 only through the pure `apply`; Epic 4 builds `preview`. 
 - The Release 0 commands of section 4.1 (all but `carryDown`, `setTopDiagram`,
   `setShowFindings` and `setCaseText`) and the queries `getModel`, `getOutline`, `getElement`, `whereUsed`
   and `expandData`, each with a name, a schema and a sentence, in one registry.
-  `getFindings` and `preview` need the rules, so Epic 4 builds them.
+  `getFindings` and `preview` need the rules, so Epic 5 builds them.
 - One file per family of kinds, so that Release 1's use case and ERD epics add files.
 
 - Every creating command carries the new item's identifier, and `apply` refuses one whose
@@ -134,35 +134,70 @@ shows the new name on both, and a test that replaying the log rebuilds the model
 entry and the storage form are hard to undo, so the epic's architect run brings them to
 the user and its fold records them in SPEC.md section 3.6.
 
-### Epic 3: Server and Canvas launch
+### Epic 3: Server and sign-in
 
-Serves SPEC.md section 1 (the rows "Server framework", "Canvas launch", "Database
-access", "Deployment", "Sign-in" and "Host names") and section 12, and
-VISION.md section 5, "Canvas through LTI 1.3". Owns `apps/server`, `packages/mock-lti` and
-the Docker files.
-Depends on Epic 1. Runs beside Epics 2, 4 and 5. Size M.
+Serves SPEC.md section 1 (the rows "Server framework", "Database access", "Deployment",
+"Sign-in" and "Host names"), section 2 item 8 and section 12. Owns `apps/server` and the
+Docker files; Epics 4 and 7 add their own folders to `apps/server` under section 1's
+rule 4. Depends on Epic 1. Runs beside Epic 2. Size S.
 
-- The epic's architect run starts by reading the `packages/auth` and `packages/mock-lms`
-  packages of Portikus, the author's own project (MIT license, on the same Kysely and `jose` stack). Portikus already has a tested LTI 1.3 layer (login, token checks,
-  state and nonce, roles, the tool's key, platform registrations, the roster service),
-  a mock platform, and sign-in methods keyed by issuer and subject. The epic ports what
-  fits, adapted to Fastify and to SPEC.md. Deep linking is not needed.
-- A Fastify server with Zod-checked settings and requests.
-- The Learning Tools Interoperability (LTI) 1.3 login and launch on `jose`: state, nonce,
-  signature, issuer, audience and deployment checks, and the tool's public key set. One
-  platform registration, read from settings.
-- PostgreSQL through Kysely, with the migration runner, for accounts, sign-in methods,
-  sessions and launch nonces. The project tables are Epic 6's.
-- An account kept apart from its sign-in methods (SPEC.md section 1, "Sign-in"); an LTI
-  sign-in method keyed by the token's issuer and subject; a host-only session cookie (no
-  `Domain` attribute) that points to a stored session.
-- The launch requests the Canvas login ID as the custom variable `$Canvas.user.loginId`,
-  and a new account stores it as its login (SPEC.md section 3.9).
+The epic exists so that a deployed preview, behind a real sign-in, can collect feedback
+from faculty while the rest of Release 0 is built.
+
+- The epic's architect run starts by reading the `packages/auth` package of Portikus, the
+  author's own project (MIT license, on the same Kysely stack), for its accounts, sign-in
+  methods, sessions and password handling, and ports what fits, adapted to Fastify and to
+  SPEC.md.
+- A Fastify server with Zod-checked settings and requests, including the app's host
+  name. It runs behind the deployment's own reverse proxy, which ends the TLS connection.
+- PostgreSQL through Kysely, with the migration runner, for accounts, sign-in methods and
+  sessions. The project tables are Epic 7's; the launch nonces are Epic 4's.
+- An account kept apart from its sign-in methods (SPEC.md section 1, "Sign-in"), and a
+  password sign-in method keyed by username. Passwords are stored as scrypt hashes from
+  Node's own `crypto`, so no library is added. Repeated failed sign-ins for one username
+  or from one address are slowed and then refused for a while.
+- A command run on the server that makes a password account, sets its password, or
+  disables it. Nobody can sign up from the web. A new account's login is its username
+  (SPEC.md section 3.9).
+- A sign-in page, a sign-out, and a host-only session cookie (no `Domain` attribute,
+  `Secure`, `HttpOnly`) that points to a stored session.
 - Every request signed in by the session cookie that changes anything is refused
   unless its `Origin` header matches the app host; `Origin: null` and a missing
-  `Origin` are refused too. The LTI launch and API-key requests prove themselves
-  another way (SPEC.md section 1, "Host names"). Tests cover each case.
-- The launch's course and whether the person is an instructor are kept, because Epic 6
+  `Origin` are refused too (SPEC.md section 1, "Host names"). Tests cover each case.
+- Every path except the sign-in page and a health check needs a session. Until Epic 8
+  serves the web app's build, the server serves the prototype's build behind the
+  sign-in. The Docker build runs the prototype's own `npm ci` and `npm run build`; no
+  file in `prototype/` changes (section 1's rule 7).
+- The Docker image, and the Compose file that adds PostgreSQL.
+
+Exit: the Docker image deployed behind a reverse proxy, where a person with a password
+account signs in and sees the prototype, and a person without one sees only the sign-in
+page. The security reviewer has run.
+
+### Epic 4: Canvas launch
+
+Serves SPEC.md section 1 (the rows "Canvas launch" and "Sign-in"), section 2 item 6 and
+VISION.md section 5, "Canvas through LTI 1.3". Owns the launch folder in `apps/server`,
+its migrations and its routes, and `packages/mock-lti`. Depends on Epic 3. Runs beside
+Epics 2, 5 and 6. Size M.
+
+- The epic's architect run starts by reading the `packages/auth` and `packages/mock-lms`
+  packages of Portikus, on the same `jose` stack. Portikus already has a tested LTI 1.3
+  layer (login, token checks, state and nonce, roles, the tool's key, platform
+  registrations, the roster service), a mock platform, and sign-in methods keyed by
+  issuer and subject. The epic ports what fits, adapted to Fastify and to SPEC.md. Deep
+  linking is not needed.
+- The Learning Tools Interoperability (LTI) 1.3 login and launch on `jose`: state, nonce,
+  signature, issuer, audience and deployment checks, and the tool's public key set. One
+  platform registration, read from settings. Launch nonces are stored in PostgreSQL.
+- An LTI sign-in method, keyed by the token's issuer and subject, on Epic 3's accounts.
+  A launch signs the person in with Epic 3's session cookie.
+- The launch requests the Canvas login ID as the custom variable `$Canvas.user.loginId`,
+  and a new account stores it as its login (SPEC.md section 3.9).
+- The LTI launch proves itself with the platform's signed token, so Epic 3's `Origin`
+  check does not apply to it (SPEC.md section 1, "Host names"). Tests cover that a
+  launch is accepted from the platform's site and that nothing else is let past the check.
+- The launch's course and whether the person is an instructor are kept, because Epic 7
   finds the student's project by course: one project per student per course.
 - The launch only signs a person in (SPEC.md section 1, "Grading"). The roster service
   comes with the course dashboard, R2-l.
@@ -171,16 +206,15 @@ Depends on Epic 1. Runs beside Epics 2, 4 and 5. Size M.
   that sends each person's login ID as the `$Canvas.user.loginId` custom variable, launching
   inside a frame, a roster service, and a signed-launch generator with deliberate
   defects for negative tests. It is never in the Docker image.
-- The Docker image, and the Compose file that adds PostgreSQL.
 - Tests against the mock platform, with good launches and launches carrying each defect.
 
 Exit: a launch from the mock platform, including one inside a frame, reaches the deployed
 server and signs the user in. The security reviewer has run.
 
-### Epic 4: Rules and test cases
+### Epic 5: Rules and test cases
 
 Serves SPEC.md sections 5 and 6. Owns `packages/rules` and `packages/cases`. Depends on
-Epic 2. Runs beside Epics 3, 5 and 6. Size L.
+Epic 2. Runs beside Epics 3, 4, 6 and 7. Size L.
 
 - The rule shape and finding of section 5.1, and the one built-in profile.
 - One task per rule family, each owning its file and codes: element and connection
@@ -191,12 +225,12 @@ Epic 2. Runs beside Epics 3, 5 and 6. Size L.
 
 Exit: all three cases pass as automated tests, which meets the first exit criterion.
 
-### Epic 5: Canvas and outline view
+### Epic 6: Canvas and outline view
 
 Serves SPEC.md section 2 items 4 and 5 and section 3.5, VISION.md section 5
 ("Accessibility and keyboard modeling"), and `docs/mockups/STYLES.md`. Owns `apps/web`,
-except the save-queue folder that Epic 6 owns. Depends on Epic 2. Runs beside Epics 3, 4
-and 6. Size M.
+except the save-queue folder that Epic 7 owns. Depends on Epic 2. Runs beside Epics 3, 4,
+5 and 7. Size M.
 
 - A Vite, React and React Router app with one store over the model's `apply`, held in
   memory. A first task builds it; the canvas and the outline are then separate folders
@@ -211,12 +245,12 @@ Exit: Playwright tests that build a context diagram with the keyboard alone (the
 exit criterion) and rename an element shown on two diagrams. The accessibility reviewer
 has run over the outline.
 
-### Epic 6: Saving
+### Epic 7: Saving
 
 Serves SPEC.md section 2 item 7 and section 3.9's "Work is saved as the student goes".
 Owns the project store in `apps/server` (one folder, its migrations and its routes) and
 the save queue in `apps/web` (one folder), under section 1's rules 4 and 5. Depends on
-Epics 2 and 3. Runs beside Epics 4 and 5. Size M.
+Epics 2 and 4. Runs beside Epics 5 and 6. Size M.
 
 - The project-store interface of SPEC.md section 12 (load, save, append to the log) on
   Kysely: each project one JSON document in a projects table, and every accepted
@@ -229,7 +263,7 @@ Epics 2 and 3. Runs beside Epics 4 and 5. Size M.
   is already used is refused (SPEC.md section 3.2).
 - The browser's save queue: commands sent in order, kept while offline, a new identifier
   made and the command sent again after that refusal, and a warning before the page
-  closes with changes waiting. It knows nothing of the web store; Epic 7 connects it.
+  closes with changes waiting. It knows nothing of the web store; Epic 8 connects it.
 - One project per student per Canvas course, made empty on first open.
 - One editing tab per project (SPEC.md section 3.9): every other tab showing it is
   read-only and says so, and offers a takeover that makes the editing tab read-only. Undo
@@ -241,15 +275,15 @@ until it takes over, after which the first tab is read-only. The save request
 and the database schema are hard to undo, so the epic's architect run brings them to the
 user. The security reviewer has run.
 
-### Epic 7: Trial launch
+### Epic 8: Trial launch
 
 Serves SPEC.md section 2 item 6 and the third exit criterion. Owns the path from launch
 to app: the serving of the web build in `apps/server`, and the launch entry in `apps/web`.
-Depends on Epics 4, 5 and 6. Size S.
+Depends on Epics 5, 6 and 7. Size S.
 
 - The launch opens the web app on the student's saved project for that course, and the
-  app lists its findings. A read-only tab shows Epic 6's read-only notice and takeover.
-- The web store sends each accepted command through Epic 6's save queue, and the top bar
+  app lists its findings. A read-only tab shows Epic 7's read-only notice and takeover.
+- The web store sends each accepted command through Epic 7's save queue, and the top bar
   says when the project was last saved.
 - The trial from the mock platform, then the release gate's whole-system review by the
   architect (WORKFLOW.md, "Epic plans"), its findings filed as issues.
@@ -306,7 +340,7 @@ section 10, Level 1). SPEC.md sections 8 and 9 fix its new parts.
 | R1-h | Keyboard and screen reader | The outline as a full keyboard editor for every Release 1 kind, and a screen-reader pass (VISION.md section 10, item 13) | R1-c, R1-d, R1-e |
 | R1-i | Instructor MCP server | SPEC.md section 7.1: personal API keys kept as hashes, revocable and logged, and Model Context Protocol (MCP) tools made from the command and query registry. Keys are for instructors only. While the agent edits, the instructor's open tabs on that project are read-only and say so. The architect run reads how Portikus's `packages/auth` stores API keys as hashes and ports what fits | R1-a, R1-b |
 | R1-k | Retention, archiving and account deletion | SPEC.md section 1, "Data retention": an instructor archives a course, which makes it read-only while students keep their projects; a retention policy deletes command logs and snapshots, analytics, AI usage records and logged AI exchanges, the request log of API keys, checkpoints, and archived courses after the periods the administrator sets in R1-l, two years by default; an account can be deleted. Needed before the live course. The security reviewer runs | R1-a, R1-f, R1-l |
-| R1-l | Administrator interface and operations | SPEC.md section 1, "Administration": one system administrator per deployment; the first one made by the first sign-in with the break-glass password set at install; a second factor for administrators, either a passkey or an authenticator app's time-based one-time codes, and never text messages; retention period settings; an operations document for backup, restore and monitoring, with the data inventory of SPEC.md section 1, "Student records" (what is stored, where, and for how long); and their state shown in the interface (server status, last backup). The system administrator also manages Canvas platform registrations here, which R1-f needs. The other ways of signing in are R2-m. The architect run reads Portikus's `packages/auth` for its local administrator, passkey and breached-password code. The security reviewer runs | Release 0 |
+| R1-l | Administrator interface and operations | SPEC.md section 1, "Administration": one system administrator per deployment; the first one made by the first sign-in with the break-glass password set at install; a second factor for administrators, either a passkey or an authenticator app's time-based one-time codes, and never text messages; retention period settings; an operations document for backup, restore and monitoring, with the data inventory of SPEC.md section 1, "Student records" (what is stored, where, and for how long); and their state shown in the interface (server status, last backup). The system administrator also manages Canvas platform registrations here, which R1-f needs, and makes, resets and disables password accounts, in place of Epic 3's server command. The other ways of signing in are R2-m. The architect run reads Portikus's `packages/auth` for its local administrator, passkey and breached-password code. The security reviewer runs | Release 0 |
 | R1-j | Checked against the book | The exit criteria on chapters 4 and 5 and on Visible Analyst's checks. It needs `sources/`, so it runs from the main checkout | All of the above |
 
 ## 4. Release 2 candidates
@@ -338,15 +372,15 @@ planned here.
 
 ```
 Epic 1 Foundation
- ├─ Epic 2 Model ─┬─ Epic 4 Rules and test cases ─────┐
- │                ├─ Epic 5 Canvas and outline ───────┤
- │                └─┐                                 │
- └─ Epic 3 Server ──┴─ Epic 6 Saving ─────────────────┴─ Epic 7 Trial launch
+ ├─ Epic 2 Model ─────────────────────────────────────┬─ Epic 5 Rules and test cases ──┐
+ │                                                    ├─ Epic 6 Canvas and outline ────┤
+ │                                                    │                                │
+ └─ Epic 3 Server and sign-in ─ Epic 4 Canvas launch ─┴─ Epic 7 Saving ────────────────┴─ Epic 8 Trial launch
 ```
 
 | Stage | Epics that can run at once |
 | --- | --- |
-| Release 0 | Epic 1 alone; then Epics 2 and 3; then Epics 4 and 5, with Epic 3 if it is still running; then Epic 6 once Epics 2 and 3 have merged; then Epic 7 |
+| Release 0 | Epic 1 alone; then Epics 2 and 3; then Epic 4 once Epic 3 has merged, and Epics 5 and 6 once Epic 2 has merged, with Epic 2 or 3 if still running; then Epic 7 once Epics 2 and 4 have merged; then Epic 8 |
 | Release 1 | R1-a, R1-c, R1-d, R1-e and R1-l; then R1-b, R1-f, R1-g and R1-h; then R1-i and R1-k; then R1-j |
 | Release 2 | R2-a, R2-b, R2-c, R2-d, R2-e, R2-g and R2-m; then R2-h, R2-i, R2-j and R2-l; then R2-f; then R2-k |
 
