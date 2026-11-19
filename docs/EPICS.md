@@ -40,8 +40,10 @@ file in common. These rules make that hold.
    (`prototype/README.md`, "Rules for a screen agent").
 5. **Database migrations are added, never edited.** Before its epic pull request, an epic
    renames any migration not yet on `main` so that it sorts after the newest one there.
-6. **Documents change at the fold, by adding.** `docs/STATUS.md` and `docs/SPEC.md`
-   change only in fold tasks. When two epics add to the same section, the one merging
+6. **Documents change at the fold, by adding.** Inside an epic, `docs/STATUS.md` and
+   `docs/SPEC.md` change only in fold tasks. Outside any epic, `docs/SPEC.md` may also
+   change in a documentation-only pull request into `main`, which is how an open point is
+   settled before its epic starts. When two epics add to the same section, the one merging
    second keeps both when it merges `main` in, which it must do before its epic pull
    request anyway (WORKFLOW.md, "Pull requests").
 7. **The prototype is frozen.** No epic edits `prototype/`. It is retired at the Release 1
@@ -57,12 +59,11 @@ file in common. These rules make that hold.
 | `Dockerfile`, `compose.yaml`, `.dockerignore` | Epic 3 | Epic 7, to serve the web app's build |
 | `packages/mock-lti` | Epic 3 | Epic 7, for the trial's people and courses |
 | CLAUDE.md's commands table, WORKFLOW.md's "Local development" and "CI", the `epic-run` skill | Epic 1 | Fold tasks |
-| `docs/STATUS.md`, `docs/SPEC.md` | Fold tasks, by adding | Nobody else |
+| `docs/STATUS.md`, `docs/SPEC.md` | Fold tasks, by adding | For `docs/SPEC.md`, a documentation-only pull request into `main` outside any epic (rule 6) |
 
-Two other ways were weighed. Letting each epic add its own dependencies and CI steps saves
-the foundation epic, but the first two parallel epics then conflict on the lockfile and
-`ci.yml` at once. Writing the model's types in the foundation epic would start the rules
-and the web app sooner, but those types are the hardest thing to undo, belong with
+The foundation epic owns the dependencies and CI steps because two parallel epics that
+each add their own conflict on the lockfile and `ci.yml` at once. The model's types stay
+out of the foundation epic because they are the hardest thing to undo, belong with
 `apply` and its invariant tests, and give the other epics little to build on alone.
 
 ## 2. Release 0
@@ -110,8 +111,8 @@ and `main` is green.
 
 ### Epic 2: Model
 
-Serves SPEC.md sections 3.1 to 3.6, section 4 for Release 0, and section 7 items 1, 2, 5
-and 6. Owns `packages/model`. Depends on Epic 1. Runs beside Epic 3. Size L.
+Serves SPEC.md sections 3.1 to 3.6, section 4 for Release 0, and section 7 items 1, 2
+and 5. It serves item 6 only through the pure `apply`; Epic 4 builds `preview`. Owns `packages/model`. Depends on Epic 1. Runs beside Epic 3. Size L.
 
 - The element kinds of section 3.3 and their Zod schemas, the views of section 3.5, and
   the storage form of section 3.6 with `schemaVersion` 1 and a published JSON Schema.
@@ -161,8 +162,8 @@ Depends on Epic 1. Runs beside Epics 2, 4 and 5. Size M.
   unless its `Origin` header matches the app host; `Origin: null` and a missing
   `Origin` are refused too. The LTI launch and API-key requests prove themselves
   another way (SPEC.md section 1, "Host names"). Tests cover each case.
-- The launch's course and whether the person is an instructor are kept only if Epic 6
-  needs them to find the student's project for that course.
+- The launch's course and whether the person is an instructor are kept, because Epic 6
+  finds the student's project by course: one project per student per course.
 - No score return or Deep Linking (SPEC.md section 1, "Grading"). The roster service
   comes with the course dashboard, R2-l.
 - A mock LTI 1.3 platform in `packages/mock-lti` for development, CI and the Release 0
@@ -293,7 +294,7 @@ section 10, Level 1). SPEC.md sections 8 and 9 fix its new parts.
 | Code | Epic | What it does | Depends on |
 | --- | --- | --- | --- |
 | R1-a | Project list and checkpoints | SPEC.md section 3.9: the project list, starting a new project, copying, renaming and deleting one, and named checkpoints that a student saves at any time and opens later as a new copy of the project, over Release 0's saving | Release 0 |
-| R1-b | Project files and starter cases | Export and import with version upgrades and plain refusals (section 3.9), saving a project as a starter case (section 3.8), two shipped starter cases and symbol help (VISION.md section 10, item 17). Import is a security boundary: the security reviewer runs, and the exit includes tests built from section 3.9's "Import fails safe" list, with fuzzed and hand-crafted hostile files | R1-a |
+| R1-b | Project files and starter cases | Export and import with version upgrades and plain refusals (section 3.9), saving a project as a starter case (section 3.8), two shipped starter cases and symbol help (VISION.md section 10, item 17), and the case text shown beside the canvas (section 3.7, `caseText`). Starter cases and version upgrades cover every Release 1 kind. Import is a security boundary: the security reviewer runs, and the exit includes tests built from section 3.9's "Import fails safe" list, with fuzzed and hand-crafted hostile files | R1-a, R1-c, R1-d, R1-e |
 | R1-c | Data flow diagrams and dictionary, complete | The Release 1 commands and queries of section 4, the settings of section 3.7, the full editor, the dictionary screen, the problems panel, where-used, and safe rename and delete (VISION.md section 10, items 3, 5, 11, 12). Only Gane and Sarson symbols are drawn; other styles come later (SPEC.md section 14.1 item 6) | Release 0 |
 | R1-d | Use case forms | SPEC.md section 8: kinds, rules, worked-out views and the form screen | Release 0 |
 | R1-e | Entity relationship diagram and CRUD matrix | SPEC.md section 9, including the checks against the process model | Release 0 |
@@ -317,12 +318,12 @@ section 10, Level 2). SPEC.md sections 7, 10 and 11 fix most of it.
 | R2-c | Requirements and test plan | SPEC.md sections 10.3 and 10.5, with their trace links | Release 1 |
 | R2-d | Interface structure diagram | SPEC.md section 10.6 | Release 1 |
 | R2-e | Binder and attachments | SPEC.md section 10.7: attached files kept outside the project document by content hash, the files host of SPEC.md section 1 ("Host names"), images encoded again on the server, PDFs drawn with pdf.js, web pages and zipped prototypes only in a sandboxed frame from the files host, and everything else as a download. Import is extended for the zip export file and its limits (SPEC.md section 3.9, "Import fails safe"), with tests for each limit. The security reviewer runs | R1-a, R1-b |
-| R2-f | Compiled PDFs and dictionary export | SPEC.md section 10.8, and the data dictionary's CSV export (section 3.9). Needs the choice of SPEC.md section 14.1 item 3 | R1-g, R2-b to R2-e |
+| R2-f | Compiled PDFs and dictionary export | SPEC.md section 10.8, and the data dictionary's CSV export (section 3.9). Needs the choice of SPEC.md section 14.1 item 3 | R1-g, R2-b to R2-e, R2-g, R2-h, R2-i, R2-j |
 | R2-g | Logical and physical mode | SPEC.md section 11.1, which the three design epics need | Release 1 |
 | R2-h | Physical data flow diagram | SPEC.md section 11.2 | R2-g |
 | R2-i | Structure chart and program specification | SPEC.md sections 11.3 and 11.4 | R2-g |
 | R2-j | Physical data model, SQL schema export and storage estimate | SPEC.md sections 11.5 and 11.6, including the SQL schema export of section 11.5 in one dialect | R2-g |
-| R2-k | Accessibility audit | An independent audit and a published conformance report, so that students with disabilities can rely on doing all their work in the tool | The screens of R2-b to R2-j |
+| R2-k | Accessibility audit | An independent audit and a published conformance report, so that students with disabilities can rely on doing all their work in the tool | The screens of R2-a to R2-j, R2-l and R2-m |
 | R2-l | Course dashboard | Behavior analytics per Canvas course, such as time spent, worked out from the saved command log. It may show R2-a's counts of AI requests and tokens, never prompts or responses. Its class list comes from Canvas's roster service (Names and Role Provisioning Services, NRPS), fetched when the instructor opens it and not kept (SPEC.md section 1, "Grading"). The architect run reads Portikus's roster client in `packages/auth`. No grades. Students are told what it shows | Release 0's saving, R2-a, R1-k |
 | R2-m | More ways to sign in | SPEC.md section 1, "Sign-in" and "Administration": OpenID Connect (OIDC) for school Google or Microsoft accounts, LDAP directories, and email magic links limited to an allow list of addresses or to allowed domains, each set up in R1-l's administrator interface and each a sign-in method of an existing kind of account. A new account takes its login from its first sign-in method (SPEC.md section 3.9). The administrator sets, for each method, whether it needs a second factor; by default LDAP and magic links do and OIDC does not. The architect run reads Portikus's `packages/auth` for its OpenID Connect sign-in and ports what fits. The security reviewer runs | R1-l |
 
@@ -347,7 +348,7 @@ Epic 1 Foundation
 | --- | --- |
 | Release 0 | Epic 1 alone; then Epics 2 and 3; then Epics 4 and 5, with Epic 3 if it is still running; then Epic 6 once Epics 2 and 3 have merged; then Epic 7 |
 | Release 1 | R1-a, R1-c, R1-d, R1-e and R1-f; then R1-b, R1-g, R1-h and R1-l; then R1-i and R1-k; then R1-j |
-| Release 2 | R2-a, R2-b, R2-c, R2-d, R2-e, R2-g and R2-m; then R2-f, R2-h, R2-i, R2-j and R2-l; then R2-k |
+| Release 2 | R2-a, R2-b, R2-c, R2-d, R2-e, R2-g and R2-m; then R2-h, R2-i, R2-j and R2-l; then R2-f and R2-k |
 
 ## 6. Questions to settle before an epic starts
 

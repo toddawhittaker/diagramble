@@ -20,7 +20,3 @@ that is not a gap in something built goes in a GitHub issue instead.
 
 ## Open items
 
-- The prototype's Windows high-contrast mode rules for chips and marks have
-  not been tried on Windows.
-- In the prototype's navigator, "Requirements definition" is cut short
-  beside its chips.

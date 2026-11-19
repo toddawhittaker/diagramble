@@ -29,8 +29,8 @@ this document wins. Section 14 lists the points still open.
 
 | Decision | Choice | Effect |
 | --- | --- | --- |
-| License | Business Source License 1.1. Free production use for non-profit organizations (including credit-bearing tuition), individuals' own study and teaching (including students at for-profit schools), and a one-time paid setup for a non-profit that hosts the tool itself, all only with a copy obtained free or from the author. A commercial license is needed for any other use by a for-profit organization; for a company paid to run a college's courses that use it; for selling or bundling; for any recurring charge for hosting, operating, maintaining or supporting it, even to a non-profit; and for paid training that earns no academic credit. A "charge" includes indirect income such as advertising, data, revenue shares and paid bundles. Each version becomes AGPL-3.0-or-later four years after it is published. The full terms are in `LICENSE`, and a plain-language summary is in `LICENSING.md` | It is not an open source license. No dependency may be under the GPL or the AGPL alone, because those would require the whole tool to use the same license. Libraries under the Eclipse Public License are allowed. elkjs is used under its "EPL-2.0" option (section 12). Outside contributions would need a contributor license agreement, so that commercial licenses can be sold. One is written when someone wants to contribute |
-| Hosting | Self-hosting. Each institution runs its own copy from the Docker image ("Deployment" below). The project's author hosts the first deployment, and may sell commercial licenses or hosting. There is no community-hosted instance | The trial launch in Release 0 runs against the author's deployment |
+| License | Business Source License 1.1. Free production use for non-profit organizations (including credit-bearing tuition), individuals' own study and teaching (including students at for-profit schools), and a one-time paid setup for a non-profit that hosts the tool itself, all only with a copy obtained free or from the author. A commercial license is needed for any other use by a for-profit organization; for a company paid to run a college's courses that use it; for selling or bundling; for any recurring charge for hosting, operating, maintaining or supporting it, even to a non-profit; and for paid training that earns no academic credit. A "charge" includes indirect income such as advertising, data, revenue shares and paid bundles. Each version becomes AGPL-3.0-or-later four years after it is published. The full terms are in `LICENSE`, and a plain-language summary is in `LICENSING.md` | It is not an open source license. No dependency may be under the GPL or the AGPL alone, because those would require the whole tool to use the same license. Libraries under the Eclipse Public License are allowed. elkjs is used under its "EPL-2.0" option (section 12). Outside contributions would need a contributor license agreement, so that the license terms can be kept. One is written when someone wants to contribute |
+| Hosting | Self-hosting. Each institution runs its own copy from the Docker image ("Deployment" below). The project's author hosts the first deployment. A commercial license is needed for any for-profit hosting, including the author's. There is no community-hosted instance | The trial launch in Release 0 runs against the author's deployment |
 | Textbook | Dennis, Wixom and Roth, *Systems Analysis and Design*, 8th edition (Wiley, 2022) | The tool is built for this book. It sets the symbol style, the names of things, the limits and the wording of the rules. See section 13 |
 | Course coverage | Chapters 1 to 12. Chapter 13, on agile methods, is not covered | The design diagrams of chapters 9 and 10 join the roadmap in the second release. None is in Release 0 |
 | Balancing strictness | Parent data missing from the child diagram is an error. Data added on the child diagram is a warning | BAL-03 is a warning. See section 5.5 |
@@ -235,16 +235,17 @@ On the server the log is kept apart from the rest:
 
 ### 3.7 Project settings
 
-A project has two settings. Both exist so that a textbook exercise can be done as it is
-set.
+A project has three settings. All exist so that a textbook exercise can be done as it
+is set.
 
 | Setting | Values | Notes |
 | --- | --- | --- |
 | `topDiagramId` | A diagram. The context diagram by default | The highest diagram that the project is expected to contain. Many of the textbook's exercises ask for a level 0 diagram alone (Chapter 4, exercises B, D, G, I, K, M, O, Q and S), and some start lower still: minicase 3 gives one process and asks for its level 1 diagram. Diagrams above the top diagram are "above the project". They stay in the model, because the hierarchy needs them (section 3.4) |
 | `showFindings` | `always` or `onRequest`. `always` by default | With `onRequest`, the findings are worked out as usual but shown only when the student asks. It suits an exercise that asks the student to find the errors in a given diagram (Chapter 4, minicase 2). Visible Analyst works this way all the time |
+| `caseText` | Plain text. May be empty, and empty by default | The case description that the exercise starts from. When it is not empty it is shown beside the canvas. Whoever builds a starter case sets it, and it travels with the starter case and in the export file. It is the starter case text of section 7 item 4 |
 
 Later sections add values that belong to the whole project rather than to one element.
-They are kept in `settings` beside these two: `overheadRate` and `months` for the
+They are kept in `settings` beside these three: `overheadRate` and `months` for the
 storage estimate (section 11.6), and the requirements definition's `noneExpected` mark
 for each nonfunctional type (section 10.3).
 
@@ -423,7 +424,7 @@ and later as tool definitions for an AI model (section 7).
 | `setFlowData` | Changes which data definition a flow carries |
 | `expandProcess` | Creates the child diagram for a process. Refused if the process already has one. For each data flow touching the process on the parent, it creates a new flow on the child diagram carrying the same data, left unattached to any child process. If the other end is an external entity or data store, that element is placed on the child diagram. If the other end is another process, it becomes an off-diagram end. Control flows are not carried down |
 | `carryDown` | For a process that already has a child diagram, brings down the flows that were added to the parent afterwards. A flow touching the process on the parent is brought down when no flow that crosses the edge of the child diagram in the same direction carries the same data definition. Each new flow is made as `expandProcess` makes it, with its inner end unattached. Flows whose data already arrives in parts are left alone, because they balance through the dictionary |
-| `setTopDiagram`, `setShowFindings` | Change the project settings of section 3.7 |
+| `setTopDiagram`, `setShowFindings`, `setCaseText` | Change the project settings of section 3.7 |
 | `removeOccurrence` | Removes one occurrence, and the flows attached to it on that diagram |
 | `deleteElement` | Deletes an element everywhere. Refused for a data definition that is still carried or used as a component, unless `cascade` is set |
 | `undo`, `redo` | Steps through the log, within the current editing session only (section 3.9). Edits made before a reload or a takeover cannot be undone |
@@ -439,7 +440,7 @@ it to a child process, rule DFD-05 reports it.
 `carryDown` is the one-step answer to a BAL-01 or BAL-02 finding in which the whole of a
 parent flow is missing. It comes from Visible Analyst, where exploding a process a
 second time drags new parent flows down. It never removes a flow from the child diagram.
-`carryDown`, the two settings commands, and the queries `search` and `getFragment` are
+`carryDown`, the three settings commands, and the queries `search` and `getFragment` are
 added in the first release. They are not part of Release 0.
 
 ### 4.2 Queries
@@ -481,7 +482,7 @@ below, and it blocks nothing. The defaults follow the textbook's quality
 checklist (Figure 4-24) and its list of common errors (Figure 4-25). Rules run on the
 whole model after every command. Student models are small, so nothing incremental is needed.
 
-Two project settings change what a student sees, and neither changes a rule. A finding
+Two project settings change which findings a student sees, and neither changes a rule. A finding
 on a diagram above the project's top diagram is dropped, and the findings can be held
 back until the student asks for them (section 3.7).
 
@@ -759,7 +760,7 @@ product vision.
    | 3 Critique | Level 2, plus the project's starter case text |
 
    Release 2 delivers levels 0 to 2. Level 3, a critique of a complete draft against the
-   starter case text, is a later goal in no release (VISION.md section 11, "Later goals").
+   starter case text (`caseText`, section 3.7), is a later goal in no release (VISION.md section 11, "Later goals").
 
 5. **An AI model never changes a student's model.** No assistance level offers it a
    command, and nothing it says is applied to the model.
@@ -1659,7 +1660,7 @@ for each month.
 | Deployment | Docker image, and Docker Compose with PostgreSQL | Not applicable |
 | Linking the packages and apps | npm workspaces | Part of npm |
 | Web app build and routing | Vite and React Router | MIT |
-| Browser tests | Playwright, with its default Chromium headless shell. Of the other engines measured, Firefox and WebKit were no lighter, and Lightpanda and Obscura failed keyboard focus, SVG sizes or rendering | Apache-2.0 |
+| Browser tests | Playwright, with its default Chromium headless shell. No other engine is used: Firefox and WebKit are no lighter, and Lightpanda and Obscura do not handle keyboard focus, SVG sizes or rendering reliably | Apache-2.0 |
 | Database migrations | Kysely's migration runner | MIT |
 
 From version 0.12.0, elkjs is released under "EPL-2.0 OR GPL-3.0-or-later". Its package's

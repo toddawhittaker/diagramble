@@ -82,7 +82,7 @@ checkout can read it.
 
 Before a feature epic's plan is written, the architect agent designs it
 (not for small fix batches). It reads wide: VISION.md, the releases still
-to come in VISION.md section 11, SPEC.md and the open GitHub issues for
+to come in VISION.md section 11, SPEC.md, docs/EPICS.md and the open GitHub issues for
 the area. It reports where the code goes, what existing helpers and
 schemas the builders must reuse, and which task owns each shared file and
 schema change. For each significant choice it gives the smallest change

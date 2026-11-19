@@ -10,7 +10,7 @@ It is written for the course textbook: Dennis, Wixom and Roth, *Systems Analysis
 
 Build a small web tool that keeps one model behind every diagram, checks that model against explicit rules, and explains each violation in plain words. That is the part of Visible Analyst that a course using the book needs, and no free or web-based tool found does it.
 
-The product is called Diagramble, pronounced DYE-uh-GRAM-buhl with the main stress on GRAM, and its tagline is "See the system. Shape the solution." The name is coined from "diagram" and "able". Diagramming is the core activity of systems analysis and design: modeling processes, data, entities and relationships in pictures. "Able" suggests capability, accessibility and ease of use, and echoes words such as learnable, approachable and manageable. Together they mean making systems diagramming accessible and capable. The name also has a light echo of "ramble" and "scramble", which makes it sound friendly without making the tool seem like a toy. It was chosen because it is short and easy to say and remember.
+The product is called Diagramble, pronounced DYE-uh-GRAM-buhl with the main stress on GRAM, and its tagline is "See the system. Shape the solution." The name is coined from "diagram" and "able". Diagramming is the core activity of systems analysis and design: modeling processes, data, entities and relationships in pictures. "Able" suggests capability, accessibility and ease of use, and echoes words such as learnable, approachable and manageable. Together they mean making systems diagramming accessible and capable. The name also has a light echo of "ramble" and "scramble", which makes it sound friendly without making the tool seem like a toy. It is short and easy to say and remember.
 
 CASE means Computer-Aided Software Engineering. DFD means data flow diagram. ERD means entity relationship diagram.
 
@@ -106,7 +106,7 @@ Several open-source projects prove that diagrams can be views of one model in a 
 - **One model with many views,** from Structurizr, Sirius Web and bpmn.io.
 - **Rules enforced while drawing, plus named rule sets,** from bpmn.io and bpmnlint.
 - **No install and no account to set up,** from the web drawing tools.
-- **AI that the instructor controls.** Commercial web tools now generate diagrams with AI, and controls to turn it off exist only on some plans. A course needs that choice to be the instructor's (section 8).
+- **AI that the instructor controls.** Commercial web tools now generate diagrams with AI. A course needs the choice to turn it off to be the instructor's (section 8).
 
 ### Evidence limits
 
@@ -118,7 +118,7 @@ Several open-source projects prove that diagrams can be views of one model in a 
 
 Preserve the repository, decomposition, balancing and the data-to-process checks. Redesign how feedback is delivered. Abandon code generation and most of the extra diagram types. Structure charts stay, because the course textbook teaches them.
 
-The detail below comes from four documents. Two were read first: the [Operation Manual for version 7.6](https://www2.rivier.edu/faculty/vriabov/VA-7-6-manual.pdf) (copyright 2002) and the vendor's [Entity Relationship and Data Flow Tutorial](https://resources.visiblesystemscorp.com/hubfs/VA%20Tutorial%20ERD%20and%20Dataflows.pdf) (copyright 2008 to 2020). Two more were read later on 17 November 2026: the 287-page "Visible Analyst Tutorial, Zachman Framework Edition" (copyright 2009) and the 35-page "Enterprise Framework 360 Degree View" tutorial (copyright 2008 to 2020), which reprints the framework chapter of the first. Page numbers below are PDF pages of the 2009 tutorial. Where a statement rests on the 2002 manual alone, the table says so. The notes from the two later tutorials are in `sources/notes/visible-analyst-gap-report.md`, kept outside the repository.
+The detail below comes from four documents: the [Operation Manual for version 7.6](https://www2.rivier.edu/faculty/vriabov/VA-7-6-manual.pdf) (copyright 2002) and the vendor's [Entity Relationship and Data Flow Tutorial](https://resources.visiblesystemscorp.com/hubfs/VA%20Tutorial%20ERD%20and%20Dataflows.pdf) (copyright 2008 to 2020), the 287-page "Visible Analyst Tutorial, Zachman Framework Edition" (copyright 2009) and the 35-page "Enterprise Framework 360 Degree View" tutorial (copyright 2008 to 2020), which reprints the framework chapter of the first. Page numbers below are PDF pages of the 2009 tutorial. Where a statement rests on the 2002 manual alone, the table says so. The notes from the two 2009-era tutorials are in `sources/notes/visible-analyst-gap-report.md`, kept outside the repository.
 
 ### Current status
 
@@ -153,7 +153,7 @@ The detail below comes from four documents. Two were read first: the [Operation 
 | Key Synchronization | Migrates primary keys across relationships to create foreign keys, and reports what it added (page 261) | Preserve, make visible | The student places each foreign key, and the tool proposes none, because placing them is the lesson. The tool checks what the student placed. It belongs to the physical data model at Level 2 |
 | Model Balancing | Two options: every entity must match a data store with the same composition, and every data element of an entity must be used by at least one process on a DFD (page 73) | Preserve | This is the signature cross-model check. Add the textbook's create, read, update, delete (CRUD) matrix of processes against entities |
 | Data model views | A global view of every entity, a new view from chosen entities, a "process view" of the entities used by one process, and clusters that show several entities as one symbol (pages 108 to 117) | Defer | A project can have several entity relationship diagrams, and the CRUD matrix shows which entities a process uses. Views built by the tool matter only for large models |
-| SQL schema generation | CREATE TABLE, CREATE INDEX and comments in many dialects. Education editions limited to Access and Oracle (page 263). The entity entry also holds triggers, check constraints and storage detail | Modernize, later | One or two dialects is enough. It shows students that a model produces something real. The extra physical detail is beyond Chapter 10 |
+| SQL schema generation | CREATE TABLE, CREATE INDEX and comments in many dialects. Education editions limited to Access and Oracle (page 263). The entity entry also holds triggers, check constraints and storage detail | Modernize, later | One dialect, PostgreSQL, is enough. It shows students that a model produces something real. The extra physical detail is beyond Chapter 10 |
 | Reverse engineering and schema comparison | Reads a database through ODBC and compares model with schema | Abandon for education | Not part of an analysis course. SQL import is not planned |
 | Structure charts | Yourdon/Constantine charts, drawn by hand, with more symbols than the textbook uses. The tutorial calls the link to DFD processes "very loose" and shows no check (pages 141 to 150) | Defer to Level 2 | The course textbook teaches them in Chapter 9, and the course covers that chapter. Use the textbook's symbols and rules |
 | Shell code generation | Program skeletons in C and COBOL | Abandon | No curriculum value today |
@@ -313,7 +313,6 @@ Diagramble does not grade. It has no rule-scored rubric rows, comments on submis
 
 The launch and the roster are the only Canvas services used. Diagramble does not use [Deep Linking 2.0](https://www.imsglobal.org/spec/lti-dl/v2p0), [Assignment and Grade Services 2.0](https://www.imsglobal.org/spec/lti-ags/v2p0/) (score return) or LTI Advantage certification, because it does no grading.
 
-The newer [Asset Processor placement](https://developerdocs.instructure.com/services/canvas/external-tools/lti/file.document_processor) handles submitted files, so it suits a report on an exported document more than live modeling.
 
 ### Accessibility and keyboard modeling
 
@@ -325,7 +324,7 @@ The newer [Asset Processor placement](https://developerdocs.instructure.com/serv
 ### What a hosting school needs
 
 - **Student records.** Each school that hosts Diagramble is responsible for its own compliance with the Family Educational Rights and Privacy Act (FERPA), the United States student privacy law. Diagramble supplies what a host needs: retention settings, account deletion, the rules on the AI provider (SPEC.md section 7 item 7), and a data inventory that says what is stored, where, and for how long (SPEC.md section 1, "Student records").
-- **Data retention.** Course archiving, a retention policy for logs, analytics, AI usage records and archived courses, and account deletion are needed before the first live course. The deployment's system administrator sets the periods; the defaults are open (SPEC.md section 14.1).
+- **Data retention.** Course archiving, a retention policy for logs, analytics, AI usage records, checkpoints and archived courses, and account deletion are needed before the first live course. The deployment's system administrator sets the periods; the defaults are open (SPEC.md section 14.1).
 - **Accessibility.** The target and the audit described above.
 - **Self-hosting.** Each school runs its own copy from one Docker image on its own server. AI features cost it money per request, billed to its own model account. Students pay nothing.
 
@@ -403,17 +402,15 @@ A rule for later notations follows from this. A notation that shares meaning wit
 | Data flow | DFD | Source and target. Carries exactly one data definition, a structure or an element |
 | Control flow | DFD | The process it starts. Carries no data |
 | Data structure | Dictionary | Composed of structures and elements, in order, each once, optional or many |
-| Data element | Dictionary | Type, and allowed values with their meanings. May be realized by an attribute |
-| Entity | ERD | Attributes and an identifier |
-| Attribute | ERD | Belongs to one entity. Key role. May be defined by a data element |
+| Data element | Dictionary | Type, and allowed values with their meanings. An entity may own it as one of its attributes |
+| Entity | ERD | Attributes, which are data elements it owns, and an identifier |
 | Relationship | ERD | Two ends, each with an entity, a cardinality, an optionality and a verb phrase. The relationship has no name of its own. Cardinality and optionality may be left undecided |
 | Diagram | View | Kind. For a child DFD, the process it decomposes |
 | Occurrence | View | The element shown, with position, size and route |
-| Checkpoint | History | A named copy of the whole project, saved by the student |
 
 Every element also has aliases and notes, and a process has a longer process description beside its short one. The textbook's dictionary entries list all three.
 
-Three links carry the product's value: flow carries structure, store holds entity, and element realized by attribute. They are what make balancing through the dictionary and data-to-process checks possible. A fourth link, use case carried out by process, ties the textbook's first modeling step to the diagrams.
+Two links and one shared kind carry the product's value: flow carries structure, store holds entity, and an entity's attributes are data elements, the same ones the flows carry. They are what make balancing through the dictionary and data-to-process checks possible. A fourth link, use case carried out by process, ties the textbook's first modeling step to the diagrams.
 
 ### Validation
 
@@ -422,22 +419,20 @@ A rule is a small unit with a stable name, the package it belongs to, a default 
 | When | What happens | Example |
 | --- | --- | --- |
 | While drawing | Structures that cannot exist are refused | A second child diagram for a process that already has one |
-| Continuously | Rule violations are flagged, not blocked, so the student sees and fixes the mistake | A flow between two data stores |
-| On demand and before handing in | The whole model is checked, including cross-diagram and cross-package rules | Balancing, stores without entities |
+| After every command | The whole model is checked, including cross-diagram and cross-package rules. Violations are flagged, not blocked, so the student sees and fixes the mistake | A flow between two data stores, balancing, stores without entities |
+| On request | With `showFindings` set to `onRequest`, findings are held back until the student asks for them | An exercise to find the errors in a given diagram |
 
 Whether a given rule blocks or flags is a profile setting. Blocking teaches less, because the student never sees the error explained.
 
-**Can cross-diagram validation be built incrementally?** Yes, in the sense that matters. Rules are additive once identity and the three key links exist, so each release can add rules without changing stored data. Incremental computation is not needed. A student project has a few hundred elements, so every rule can be re-run on every change. Incremental query engines such as [VIATRA](https://eclipse.dev/viatra/query.php) solve a scale problem this product will not have for years.
+**Can cross-diagram validation be built incrementally?** Yes, in the sense that matters. Rules are additive once identity and the key links exist, so each release can add rules without changing stored data. Incremental computation is not needed. A student project has a few hundred elements, so every rule can be re-run on every change. Incremental query engines such as [VIATRA](https://eclipse.dev/viatra/query.php) solve a scale problem this product will not have for years.
 
 The starting rule list for DFDs can be taken from a [published formalization of DFD rules](https://arxiv.org/abs/1011.0278) and from Visible Analyst's documented checks. Its tutorials show thirteen checks for DFDs, ERDs and the two models together, and section 13 of the specification sets each against a rule. The course textbook's quality checklist and its list of common errors (Figures 4-24 and 4-25) set the defaults. That paper checks only the context diagram against level 0 and does not cover the dictionary, so deeper balancing needs original work.
 
 ### Versioning, history and provenance
 
 - **Operation log.** Every edit is a recorded command. This gives undo, the course dashboard's summaries, and evidence of process.
-- **Checkpoints.** A student can save a named checkpoint at any time and later open it as a new copy of the project.
-- **Exact comparison.** Because identifiers are stable, two checkpoints are compared by identifier. Tools that compare files without stable identity [must guess which elements match](https://link.springer.com/article/10.1007/s10270-022-00976-4).
-- **Provenance.** Each element records who created it and whether it came from a starter model, the student, or an AI suggestion.
-- **Reference design.** The [SysML v2 API](https://www.omg.org/spec/SystemsModelingAPI/) defines projects, commits, branches and tags. Copy its separation of stable identity, immutable commits and named pointers. Branches are not needed in the first releases.
+- **Checkpoints.** From the project list, a student can save a named checkpoint at any time and later open it as a new copy of the project (SPEC.md section 3.9).
+- **Provenance.** Each element records who created it and whether it came from a starter model, the student, or an instructor's own AI agent. An AI model never changes a student's model.
 
 ### Collaboration
 
@@ -558,7 +553,7 @@ Three safeguards apply at every level above 0.
 1. Give the AI the model in its structured text form and the rule findings, never a picture.
 2. Require replies in a fixed structure that the server can parse.
 3. Let AI change nothing in a student's model. An instructor's own agent changes a model only through commands, which are checked like anyone else's (SPEC.md section 7.1).
-4. Record AI-originated elements in the model's provenance.
+4. Give the `ai` origin in the model's provenance to elements made by an instructor's own MCP agent, the only source of that origin.
 
 A fixed reply structure guarantees the shape of a reply, not that its content is right. Step 3 is what carries the weight.
 
@@ -652,7 +647,7 @@ Values are High, Medium or Low. Effort is a relative size: S (days to two weeks)
 | 4 | Gane and Sarson symbols. DeMarco and Yourdon as a display setting is a later goal, as a per-course choice | Medium | Medium | Low | S | 3 |
 | 5 | Data dictionary with composition, aliases, notes, and values with their meanings | High | High | Medium | M | 1 |
 | 6 | ERD editor in crow's-foot notation, with identifiers, modality, and independent, dependent and intersection entities | High | High | Medium | L | 1, 2 |
-| 7 | Links: flow to structure, store to entity, element to attribute | High | High | Medium | M | 3, 5, 6 |
+| 7 | Links: flow to structure and store to entity, with an entity's attributes as data elements it owns | High | High | Medium | M | 3, 5, 6 |
 | 8 | Rule engine with about 40 rules, severities and explanations | High | High | Medium | L | 1 |
 | 9 | Balancing through the dictionary | High | High | High | L | 3, 5, 8 |
 | 10 | Checks between data model and process model | High | Medium | Medium | M | 7, 8 |
@@ -685,7 +680,7 @@ Items 1, 3 and 9 carry the technical risk. Item 13 is in Level 1 because student
 | Checked forms: system request, feasibility analysis, alternative matrix and test plan (Chapters 1, 6 and 11) | Medium | High | Medium | L | Requirements, use cases |
 | Interface structure diagram linked to DFD processes (Chapter 8) | Medium | Medium | Medium | M | DFD |
 | Project binder: text sections and attachments for every other deliverable (Chapters 2, 7, 8, 11 and 12) | Low | High | Low | M | Accounts |
-| Compiled PDFs that follow the textbook's outlines for the system proposal and the system specification | Medium | High | Low | M | Project document |
+| Compiled PDFs that follow the textbook's compiled documents | Medium | High | Low | M | Project document |
 | Requirements definition with trace links to use cases and processes (Chapter 3) | Medium | Medium | Low | M | Core |
 | AI assistance levels 1 and 2: explain, question, hint | High | Medium | Medium | M | Course settings, AI gateway |
 | More ways to sign in: OpenID Connect (OIDC) with school Google or Microsoft accounts, LDAP directories, and email magic links limited to allowed addresses or domains, each set up in the administrator interface | Low | High | Medium | M | Administrator interface |
@@ -693,7 +688,7 @@ Items 1, 3 and 9 carry the technical risk. Item 13 is in Level 1 because student
 
 ### Deliberately left out of every level
 
-Program skeleton generation, use case diagrams, entity life history diagrams, PERT and organization charts, the Zachman framework, SSADM and Métrica rule sets, AI writing detectors, and a general whiteboard mode. Also left out after the Visible Analyst tutorials were read: planning statements as a kind of their own, a functional decomposition editor that spawns DFDs, component diagrams, and physical database detail beyond Chapter 10 of the textbook. Chen notation for ERDs is left out too, because it would need model changes.
+Program skeleton generation, use case diagrams, entity life history diagrams, PERT and organization charts, the Zachman framework, SSADM and Métrica rule sets, AI writing detectors, and a general whiteboard mode. Also left out: planning statements as a kind of their own, a functional decomposition editor that spawns DFDs, component diagrams, and physical database detail beyond Chapter 10 of the textbook. Chen notation for ERDs is left out too, because it would need model changes.
 
 ## 11. Phased product roadmap
 
@@ -718,7 +713,7 @@ A throwaway-quality prototype of the three things most likely to fail.
 
 | Exit criterion | Why it matters |
 | --- | --- |
-| Every Visible Analyst DFD and ERD check marked "preserve" in section 3 has an equivalent rule with an explanation | Functional replacement is real, not approximate |
+| Every Visible Analyst DFD and ERD check marked "preserve" in section 3 has an equivalent rule with an explanation, except the key checks that section 3 places at Level 2 (Key Analysis and Key Synchronization) | The tool covers the checks the book needs |
 | No sequence of interface actions can leave a dangling reference or a mismatched name | The model is trustworthy |
 | The starter case can be completed with keyboard only, and with a screen reader | Accessibility is built in |
 | One instructor runs a full sequence of use cases, context diagram, leveled DFDs, ERD and dictionary in a live course section | The product survives real use |
@@ -798,7 +793,7 @@ She decides the split is useful. She replaces "Booking Info" with two flows, Cli
 
 ### Step 6: the data model
 
-She builds an ERD with Client, Pet, Veterinarian, Appointment, Treatment and Invoice. She links the Clients and Pets store to the Client and Pet entities. A full check produces the last two findings.
+She builds an ERD with Client, Pet, Veterinarian, Appointment, Treatment and Invoice. She links the Clients and Pets store to the Client and Pet entities. The checks that run after each change produce the last two findings.
 
 - **Many-to-many relationship.** Pet and Veterinarian are joined many-to-many. The explanation says to resolve it with an intersection entity between them. She sees that Appointment is that entity and redraws the relationships.
 - **Entity not held in any data store.** Invoice exists in the ERD, but no data store holds it. She realizes the DFD never stores invoices, adds an Invoices store, and connects Bill Client to it.
@@ -835,7 +830,7 @@ Five of the eight assumptions hold only with conditions, and three are rejected 
 | AI-generated diagrams improve learning | No for graded work | The best experiment found shows a lasting cost when AI gives answers during practice. Language models also make cardinality and relationship errors that a beginner cannot spot | Generation has uses as worked examples and for instructors preparing cases. Keep it out of the student path by default |
 | A checking tool is worth using when free drawing tools exist | Only for what they cannot do | Free tools are familiar and good for shared editing. They have no semantics, no checking and no dictionary | If an instructor wants only pictures in a report, a drawing tool is enough. The author's own instructor feedback during use shows whether the checking helps |
 | A unified repository is the right foundation | Yes within a project, with a shared core and notation packages. No as one flat metamodel | The three first notations reference each other constantly. Every tool that checks consistency has a repository | The difference between an element and its occurrence confuses beginners. Sensible defaults and an "unplaced" list reduce that. The core must be kept small |
-| Hidden assumption: Visible Analyst is the product to replace | Only partly | No syllabus from 2025 or 2026 requiring Visible Analyst was found, and the current Kendall edition's publisher page does not name it. One current syllabus lists Visio | Most students now draw these diagrams in free drawing tools. The tool should help a student who has had no checking at all, not only one who knew Visible Analyst |
+| Hidden assumption: covering Visible Analyst's checks is what the book needs | Only partly | No syllabus from 2025 or 2026 requiring Visible Analyst was found, and the current Kendall edition's publisher page does not name it. One current syllabus lists Visio | Most students now draw these diagrams in free drawing tools. The tool should help a student who has had no checking at all, not only one who knew Visible Analyst |
 
 ### Evidence gaps that could change these verdicts
 
@@ -857,7 +852,7 @@ Seven decisions shape the build, and each has a recommendation below.
 | Flow identity across levels | **A. A child's boundary flow is the same element as the parent's flow.** Consistent by construction, but hides the lesson. **B. Separate elements matched by a rule.** A real check, with some duplication | B. A flow on a parent diagram and a flow on its child are separate elements. Each flow carries exactly one dictionary definition, and the two levels balance by sharing definitions or through a definition's composition (core specification, sections 3.3 and 5.5) | Settled |
 | Rule violations: block or flag | **A. Block.** The model is never wrong, and the student never sees why. **B. Flag.** The student makes the mistake and reads the explanation | B. Every rule flags by default. A course's rule profile can turn a rule off, change its severity, or make it block a change. The model's invariants are always enforced (SPEC.md section 5.1) | Settled |
 | Project license | The Business Source License 1.1, so educators use it freely and publishers and other for-profits cannot take the work and sell it. MIT would allow that | Section 9 has the detail | Settled |
-| Hosting and running cost | **A. Each institution hosts its own copy.** No central cost. Needs local technical staff. **B. One community-hosted instance.** Easiest for instructors. Someone pays for servers and holds student data for many schools. **C. Self-hosting, with AI features billed to the institution's own model account** | C. Each institution runs its own copy from the Docker image, so cost and responsibility for student data stay with the institution that benefits. The author may sell commercial licenses or hosting. There is no community-hosted instance | Settled |
+| Hosting and running cost | **A. Each institution hosts its own copy.** No central cost. Needs local technical staff. **B. One community-hosted instance.** Easiest for instructors. Someone pays for servers and holds student data for many schools. **C. Self-hosting, with AI features billed to the institution's own model account** | C. Each institution runs its own copy from the Docker image, so cost and responsibility for student data stay with the institution that benefits. A commercial license is needed for any for-profit hosting, including the author's. There is no community-hosted instance | Settled |
 
 ### Unresolved questions
 
@@ -928,7 +923,7 @@ The binder is the one place where the tool holds work it cannot check, which pri
 
 ### What the textbook's exercises ask for
 
-The exercises of chapters 4 and 5 were read against the specification on 17 November 2026. Most ask for a use case form, a data flow diagram or a data model as the chapter teaches it. Six kinds of exercise ask for something more, and the specification covers each.
+Most exercises of chapters 4 and 5 ask for a use case form, a data flow diagram or a data model as the chapter teaches it. Six kinds of exercise ask for something more, and the specification covers each.
 
 | The exercise asks for | Examples | What the tool does |
 | --- | --- | --- |
@@ -942,7 +937,7 @@ The exercises of chapters 4 and 5 were read against the specification on 17 Nove
 
 Written answers, such as the minicases that ask for an explanation, go in the project binder.
 
-The exercises of chapters 1 to 3 and 6 to 12 were read the same day, 179 items in all. Thirty call for a model, 23 for a checked form and 50 for a binder section. The other 76 are discussion, opinion or outside research, which no tool does. None was out of the tool's reach. The specification covers each point below, so that each exercise can be done as it is set.
+The exercises of chapters 1 to 3 and 6 to 12 number 179 items. Thirty call for a model, 23 for a checked form and 50 for a binder section. The other 76 are discussion, opinion or outside research, which no tool does. None was out of the tool's reach. The specification covers each point below, so that each exercise can be done as it is set.
 
 | The exercise needs | Examples | What the tool does |
 | --- | --- | --- |

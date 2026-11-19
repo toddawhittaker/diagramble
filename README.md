@@ -71,4 +71,5 @@ license differ, the license governs.
 ## Contributing
 
 Outside contributions are not being accepted yet. They will need a contributor license
-agreement, so that commercial licenses can still be offered.
+agreement, so that the license terms can be kept. A commercial license is needed for any
+for-profit hosting, including the author's.

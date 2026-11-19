@@ -29,6 +29,7 @@ Read more than the epic's own section:
 
 - docs/VISION.md for intent, and its section 11 for the releases still to
   come and their exit criteria;
+- docs/EPICS.md for the epic's place among the others and its dependencies;
 - docs/SPEC.md section 1 (decisions), section 2 (Release 0 scope),
   section 12 (code layout and tools) and section 14 (open points and
   scope left out);
