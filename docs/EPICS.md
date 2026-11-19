@@ -95,10 +95,11 @@ stays small. Size S.
   enforces SPEC.md section 12's boundary instead of only stating it.
 - Internal packages export their TypeScript source, and the server runs it with the
   `.nvmrc` Node's type stripping, so no package has a build step.
-- A CI job named "App": `npm ci` at the root, the four checks, a PostgreSQL service for
-  the server's tests, Playwright's browser when `apps/web` has a Playwright
-  configuration, and a Docker build when a `Dockerfile` exists. The "Prototype" job
-  stays. The user adds "App" to both rulesets' required checks.
+- Two CI jobs, both required checks. "App checks" runs `npm ci` at the root, the
+  typecheck, lint and build, and a Docker build when a `Dockerfile` exists. "App tests"
+  runs the tests with their 75% coverage floor, a PostgreSQL service for the server's
+  tests, and Playwright's browser when `apps/web` has a Playwright configuration. The
+  "Prototype" job stays.
 - The section 12 libraries for Release 0, plus four the server needs: `pg` (Kysely's
   PostgreSQL driver), `@fastify/formbody` (an LTI launch arrives as a form post),
   `@fastify/cookie` (the session cookie) and `@fastify/static` (serving the web build),

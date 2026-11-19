@@ -84,8 +84,8 @@ copyright and reading the book). An agent's worktree has no `sources/`.
 - Branches are deleted on merge.
 
 Two rulesets enforce this. `main` and `epic/**` take changes only by pull
-request, with the four CI checks green (Secret scan, Docs and comments,
-Prototype and App). A pull request into `main` must also be up to date with it; one
+request, with the five CI checks green (Secret scan, Docs and comments,
+Prototype, App checks and App tests). A pull request into `main` must also be up to date with it; one
 into an epic branch need not be.
 
 ## Epic plans
@@ -189,12 +189,13 @@ request's run on the older commit. Its jobs:
   check, from the repository root.
 - **Prototype**: `npm ci`, then typecheck, lint, the test suite and the
   build, in `prototype/`.
-- **App**: `npm ci` at the root, then typecheck, lint, the test suite and the
-  build, with a PostgreSQL service whose address the tests read from
-  `DATABASE_URL`. The test step enforces the 75% coverage floor for each
-  workspace and for the scripts. The job installs Playwright's Chromium headless shell and runs
-  `npm run test:browser` only once `apps/web/playwright.config.ts` exists, and
-  it runs `docker build .` only once a `Dockerfile` exists at the root.
+- **App checks**: `npm ci` at the root, then typecheck, lint and the build. It
+  runs `docker build .` only once a `Dockerfile` exists at the root.
+- **App tests**: `npm ci` at the root, then the test suite, with a PostgreSQL
+  service whose address the tests read from `DATABASE_URL`. The test suite
+  enforces the 75% coverage floor for each workspace and for the scripts. The
+  job installs Playwright's Chromium headless shell and runs
+  `npm run test:browser` only once `apps/web/playwright.config.ts` exists.
 
 Every job has a time limit, so a hung runner cannot hold a pull request for
 hours.
