@@ -68,7 +68,7 @@ checkout can read it.
   plan, because the plan goes away.
 - The epic's last task folds the plan's lasting rules into SPEC.md in a
   sentence or two each (a decision in section 1, a settled question in
-  section 14), and deletes the plan.
+  the section it concerns, taken off section 14's open points), and deletes the plan.
 - Parallel task pull requests do not edit `docs/STATUS.md`, because
   they all conflict on it. Each one puts its proposed STATUS line (one
   sentence on what it delivered, and any new open items) in its pull
@@ -82,7 +82,7 @@ checkout can read it.
 
 Before a feature epic's plan is written, the architect agent designs it
 (not for small fix batches). It reads wide: VISION.md, the releases still
-to come in VISION.md section 11, SPEC.md and the open GitHub issues for
+to come in VISION.md section 11, SPEC.md, docs/EPICS.md and the open GitHub issues for
 the area. It reports where the code goes, what existing helpers and
 schemas the builders must reuse, and which task owns each shared file and
 schema change. For each significant choice it gives the smallest change
@@ -131,8 +131,9 @@ different times:
 - An epic pull request, from an epic branch into `main`, is opened only
   after every task pull request for that epic has landed, code-reviewer,
   security-reviewer (when the epic touches the server, accounts, saving,
-  sign-in, the LMS launch, the MCP server or API keys, import or export, or
-  AI features) and a11y-reviewer (when the epic touches a screen) have run
+  sign-in, the LMS launch, the MCP server or API keys, import or export,
+  AI features, attachments and the files host, the administrator
+  interface, second factors, or retention deletion) and a11y-reviewer (when the epic touches a screen) have run
   over the epic branch's head, every finding they required has been fixed
   or explicitly deferred, and the checks are green locally. Only the user
   merges an epic pull request into `main`.

@@ -231,13 +231,13 @@ diagram, and nothing on Level 0 carries it.
 
 Left out:
 
-- **Sign-in.** There is none. The first deployment opens a project straight from Canvas.
+- **Sign-in.** The first-release student screens have none. The first deployment opens a project straight from Canvas.
 - **Settings.** A plain form with nothing to read at a glance.
 - **Project list.** A plain list.
 - **Whole-project problems list.** A plain list of the same cards as the problems panel on screen 1.
 - **Help pages.** Plain reading text.
 - **PDF export.** The result is a document, not a screen.
-- **Assignments, handing in, grading and class views.** Not this app's job. Canvas does them.
+- **Assignments, handing in, grading and class views.** Not part of the first-release student screens, and not this app's job. Canvas does them.
 - **Entity relationship diagram.** It uses the frame of screen 1 with the book's own symbols. It comes in the first release and is worth a brief then.
 - **CRUD matrix (create, read, update, delete).** A grid of letters that depends on the data model. It comes in the first release and is worth a brief then.
 - **Second-release forms, binder and design diagrams.** The forms will follow screen 4 and the diagrams will follow screen 1.

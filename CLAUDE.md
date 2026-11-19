@@ -15,8 +15,9 @@ status and history go in `docs/`, cited by file and section, never here.
 | Path | What it holds |
 | --- | --- |
 | `docs/VISION.md` | Research and product vision. Wins on questions of intent. Section 11 is the release roadmap and its exit criteria |
-| `docs/SPEC.md` | The core specification. Wins on implementation detail. Section 1 holds the decisions, 2 Release 0's scope, 3 the model, 5 the rules, 6 the test cases, 12 the code layout and tools, 14 the settled and open points |
+| `docs/SPEC.md` | The core specification. Wins on implementation detail. Section 1 holds the decisions, 2 Release 0's scope, 3 the model, 5 the rules, 6 the test cases, 12 the code layout and tools, 14 the open points and the scope left out |
 | `docs/STATUS.md` | A one- or two-sentence summary of each epic, and the open items |
+| `docs/EPICS.md` | The epic plan: each epic's scope, owned directories, dependencies, and the epics that can run beside it. Its section 1 says who may edit the files that epics share |
 | `docs/WORKFLOW.md` | Local development, branches, epic plans, pull requests, CI, secret scanning |
 | `docs/mockups/` | The screen briefs (`BRIEFS.md`) and the Drafting Paper style (`STYLES.md`) |
 | `docs/images/` | Figures for the documents, and the logo in `brand/` |
@@ -26,12 +27,18 @@ status and history go in `docs/`, cited by file and section, never here.
 Before implementing any part, read the SPEC.md sections that cover it. Cite sections by
 number in prompts, commits, and reports.
 
+Documents state what is true now, in the present tense, with the reason where it matters.
+They record no dates of decisions and nothing dropped or changed; git holds history. If
+the project starts keeping architecture decision records, one would hold the reasoning
+behind a hard-to-undo choice.
+
 ## Layout and commands
 
 The only code so far is a throwaway clickable prototype in `prototype/`, an npm project.
 It runs in the browser with sample data and has no backend. It covers the first-release
-and second-release screens of the specification. `prototype/README.md` describes its
-parts. The real application's layout is SPEC.md section 12.
+and second-release screens of the specification. It is frozen, a reference for screen
+layout only, and is deleted once `apps/web` has the Release 2 screens.
+`prototype/README.md` describes its parts. The real application's layout is SPEC.md section 12.
 
 Prerequisites: the `.nvmrc` Node (a SessionStart hook puts it on PATH in Claude
 sessions; humans run `nvm use`), and gitleaks for the pre-commit hook
@@ -74,6 +81,10 @@ Orchestration rules:
   and tell it to stop and report any choice the prompt leaves open.
 - Run independent agents in parallel. Never let two agents edit the same
   files; split by package or directory and merge in the main session.
+- Several epics may run at once. An epic edits only the directories
+  `docs/EPICS.md` gives it, and touches the shared files (root
+  `package.json`, the lockfile, CI, the Docker files, `docs/STATUS.md`,
+  `docs/SPEC.md`, this file) only as that file's section 1 allows.
 - A good prompt names the SPEC.md sections, the files in scope, the base
   commit, what done looks like, and what to leave alone.
 - Agent worktrees start at `main`. Tell a worktree agent the exact commit
@@ -127,5 +138,7 @@ Orchestration rules:
 - Never copy the textbook's text, figures, cases or worked numbers into the
   project. Cite it by chapter, figure and printed page.
 - Diagramble supports the book; it is not a learning management system. Nothing
-  deals with assignments, handing work in, grades, due dates or class lists
-  unless the user asks (`prototype/README.md`).
+  deals with assignments, handing work in, grades or due dates unless the user asks.
+  The spec makes two exceptions: course settings, and the Release 2 course dashboard
+  of behavior analytics with a roster-service class list and no grades (SPEC.md
+  section 1, "Grading").

@@ -1,10 +1,10 @@
 # Diagramble: Core Specification for Release 0
 
-17 November 2026 · Draft for review
+Draft for review
 
 This document specifies the core of Diagramble narrowly: the semantic model, the first
-rules for data flow diagrams, and three test cases. It is the basis for the Release 0
-prototype described in the [product vision](VISION.md). Sections 8 to 11 go further.
+rules for data flow diagrams, and three test cases. It is the basis for Release 0, a rough first build that later releases keep,
+described in the [product vision](VISION.md). Sections 8 to 11 go further.
 They fix the shape of what the first and second releases add, so that the core does not
 have to change later. They are not built in Release 0.
 
@@ -12,10 +12,9 @@ It follows the course textbook: Dennis, Wixom and Roth, *Systems Analysis and De
 8th edition. Page and figure numbers in this document are that book's printed ones.
 Section 13 lists what was checked against it.
 
-Revised on 17 November 2026 after two Visible Analyst tutorials were read. Section 13
-ends with every check those tutorials show, set against the rules here. Section 14.4
-lists what was taken from Visible Analyst and what was left out. Revised again after the
-exercises of every chapter were read against it. Section 14.5 lists what that changed.
+Section 13 ends with every check that two Visible Analyst tutorials show, set against the
+rules here. Section 14.2 lists what was taken from Visible Analyst and what was left out,
+and section 14.3 lists the textbook's exercises the tool does not cover yet.
 
 Terms used throughout: a data flow diagram (DFD) shows processes, data stores, external
 entities and the data flowing between them. An entity relationship diagram (ERD) shows
@@ -25,13 +24,13 @@ that come level 1 and level 2 diagrams.
 
 ## 1. Decisions
 
-These were decided on 17 November 2026. Where they differ from the product vision, this
-document wins. Section 14 records the smaller points settled the same day.
+This section holds the project's decisions. Where they differ from the product vision,
+this document wins. Section 14 lists the points still open.
 
 | Decision | Choice | Effect |
 | --- | --- | --- |
-| License | Business Source License 1.1, decided on 18 November 2026. Free production use for non-profit organizations (including credit-bearing tuition), individuals' own study and teaching (including students at for-profit schools), and a one-time paid setup for a non-profit that hosts the tool itself, all only with a copy obtained free or from the author. A commercial license is needed for any other use by a for-profit organization; for a company paid to run a college's courses that use it; for selling or bundling; for any recurring charge for hosting, operating, maintaining or supporting it, even to a non-profit; and for paid training that earns no academic credit. A "charge" includes indirect income such as advertising, data, revenue shares and paid bundles. Each version becomes AGPL-3.0-or-later four years after it is published. The full terms are in `LICENSE`, and a plain-language summary is in `LICENSING.md` | It is not an open source license. No dependency may be under the GPL or the AGPL alone, because those would require the whole tool to use the same license. Libraries under the Eclipse Public License are allowed. elkjs is used under its "EPL-2.0" option, which section 14 confirms. Outside contributions need a contributor license agreement, so that commercial licenses can be sold |
-| First deployment | Hosted by the project's author | The trial launch in Release 0 runs against that deployment. Who hosts for other institutions is not decided |
+| License | Business Source License 1.1. Free production use for non-profit organizations (including credit-bearing tuition), individuals' own study and teaching (including students at for-profit schools), and a one-time paid setup for a non-profit that hosts the tool itself, all only with a copy obtained free or from the author. A commercial license is needed for any other use by a for-profit organization; for a company paid to run a college's courses that use it; for selling or bundling; for any recurring charge for hosting, operating, maintaining or supporting it, even to a non-profit; and for paid training that earns no academic credit. A "charge" includes indirect income such as advertising, data, revenue shares and paid bundles. Each version becomes AGPL-3.0-or-later four years after it is published. The full terms are in `LICENSE`, and a plain-language summary is in `LICENSING.md` | It is not an open source license. No dependency may be under the GPL or the AGPL alone, because those would require the whole tool to use the same license. Libraries under the Eclipse Public License are allowed. elkjs is used under its "EPL-2.0" option (section 12). Outside contributions would need a contributor license agreement, so that commercial licenses can be sold. One is written when someone wants to contribute |
+| Hosting | Self-hosting. Each institution runs its own copy from the Docker image ("Deployment" below). The project's author hosts the first deployment. A commercial license is needed for any for-profit hosting, including the author's. There is no community-hosted instance | The trial launch in Release 0 runs against the author's deployment |
 | Textbook | Dennis, Wixom and Roth, *Systems Analysis and Design*, 8th edition (Wiley, 2022) | The tool is built for this book. It sets the symbol style, the names of things, the limits and the wording of the rules. See section 13 |
 | Course coverage | Chapters 1 to 12. Chapter 13, on agile methods, is not covered | The design diagrams of chapters 9 and 10 join the roadmap in the second release. None is in Release 0 |
 | Balancing strictness | Parent data missing from the child diagram is an error. Data added on the child diagram is a warning | BAL-03 is a warning. See section 5.5 |
@@ -39,15 +38,31 @@ document wins. Section 14 records the smaller points settled the same day.
 | Data model | The entity relationship diagram, its dictionary entries and the CRUD matrix, checked against the process model, in the first release | See section 9. Not built in Release 0 |
 | Design diagrams | The physical DFD, structure chart, program specification and physical data model of chapters 9 and 10, in the second release | See section 11. Not built in Release 0 |
 | Other chapters | Checked forms for chapters 1, 3, 6 and 11. The interface structure diagram for chapter 8. A project binder for everything else. All of it exports to PDF, in the second release | See section 10. Not built in Release 0 |
-| Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again, decided on 18 November 2026 | See section 3.9. Not built in Release 0 |
-| Instructors' AI agents | A Model Context Protocol (MCP) server lets an instructor's own AI agent build scenarios and starter cases, using a personal API key, decided on 18 November 2026 | See section 7.1. Not built in Release 0 |
+| Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again | See section 3.9. Release 0 has a database and saves each accepted command (section 2). The project list, named checkpoints, copying, renaming, deleting, export, import and diagram images come in Release 1. The data dictionary's CSV export comes in Release 2 |
+| Instructors' AI agents | A Model Context Protocol (MCP) server lets an instructor's own AI agent build scenarios and starter cases, using a personal API key | See section 7.1. Built in Release 1 |
+| Grading | None. Grading happens in Canvas. The Canvas launch only signs a person in and opens their work. Assignment and Grade Services, Deep Linking and LTI Advantage certification are in no plan. The course dashboard reads the class list from Canvas's roster service (LTI Names and Role Provisioning Services, NRPS) | Students hand in the exported PDF through Canvas (section 3.9), and may attach their project file too. The instructor grades in Canvas. A course dashboard of student behavior, without grades, is a Release 2 candidate. It fetches the class list from the roster service each time the instructor opens it, and does not copy or keep it |
+| Course settings | One small settings record per Canvas course. The launch says which course and whether the person is an instructor. An instructor sets one AI assistance level (0 to 2) and one rule profile for the course, and every student launched from it gets them. Nothing about assignments is stored | See section 7 item 4. Not built in Release 0, except that an account may record the course it launched from |
+| Element identifiers | Made by whoever creates the item and carried in the creating command | See sections 3.2 and 4.1 |
 | Stack | TypeScript everywhere | One shared package holds the model and rules and runs in both browser and server |
+| Server framework | Fastify (MIT), with Zod for request checking | See section 12 |
+| Canvas launch | Our own thin layer for the Learning Tools Interoperability (LTI) 1.3 launch, built on `jose` (MIT), not on ltijs. The launch is critical, so it sits inside our own tests and security review. ltijs has one maintainer and brings its own Express app and database layer | See section 12 |
+| Database access | Kysely (MIT) behind a small project-store interface of our own (load, save, append to the log) | A project is stored as one JSON document, and its command log as rows of a separate table (section 3.6). The same code can run on PostgreSQL on the server and on SQLite in a possible desktop app later (section 14.1). See section 12 |
+| AI models and agents | The Vercel AI SDK, package `ai` (Apache-2.0), for student-facing AI including agents (its tool-loop agent). Rule 1: use provider packages such as `@ai-sdk/anthropic` with the institution's own key, never bare model-name strings, which route through Vercel's hosted gateway. Rule 2: our server still builds the tool list for each request from the assistance level (section 7 item 4), and no AI model offered to a student can change the model (section 7 item 5). Rule 3: we log every step (section 7 item 7). The institution supplies and protects the provider key, and chooses a provider whose terms fit its data rules; Diagramble does not vet providers | See sections 7 and 12. No AI feature is built in Release 0 |
+| Deployment | One Docker image for the app, and a Docker Compose file that adds PostgreSQL | See section 12 |
+| Sign-in | The Canvas launch from Release 0. In Release 2, three more ways: OpenID Connect (OIDC), for school Google or Microsoft accounts; LDAP directories; and email magic links limited to an allow list of addresses or to allowed domains. The administrator sets up each one in the administrator interface. An account is kept separate from the ways of signing in to it, so that a way can be added without changing accounts. Each account stores one login, which names its export files (section 3.9) | A session is a cookie that points to a record stored in the database. Administrators always need a second factor ("Administration"). For everyone else, the administrator decides for each way of signing in whether it needs a second factor, a passkey or an authenticator app. By default LDAP and magic links need one, because a password or an email account alone is weak, and OIDC does not, because the school's own provider enforces its own. The Canvas launch needs none from Diagramble, because Canvas sign-in usually requires one already |
+| Rule findings | Every rule of section 5 flags a problem in the problems panel and, by default, blocks nothing. A course's rule profile can turn a rule off, change its severity, or make it block a change | See section 5.1. The invariants of section 3.4 are always enforced, whatever the profile says |
 | Flow identity | Separate flow elements, each carrying a shared dictionary definition | See section 3.3 |
 | AI | Agent integration must be possible from the start | See section 7. No AI feature is built in Release 0 |
+| Accessibility | Essential. Students with disabilities must be able to do all their work. The target is the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA | The keyboard outline of section 2 item 5 is the first step. Every screen is held to the target |
+| Data retention | A requirement before Release 1's live course. An instructor can archive an old course, which makes it read-only for everyone while its students keep their projects. A retention policy decides how long logs, analytics, AI usage records, checkpoints and archived courses are kept before they are deleted. An account can be deleted | The default period is two years for every kind of record the policy covers: command logs and snapshots, analytics, AI usage records and logged AI exchanges, the request log of API keys, checkpoints, and archived courses. The system administrator can change it ("Administration" below). Periods are counted in years. A snapshot at the cut point keeps a project whole (section 3.6) |
+| Student records | Each institution that hosts Diagramble is responsible for its own compliance with the Family Educational Rights and Privacy Act (FERPA), the United States student privacy law, and for any agreements it needs | Access is a plain role check in the app: a student works on their own projects, an instructor can see the work of students in their courses, and the system administrator can see everything. What anyone actually sees is decided by which screens the app provides. Diagramble supplies what a host needs to comply: the retention settings and account deletion of "Data retention", the rules on the AI provider of section 7 item 7, and a data inventory in the operations document ("Administration") that says what is stored, where, and for how long |
+| Administration | An administrator interface, built in Release 1. Each deployment has one system administrator, above instructors. The administrator sets the data retention periods, manages Canvas platform registrations, and in Release 2 sets up the other ways of signing in ("Sign-in") | The first administrator is created by the first sign-in with a break-glass password: a password kept for emergencies, set when the deployment is installed. Administrators, and only administrators, must use a second factor, either a passkey or an authenticator app with time-based one-time codes. Text messages (SMS) are never offered, because they are easy to intercept. Backups, restore, monitoring, health checks and the data inventory of "Student records" are described in an operations document. The administrator interface shows their state, such as the server's status and when the last backup ran |
+| Host names | A deployment uses two host names, for example `app.diagramble.example.edu` for the app and `files.diagramble.example.edu` for users' files. Attachments are served only from the files host (section 10.7). The app's session cookie is host-only, with no `Domain` attribute, so the files host never receives it | The two hosts are the same site, so SameSite cookie rules do not protect the app from the files host. From Release 0, every request that is signed in by the session cookie and changes anything must carry an `Origin` header that matches the app host. Anything else, including `Origin: null` or no `Origin` at all, is refused. Requests that prove themselves another way are not covered: the LTI launch carries a signed token from the platform, and the MCP server's requests carry an API key |
+| Symbol styles | Release 1 draws only the textbook's style: Gane and Sarson for data flow diagrams and the textbook's entity relationship notation | Two styles are planned for later: DeMarco and Yourdon for data flow diagrams, and the Unified Modeling Language (UML) class notation for data models. The instructor would choose one per Canvas course in the course settings of section 7 item 4 (section 14.1) |
 
 ## 2. Scope of Release 0
 
-Release 0 is a prototype that tests the riskiest parts. It is allowed to be rough.
+Release 0 is a rough first build that tests the riskiest parts. Later releases keep it.
 
 In scope:
 
@@ -56,13 +71,21 @@ In scope:
 3. The three test cases in section 6, passing as automated tests.
 4. A minimal canvas that shows one model on a context diagram and its child diagrams.
 5. A minimal outline view in which a keyboard-only user can build a context diagram.
-6. A trial launch from a Canvas test course that opens a project and returns a score.
+6. A launch from a mock LTI 1.3 platform, including one inside a frame, that signs the
+   user in and opens their saved project. The mock replaces a real Canvas for Release 0
+   (section 12).
+7. Accounts and saving to the server. PostgreSQL, reached
+   through Kysely, stores accounts, sign-in methods, sessions, launch nonces,
+   projects, the command log and snapshots (section 3.6). Each command the server accepts is saved before the next one is applied, as
+   section 3.9 describes. A student has one project for each Canvas course, and the
+   launch opens it.
 
 Out of scope: use case forms (section 8), the ERD and the CRUD matrix (section 9), the
 forms, diagram and binder of section 10, the design diagrams of the textbook's chapters 9
-and 10 (section 11), accounts, saving to the server and project files (section 3.9),
-assignment profiles, export, AI features, real-time
-editing, and visual polish.
+and 10 (section 11), the project list and copying, renaming and deleting projects,
+project files and their export and import (section 3.9), course settings (section 7
+item 4), export to PDF, AI features, real-time editing, and visual polish.
+Grading is out of every release (section 1).
 
 Exit criteria are those in section 11 of the product vision under "Release 0".
 
@@ -84,13 +107,30 @@ Every element has these fields.
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `id` | Identifier | Assigned once, never reused |
+| `id` | Identifier | Assigned once, never reused. See the identifier rules below |
 | `kind` | One of the kinds below | Never changes in Release 0 |
 | `name` | Text | May be empty while the student is working. Rules report empty names |
 | `description` | Text | May be empty while the student is working. The textbook asks for one on every item, so rule DFD-13 reports an empty description |
 | `aliases` | List of text | Other names the business uses for the same thing. The textbook lists an alias among the fields of a flow, a data store, an external entity and an attribute (Figures 4-13 and 5-9). `search` looks in them. No rule in Release 0 reads them |
 | `notes` | Text | Working notes and open questions. The textbook lists notes on every kind of entry (Figures 4-13, 4-16 and 5-6 to 5-8). Never checked |
-| `origin` | `student`, `starter` or `ai` | Who created the element. Needed later for instructor review and AI disclosure |
+| `origin` | `student`, `starter` or `ai` | Who created the element. Needed for review of an instructor's agent's work (section 7.1) and for AI disclosure |
+
+**Identifier rules:**
+
+- Whoever creates an item puts its identifier in the creating command: the browser, a
+  test, an AI agent or an instructor's MCP agent (section 7.1). The core never makes one.
+- The browser makes an identifier of 10 characters drawn from lowercase letters and
+  digits, using `crypto.getRandomValues`, never `Math.random`. Tests and agents may
+  choose readable identifiers instead.
+- An identifier is unique only within one project's document (section 3.6), and
+  nothing may assume that identifiers are unique across projects. A copy of a starter case may keep the case's identifiers.
+- The server refuses a creating command whose identifier the project's document
+  already holds. The browser then makes a new identifier and sends the command again.
+- An identifier is an opaque string. Nothing parses it.
+
+Why: the browser and the server both apply each command, and two copies of a project can
+run at once, with two open tabs, a dropped connection, or an instructor's MCP agent. A counter kept in the project would let two copies give out
+the same identifier.
 
 An alias is not a second name. A flow's label, a rule's message and every list show the
 `name`. Two elements may not be told apart by an alias, and an alias never takes part in
@@ -178,20 +218,40 @@ the model as "unplaced". Deleting the element is a separate command.
 
 ### 3.6 Storage form
 
-A project is one JSON document with five parts: `schemaVersion`, `settings`
-(section 3.7), `elements`, `views` and `log`. Elements are stored in a map keyed by `id`. The log is the ordered list of
-commands applied, each with its resulting changes in JSON Patch form (RFC 6902).
+A project is one JSON document with four parts: `schemaVersion`, `settings`
+(section 3.7), `elements` and `views`. Elements are stored in a map keyed by `id`.
 Section 7 depends on this form being stable and documented.
+
+The command log is kept on the server, apart from the document:
+
+- The database holds each project as one JSON document in this storage form. Loading a
+  project is one read, and saving it is one write.
+- Every accepted command is a row of a separate command-log table, keyed by project and
+  kept in order, with its resulting changes in JSON Patch form (RFC 6902). The course
+  dashboard's analytics read this table.
+- Every few hundred commands, the server also stores a snapshot of the project's
+  document. Any earlier state is rebuilt by replaying commands from the nearest snapshot
+  before it.
+- The log and the snapshots fall under the retention policy (section 1, "Data
+  retention"). When retention deletes old commands, the state at the cut point is kept
+  as a snapshot, so the project stays whole.
+- An exported file (section 3.9) holds the document only, never the log.
 
 ### 3.7 Project settings
 
-A project has two settings. Both exist so that a textbook exercise can be done as it is
-set.
+A project has three settings. All exist so that a textbook exercise can be done as it
+is set.
 
 | Setting | Values | Notes |
 | --- | --- | --- |
 | `topDiagramId` | A diagram. The context diagram by default | The highest diagram that the project is expected to contain. Many of the textbook's exercises ask for a level 0 diagram alone (Chapter 4, exercises B, D, G, I, K, M, O, Q and S), and some start lower still: minicase 3 gives one process and asks for its level 1 diagram. Diagrams above the top diagram are "above the project". They stay in the model, because the hierarchy needs them (section 3.4) |
 | `showFindings` | `always` or `onRequest`. `always` by default | With `onRequest`, the findings are worked out as usual but shown only when the student asks. It suits an exercise that asks the student to find the errors in a given diagram (Chapter 4, minicase 2). Visible Analyst works this way all the time |
+| `caseText` | Plain text. May be empty, and empty by default | The case description that the exercise starts from. When it is not empty it is shown beside the canvas. Whoever builds a starter case sets it, and it travels with the starter case and in the export file. It is the starter case text of section 7 item 4 |
+
+Later sections add values that belong to the whole project rather than to one element.
+They are kept in `settings` beside these three: `overheadRate` and `months` for the
+storage estimate (section 11.6), and the requirements definition's `noneExpected` mark
+for each nonfunctional type (section 10.3).
 
 What "above the project" changes:
 
@@ -200,7 +260,7 @@ What "above the project" changes:
 - The top diagram is balanced against its parent process only when that process has at
   least one flow. An empty parent means the level above was not asked for. A parent with
   flows is a given fragment, and the student's diagram must balance with it.
-- Export leaves out the diagrams above the top diagram unless the student includes them.
+- PDF export leaves out the diagrams above the top diagram unless the student includes them.
 
 ### 3.8 Projects and starter cases
 
@@ -242,23 +302,68 @@ saved.
 - If the connection drops, the browser keeps the commands in order and sends them when
   the connection returns. Until then the top bar says the latest changes are not saved
   yet. Closing the page while changes are waiting asks the student first.
-- Undo and redo are commands like any other, so they are saved the same way.
+- Undo and redo are commands like any other, so they are saved the same way. They reach
+  only the current editing session. After a reload or a takeover, earlier edits cannot be
+  undone.
+
+**Only one tab edits a project at a time.** Every other tab showing the same project is
+read-only and says so plainly. A read-only tab offers a way to take over editing, which
+makes the tab that was editing read-only. An instructor's MCP
+agent (section 7.1) counts as an editor too: while it edits one of the instructor's
+projects, every tab the instructor has open on that project is read-only and says that
+the agent is working. Students' projects are never open to an agent.
 
 **A student has many projects.** A project list shows each project's name and when it was
 last changed. From it the student can open a project, start a new one (empty, or from a
 starter case as in section 3.8), copy one, rename one, or delete one. Deleting asks the
 student to confirm.
 
+**A student can save named checkpoints.** At any time a student can save a checkpoint of
+a project under a name of their choice. It keeps the project as it stood then. The
+project list shows each project's checkpoints, and opening one makes a new project that
+is a copy of it. A checkpoint never overwrites the current project. Checkpoints fall
+under the retention policy (section 1, "Data retention"). Saving and opening a checkpoint
+are actions of the project list on the server, like copying, not commands of section 4,
+because they do not change the model.
+
+**A student can open a project as of a past time.** From the project list a student can
+pick a date and time from a project's history and open the project as it stood then. This
+makes a new project that is a copy of that state, the same way opening a checkpoint does,
+and it never overwrites the current project. The state is rebuilt from the command log
+and snapshots (section 3.6), so it reaches back as far as the retention policy keeps
+them. Undo still reaches only the current editing session.
+
 **A project can be exported to a file and imported again.** This lets a student keep their
 own copy, work on another computer or another deployment, or give the file to someone
 else. It is not the way to hand work in. Students hand in the PDF of section 10.8.
 
 - The file is the storage form of section 3.6, as UTF-8 JSON, with the ending
-  `.diagramble.json`. It holds the whole project: every element, view and setting, the
-  log, and the binder's attached files. It holds nothing about the student, such as a
-  name or account.
-- The format is documented and kept stable, so that no student's work is locked in and
-  other tools can read it.
+  `.diagramble.json`. It holds the project only: every element, view and setting, and
+  each element's `origin`. It holds no command log and no times of the student's work,
+  and nothing about the student, such as a name or account. Importing a file starts a
+  fresh log.
+- The file is named after the student's login and the project's name, as in
+  `jsmith-Library Loans.diagramble.json`, so an instructor who collects many files can
+  tell them apart. Both parts are made
+  safe before use: path separators, control characters and characters that operating
+  systems refuse are replaced, and the name is kept to a safe length. Import never reads
+  anything from the file's name.
+- The login is stored with the account. It is set once, when the account is created,
+  from its first way of signing in: the Canvas login ID for a Canvas launch, which the
+  launch requests as the custom variable `$Canvas.user.loginId`; the username for LDAP;
+  the provider's preferred username for OpenID Connect; and the local part of the email
+  address, before the `@`, for a magic link. Whenever the preferred value is missing, the
+  local part of the email address is used, and with no email address either, the word
+  `user` followed by the account's first eight identifier characters. The login does not
+  change when the person later links another way of signing in.
+- Once the binder has attachments (Release 2), the export file is a zip archive with the
+  project's JSON inside and each attached file beside it, named by its content hash. It
+  is named the same way, with the ending `.diagramble.zip`. A file that is the JSON alone
+  still imports.
+- The format is documented but need not stay the same forever. A file exported by a
+  major release imports into every later release for as long as that major release is
+  supported. Files from Release 0 and other pre-releases need not import. There is no
+  promise of a schema contract for outside tools.
 - Importing a file always makes a new project in the list. It never replaces an existing
   project.
 - Before importing, the tool checks the file. A file made by an older version is brought
@@ -270,6 +375,43 @@ else. It is not the way to hand work in. Students hand in the PDF of section 10.
 - This is how an instructor gives a class a scenario. They build it, save it as a starter
   case, export the file and post it in Canvas, and each student imports it as their own
   new project. An instructor's AI agent can build the scenario for them (section 7.1).
+- A student may attach their project file to what they hand in through Canvas. The
+  instructor imports it to look at it. That makes a new project in the instructor's
+  account and never touches the student's own copy.
+
+**Import fails safe.** A file may come from anyone, so import is a security boundary:
+
+1. Every imported file is treated as hostile.
+2. The server checks it, not only the browser.
+3. The file's size is checked against a limit before it is parsed.
+4. Nesting depth, string lengths and element counts have limits.
+5. Keys such as `__proto__`, `constructor` and `prototype` are refused.
+6. The file is checked against the strict schema. Unknown fields are refused, not
+   dropped.
+7. A version upgrade runs only on a file that passed the check for its own version. The
+   result is checked again against the current schema and every invariant of section 3.4.
+8. Anything that fails refuses the whole file. Nothing is partly imported. The refusal is
+   a plain sentence with no internal detail.
+9. Imported text is never rendered as HTML anywhere, including the PDF export.
+10. Imported `origin` values are kept but marked unverified, and the project is marked
+    as imported.
+11. Text from an imported file that reaches an AI model, whether student AI or an
+    instructor's agent, is data, never instructions. It must not widen the tools offered.
+12. A zip file has limits on the number of entries, the size of each entry and of the
+    whole, and the compression ratio, all checked before anything is unpacked. An entry
+    whose path is absolute, contains `..`, or is a link is refused. Every attached file
+    is then checked as section 10.7 describes.
+13. Attachments are never served from the app host (section 10.7).
+
+**A diagram can be exported as an image.** From Release 1, any diagram exports as a PNG
+or an SVG image, either downloaded as a file or copied to the clipboard for pasting into
+a word processor. The clipboard always takes PNG, and takes SVG too where the browser
+allows it. Text in an SVG, whether the student typed it or it came from an imported
+file, is escaped, so it is never live markup.
+
+**The data dictionary exports as a CSV file** (comma-separated values) in Release 2, for
+review in a spreadsheet. A cell that begins with `=`, `+`, `-` or `@` is written with a
+leading apostrophe, so that a spreadsheet shows it as text and never runs it as a formula.
 
 ## 4. Commands and queries
 
@@ -295,10 +437,14 @@ and later as tool definitions for an AI model (section 7).
 | `setFlowData` | Changes which data definition a flow carries |
 | `expandProcess` | Creates the child diagram for a process. Refused if the process already has one. For each data flow touching the process on the parent, it creates a new flow on the child diagram carrying the same data, left unattached to any child process. If the other end is an external entity or data store, that element is placed on the child diagram. If the other end is another process, it becomes an off-diagram end. Control flows are not carried down |
 | `carryDown` | For a process that already has a child diagram, brings down the flows that were added to the parent afterwards. A flow touching the process on the parent is brought down when no flow that crosses the edge of the child diagram in the same direction carries the same data definition. Each new flow is made as `expandProcess` makes it, with its inner end unattached. Flows whose data already arrives in parts are left alone, because they balance through the dictionary |
-| `setTopDiagram`, `setShowFindings` | Change the project settings of section 3.7 |
+| `setTopDiagram`, `setShowFindings`, `setCaseText` | Change the project settings of section 3.7 |
 | `removeOccurrence` | Removes one occurrence, and the flows attached to it on that diagram |
 | `deleteElement` | Deletes an element everywhere. Refused for a data definition that is still carried or used as a component, unless `cascade` is set |
-| `undo`, `redo` | Steps through the log |
+| `undo`, `redo` | Steps through the log, within the current editing session only (section 3.9). Edits made before a reload or a takeover cannot be undone |
+
+Every command that creates an item carries the new item's `id`, made as section 3.2's
+identifier rules say. A command that creates more than one item, such as `addFlow` with a
+new data structure or `expandProcess`, carries one identifier for each.
 
 `expandProcess` leaves each inherited flow with one end attached to the outside element
 or off-diagram note, and the other end attached to the child diagram's boundary. Until the student attaches
@@ -307,7 +453,7 @@ it to a child process, rule DFD-05 reports it.
 `carryDown` is the one-step answer to a BAL-01 or BAL-02 finding in which the whole of a
 parent flow is missing. It comes from Visible Analyst, where exploding a process a
 second time drags new parent flows down. It never removes a flow from the child diagram.
-`carryDown`, the two settings commands, and the queries `search` and `getFragment` are
+`carryDown`, the three settings commands, and the queries `search` and `getFragment` are
 added in the first release. They are not part of Release 0.
 
 ### 4.2 Queries
@@ -339,12 +485,17 @@ pieces of text: the message, the reason, and the fix. A finding is structured da
 | `diagramId` | Where to show it, if it belongs to one diagram |
 | `values` | Named values used to fill the message text |
 
-A profile is a list of rule identifiers, each `off`, `warning` or `error`. Release 0 has
-one built-in profile with the defaults below. The defaults follow the textbook's quality
+A profile is a list of rule identifiers, each `off`, `warning` or `error`, and each
+optionally marked `block`. By default every rule flags a problem in the problems panel and
+never stops a change. A rule marked `block` refuses any command whose result has a finding
+of that rule that the model before it did not have, and the refusal gives the finding's
+message, reason and fix. The invariants of section 3.4 are separate: they are always
+enforced, whatever the profile says. Release 0 has one built-in profile with the defaults
+below, and it blocks nothing. The defaults follow the textbook's quality
 checklist (Figure 4-24) and its list of common errors (Figure 4-25). Rules run on the
 whole model after every command. Student models are small, so nothing incremental is needed.
 
-Two project settings change what a student sees, and neither changes a rule. A finding
+Two project settings change which findings a student sees, and neither changes a rule. A finding
 on a diagram above the project's top diagram is dropped, and the findings can be held
 back until the student asks for them (section 3.7).
 
@@ -366,7 +517,8 @@ back until the student asks for them (section 3.7).
 | DFD-15 | Warning | A process sends out a data definition that it also receives | "'{name}' sends out '{data}' unchanged." | A process changes data, so what leaves it usually has a different name from what entered | Name the output for what the process did to it, such as "Approved Order" |
 
 DFD-07 and DFD-08 are errors because the textbook's checklist lists them as syntax
-rules. DFD-09 stays a warning because the textbook says a data store with flows in only
+rules. DFD-13 is a warning because a missing description is unfinished work, not a
+mistake. DFD-09 stays a warning because the textbook says a data store with flows in only
 one direction is "not necessarily an error" (page 155). The textbook also wants a
 process name to start with a verb and every other name to be a noun. Software cannot
 check that reliably, so it stays with the instructor.
@@ -380,7 +532,9 @@ check that reliably, so it stays with the instructor.
 | DFD-12 | Warning | A diagram has more than seven processes | "This diagram has {count} processes. It should have no more than seven." | A crowded diagram is hard to read | Combine related processes into one and expand it |
 
 The limits of three and seven come from the textbook's checklist (Figure 4-24). Its
-prose is looser at the top: it says "no more than seven to nine" (page 149).
+prose is looser at the top: it says "no more than seven to nine" (page 149). The tool
+uses seven, because students check their work against that checklist. DFD-12 is only a
+warning, so a diagram of eight or nine is not marked wrong.
 
 Whether a second process can exist on the context diagram is settled by the model:
 `addProcess` is refused there, so no rule is needed.
@@ -598,8 +752,8 @@ No AI feature is built in Release 0. These requirements make sure the core does 
 have to change when one is added. They follow the AI strategy in section 8 of the
 product vision.
 
-1. **The model has a documented text form.** `getModel` returns stable JSON under a
-   published schema. `getOutline` returns the same content as short plain text, which
+1. **The model has a documented text form.** `getModel` returns JSON under a documented
+   schema, which changes only as section 3.9 allows for project files. `getOutline` returns the same content as short plain text, which
    costs less to send to a model.
 2. **Commands and queries are the tool surface.** Because each has a name, an argument
    schema and a description, each can be offered to an AI model as a tool with no new
@@ -607,39 +761,58 @@ product vision.
    Model Context Protocol server.
 3. **Findings are data.** An AI model explains a finding from its rule identifier,
    elements and values. It never decides whether a rule is broken.
-4. **The assistance level decides which tools exist.** The server builds the tool list
-   for each request.
+4. **The assistance level decides which tools exist.** The server reads the level from
+   the settings of the Canvas course the student launched from (section 1, "Course
+   settings"), and builds the tool list for each request from it.
 
    | Level | Tools offered to the AI model |
    | --- | --- |
    | 0 Off | None. No request is made |
    | 1 Explain | `getOutline`, `getElement`, `getFindings` |
    | 2 Question and hint | Level 1, plus `whereUsed` and `expandData` |
-   | 3 Critique | Level 2, plus the assignment's case text |
-   | 4 Open practice | Level 3, plus `preview` with commands |
+   | 3 Critique | Level 2, plus the project's starter case text |
 
-5. **An AI model never changes the model directly.** At level 4 it proposes commands
-   through `preview`. The server runs the rules on the result. The student sees the
-   proposal with its findings and accepts or rejects it. Accepted elements are stored
-   with `origin` set to `ai`.
-6. **`preview` must be cheap.** This is why the core is pure functions over an
+   Release 2 delivers levels 0 to 2. Level 3, a critique of a complete draft against the
+   starter case text (`caseText`, section 3.7), is a later goal in no release (VISION.md section 11, "Later goals").
+
+5. **An AI model never changes a student's model.** No assistance level offers it a
+   command, and nothing it says is applied to the model.
+6. **`preview` must be cheap.** An instructor's MCP agent may use it to check a change
+   before making it (section 7.1). This is why the core is pure functions over an
    unchanging model value (section 3.1).
 7. **The gateway is neutral and server-side.** It holds the institution's own key, works
-   with more than one model provider, removes student identity, and logs every request
-   and response against the project.
+   with more than one model provider, and logs every request and response against the
+   project. It is built on the AI SDK under the rules in
+   section 1.
+   - The key and the choice of provider are the institution's responsibility. The
+     institution supplies the key, protects it, and chooses a provider whose terms fit
+     its data rules, including whether the provider trains on data sent through its
+     API. Some providers do. Diagramble does not vet providers and does not alter what
+     students send. The administrator documentation says this plainly. Whether students
+     see a one-time notice the first time they use an AI feature is decided when the AI
+     epic is planned.
+   - AI use is also counted: requests and tokens, per student and per course. The course
+     dashboard may show those counts.
+   - Prompt and response text is logged for safety and debugging only. It is kept under
+     the retention policy of section 1, "Data retention", and the app offers
+     instructors no view of it.
+8. **The AI behaves as a tutor.** At level 2 it never names a missing element. Help covers
+   only work the student has already done. The student sees what was used for each
+   reply. Each reply comes in a fixed structure that the server checks before showing it.
 
 ### 7.1 Building scenarios with an instructor's own AI agent
 
 An instructor can ask their own AI agent to build a scenario, such as "a small bakery's
 ordering system, with a level 0 diagram that has two balancing errors for the students
 to find." The agent works through a Model Context Protocol (MCP) server that Diagramble
-provides. This is separate from the student assistance levels of item 4 above, and it
-never touches a student's work.
+provides. This is separate from the student assistance levels of item 4 above. MCP
+agents are for instructors only, and no agent ever reaches a student's project.
 
 - **An API key is needed.** An instructor creates a personal API key in their account,
   names it, and can revoke it at any time. The key is shown once, when it is made, and
   the server keeps only a hash of it. Each key acts as its owner and reaches only its
-  owner's own projects. Every request is logged against the key.
+  owner's own projects. Every request is logged against the key. Only an instructor can
+  make a key.
 - **The tools are the commands and queries of section 4,** offered as MCP tools as items
   1 and 2 above describe, plus making a project, saving a project as a starter case
   (section 3.8) and exporting a project file (section 3.9).
@@ -649,6 +822,9 @@ never touches a student's work.
 - **What the agent makes is marked.** Elements it creates have the `origin` `ai` in the
   instructor's project, so the instructor can review them. Saving the project as a
   starter case marks every element as given, like any other starter case.
+- **The instructor's open view is read-only while the agent works.** If the instructor
+  has the project open in a tab, that tab becomes read-only and says the agent is
+  editing, as section 3.9's one-editing-tab rule describes.
 - **The agent and its AI provider are the instructor's own.** Diagramble makes no AI
   requests for this and pays for none.
 
@@ -697,7 +873,8 @@ The textbook turns a use case into diagrams in a fixed way.
 | The information for a step | The flows into and out of that level 1 process |
 
 The student draws the diagrams. The tool keeps the links and checks the two against
-each other.
+each other, and draws nothing from the form, because turning a use case into a diagram is
+the exercise the textbook sets (pages 144 to 149).
 
 ### 8.3 Planned rules
 
@@ -747,8 +924,7 @@ section fixes their shape so that the core does not have to change when they are
 An attribute is not a new kind of element. It is a data element (section 3.3) that an
 entity owns. The data that a flow carries and the data that an entity holds are
 therefore the same elements, each with one name and one definition. That is what lets
-the tool compare the two models. The product vision listed the attribute as a kind of
-its own, linked to a data element. This section replaces that.
+the tool compare the two models.
 
 | Kind | Extra fields | Notes |
 | --- | --- | --- |
@@ -854,7 +1030,7 @@ Normalization (Appendix 5A) is checked only as far as a diagram can show it. ERD
 reports a many-to-many relationship and ERD-11 reports a repeating attribute, which is
 the test for first normal form. The second and third forms ask what an attribute depends
 on, and that is a judgment about the business, not about the diagram. They are not
-checked. Section 14.3 leaves open whether a student should be able to record those
+checked. Section 14.1 leaves open whether a student should be able to record those
 dependencies.
 
 The textbook's normalization exercises (Your Turn 5A-1, exercises J and K, and minicase
@@ -1126,6 +1302,9 @@ Figure 11-1, with the stage and type from Figure 11-4.
 | TP-01 | A test has no objective, has neither test cases nor a script, or has no expected results |
 | TP-02 | A functional requirement is addressed by no test |
 
+TP-02 asks for a test per requirement, not per use case, because the textbook ties a test
+to a requirement.
+
 ### 10.6 Interface structure diagram (Chapter 8)
 
 A new diagram kind, `isd`. A project may have several. The textbook suggests one for
@@ -1169,6 +1348,25 @@ thing.
 Nothing in a binder section is checked. A new section can start from the textbook's
 layout for that deliverable.
 
+**Attachments are kept and shown safely.** A file a student attaches may be hostile, so:
+
+1. Attached files are stored outside the project document and referenced by the hash
+   of their content.
+2. Every attachment is served only from the files host of section 1, "Host names",
+   never from the app host. A script in a file there cannot read the app's pages or
+   receive its session cookie.
+3. An image is decoded and encoded again on the server into a fresh PNG or JPEG before
+   it is shown. An SVG file is refused or turned into a bitmap, because SVG can carry
+   script.
+4. A PDF is drawn inside the app with pdf.js, with its script evaluation turned off.
+   pdf.js is kept up to date.
+5. A web page or a zipped interface prototype opens only in a sandboxed frame from the
+   files host, served with `Content-Security-Policy: sandbox` (without
+   `allow-same-origin`) and `X-Content-Type-Options: nosniff`.
+6. Every other type is offered only as a download.
+7. The browser fetches an attachment through a short-lived signed link that the app
+   hands out, because the session cookie never reaches the files host.
+
 The migration plan has one small form inside it, for the conversion strategy. The
 student makes the three choices the textbook describes: the conversion style, the
 conversion locations and the conversion modules (Figure 12-3). The tool then shows what
@@ -1209,6 +1407,12 @@ end of each phase.
 | System specification | Recommended acquisition strategy, alternative matrix, architecture design, hardware and software specification, interface design, physical process model, program design specifications, physical data model, data storage design, CRUD matrix, repository entries | Figure 6-2 |
 | Program design document | Every structure chart, then the program specifications in module order | Page 308 |
 | Implementation documents | Test plan, documentation, migration plan | The textbook gives no outline |
+
+In Release 1, a PDF comes from the browser's own print to PDF. A print stylesheet lays
+each document out as pages, and scales a large diagram to fit a page or splits it across
+pages. A short hint tells the student to choose "Save as PDF" and to turn off the
+browser's headers and footers. The compiled documents above need a better way, which is
+still open (section 14.1 item 3).
 
 The table of contents is generated. The process model and data model are the diagrams
 with their descriptions, and the repository entries are the data dictionary. A part that
@@ -1393,6 +1597,12 @@ The DM rules of section 9.4 and the CRUD rules of section 9.5 run on the physica
 as well. That covers what the textbook asks for in step 5: the data stores and data
 elements added to the physical DFD must appear as tables and fields (page 350).
 
+**SQL schema export.** The physical data model exports as SQL create-table statements,
+one per table, with each field's data type, length and whether it may be empty, the
+primary key, and a foreign key for each relationship that has one. The dialect is
+PostgreSQL's, unless the epic's architect run finds a reason for another. One dialect is
+enough to show that the data model produces a real database.
+
 In physical mode the CRUD matrix shows table and field names and includes the
 system-related processes, tables and fields, as Figure 10-11 does. It has one set of
 cells for both modes.
@@ -1453,16 +1663,42 @@ for each month.
 | `packages/cases` | The test cases in section 6 as command lists and expected findings | Tests |
 | `apps/web` | Canvas and outline view | Browser |
 | `apps/server` | Storage, Canvas launch, and later the AI gateway | Server |
+| `packages/mock-lti` | A mock LTI 1.3 platform: people and courses to launch as, launching inside a frame, a roster service, and signed launches with deliberate defects for negative tests. A development and test tool, never in the Docker image | Development, CI and the Release 0 trial |
 
 | Need | Choice | License |
 | --- | --- | --- |
 | Language | TypeScript | Apache-2.0 |
 | Interface | React | MIT |
 | Canvas | React Flow | MIT |
-| Layout | elkjs. Dagre (MIT) was the alternative. Section 14.1 records the choice | EPL-2.0 or GPL-3.0-or-later |
+| Layout | elkjs. Dagre (MIT) is the fallback if elkjs proves unworkable | EPL-2.0, one of its two options (below) |
 | Argument schemas | Zod | MIT |
+| Accessible widgets: dialogs, menus, trees, tables and listboxes | React Aria, unstyled, so the Drafting Paper style stays the project's own | Apache-2.0 |
 | Tests | Vitest | MIT |
 | Database, when the server needs one | PostgreSQL | PostgreSQL License |
+| Server framework | Fastify | MIT |
+| Canvas launch | Our own layer on `jose` | MIT |
+| Database access | Kysely, behind our own project-store interface | MIT |
+| AI models and agents | Vercel AI SDK (`ai`) plus provider packages | Apache-2.0 |
+| Deployment | Docker image, and Docker Compose with PostgreSQL | Not applicable |
+| Linking the packages and apps | npm workspaces | Part of npm |
+| Web app build and routing | Vite and React Router | MIT |
+| Browser tests | Playwright, with its default Chromium headless shell. No other engine is used: Firefox and WebKit are no lighter, and Lightpanda and Obscura do not handle keyboard focus, SVG sizes or rendering reliably | Apache-2.0 |
+| Database migrations | Kysely's migration runner | MIT |
+
+From version 0.12.0, elkjs is released under "EPL-2.0 OR GPL-3.0-or-later". Its package's
+license field is the statement to rely on, because the repository's license file still holds
+only the Eclipse Public License. It is used under EPL-2.0: GPL code would force the whole
+tool under the GPL, which the Business Source License of section 1 does not allow. EPL-2.0
+lets its files be combined with code under another license, as long as changes to elkjs's
+own files are shared under EPL-2.0.
+
+The code in `apps/server` reaches the database only through the project-store interface.
+
+Browser tests cost the most processor time and memory, so they are kept few. A check on
+one component runs in Vitest's browser mode, and a check on the model or the rules runs
+as a plain unit test. A full Playwright test is kept for a path a student follows through
+the app. Playwright runs no more workers than the machine has processor cores, and the
+suite is split across CI jobs once it grows.
 
 The `model` and `rules` packages must have no dependency on React, the browser or the
 server.
@@ -1504,7 +1740,9 @@ entity, and sample values and a format for an attribute. The notes field can hol
 The textbook's own figures do not all pass these rules. Figure 4-21 adds flows that its
 parent, Figure 4-20, does not show, which BAL-03 reports as warnings. It also renames
 "Part Needed" to "Part ID and Quantity Needed", which balances only if the dictionary
-defines one in terms of the other.
+defines one in terms of the other. Students are told: the tool's help has a page on where
+the tool is stricter than the book, and BAL-03's explanation says that the book's own
+figures add flows this way. Starter cases stay original and balanced.
 
 Chapters 1, 3, 6, 8 and 11 were read for section 10. Four points matter when testing
 against the book.
@@ -1517,7 +1755,7 @@ against the book.
 | Figure 8-25, page 290 | Interface numbers used twice on one diagram | The text says each number is unique (page 262). The tool keeps them unique |
 
 Chapter 5 was read against section 9, and chapters 9 and 10 against section 11. The
-notes are kept in `sources/notes/` on the author's computer, outside the repository.
+notes are kept in `sources/notes/`, outside the repository.
 
 | Question | What the textbook says | Where | Effect here |
 | --- | --- | --- | --- |
@@ -1555,7 +1793,7 @@ These points matter when testing against the book's design chapters.
 
 ### Checked against Visible Analyst's tutorials
 
-Two vendor tutorials were read on 17 November 2026: the Zachman Framework edition of
+Two vendor tutorials were read: the Zachman Framework edition of
 2009, and a shorter one that reprints its framework chapter. The notes are in
 `sources/notes/visible-analyst-gap-report.md`, outside the repository, and page numbers below are PDF pages of
 the 2009 tutorial. The table has every message and check that the tutorials show from
@@ -1583,89 +1821,51 @@ The tutorials show no check for a structure chart, and call that diagram's messa
 These rules have no counterpart in the tutorials: DFD-02, DFD-06, DFD-09 to DFD-15,
 DD-01 to DD-03, BAL-04, UC-01 to UC-03, CRUD-01 to CRUD-05, ERD-02 to ERD-04, ERD-06,
 ERD-07 and ERD-09 to ERD-11. Most come from the textbook's checklists. ERD-09 comes
-from Visible Analyst's older manual, and ERD-10 and ERD-11 are explained in section 14.4.
+from Visible Analyst's older manual, and ERD-10 and ERD-11 are explained in section 14.2.
 
 Visible Analyst is more permissive in one place. A net input flow may come "from
 nowhere", with no external entity (page 124). Here DFD-05 reports a flow with a free
 end, as the textbook's rule that every flow has two ends requires.
 
-## 14. Settled points and open points
+## 14. Open points and scope left out
 
-### 14.1 Settled on 17 November 2026
+### 14.1 Open points
 
-The project's author left the first seven to the specification's judgment. The eighth
-was settled by reading the library's own records. The author chose the ninth, and also
-confirmed the eight calls listed in section 14.2.
-
-| Point | Settled as | Why |
-| --- | --- | --- |
-| Upper limit on processes | Seven. DFD-12 stays as written | Students check their work against the textbook's checklist (Figure 4-24), which says seven. The finding is only a warning, so a diagram of eight or nine is not marked wrong |
-| Severities | DFD-07 and DFD-08 are errors. DFD-13 is a warning | The checklist lists the first two as syntax rules. A missing description is unfinished work, not a mistake |
-| The textbook's figures | Students are told. The tool's help has a page on where it is stricter than the book, and BAL-03's explanation says that the book's own figures add flows this way. Starter cases stay original and balanced | A student who compares their work with Figure 4-21 should not be surprised by a warning |
-| Drawing from a use case form | Not offered. The tool checks the form against the diagrams and draws nothing | Turning a use case into a diagram is the exercise the textbook sets (pages 144 to 149) |
-| Calculate or check | As section 10 has it. The tool adds up the totals. The student types the expected value, return on investment, break-even point and net present value, and the tool checks them | The textbook teaches those four as formulas |
-| Binder sections that could be forms | They stay binder sections | Nothing in them can be checked, and a binder section still exports to PDF |
-| Tests and requirements | TP-02 stays: every functional requirement needs a test | The textbook ties a test to a requirement, not to a use case |
-| elkjs license | Usable. From version 0.12.0 the package is released under "EPL-2.0 OR GPL-3.0-or-later". Since 18 November 2026 it is used under EPL-2.0 | See below |
-| Layout library | elkjs | Chosen by the project's author. Dagre stays the fallback if elkjs proves unworkable |
-
-The elkjs license was checked on 17 November 2026. The project behind the library, ELK,
-names GPL-3.0 as a secondary license in its notice file. The elkjs contributors agreed
-to the same change, and the issue that tracked their agreement was closed as complete in
-July 2026. The license file in the elkjs repository still holds only the text of
-the Eclipse Public License, so the package's own license field is the statement to rely
-on.
-
-The project's license changed from AGPL-3.0-or-later to the Business Source License on
-18 November 2026 (section 1). The GPL option no longer helps, because GPL code would force
-the whole tool under the GPL. elkjs is used under EPL-2.0 instead. EPL-2.0 lets its files
-be combined with code under another license, as long as changes to elkjs's own files are
-shared under EPL-2.0.
-
-### 14.2 Calls made in sections 9 and 11, confirmed
-
-These were made when the data model and the design diagrams were specified. The
-project's author confirmed all eight on 17 November 2026. None affects Release 0.
-
-1. **An attribute is a data element.** Section 9.1 has one element where the product
-   vision had two linked ones.
-2. **The student fills in the CRUD matrix.** The tool checks it against the flows and
-   does not fill it in (section 9.5).
-3. **Normalization is not checked,** beyond reporting a many-to-many relationship
-   (section 9.3). Section 14.4 adds one more check, for a repeating attribute, which the
-   author has not yet confirmed.
-4. **A physical model is a mode, not a copy** (section 11.1). A student cannot give the
-   physical DFD a different set of processes from the logical one, apart from the
-   system-related ones.
-5. **Structure chart connectors are left out** (section 11.3).
-6. **The limit of seven modules** is not applied to a module whose calls are all
-   conditional (section 11.3).
-7. **The tool calculates the storage size estimate** (section 11.6).
-8. **Indexes and clustering are not modeled.** They are a table in the binder
-   (section 10.7).
-
-### 14.3 Still open
-
-1. **Who hosts for other institutions.** The project's author hosts the first
-   deployment.
-2. **Recorded dependencies for normalization.** A student could record which attributes
+1. **Recorded dependencies for normalization.** A student could record which attributes
    each attribute depends on. The tool could then check the second and third normal
    forms, where it now checks only the first (section 9.3). It would make five of the
    textbook's exercises checkable, and it adds a field that most models never fill in.
-3. **The additions of section 14.4.** The author asked for the documents to be made more
-   complete. The individual calls in section 14.4 are the specification's, and the
-   author has not confirmed them one by one.
+2. **A desktop app.** An Electron app may come later. It could run the same server and
+   project store in-process with SQLite in place of PostgreSQL. The Canvas launch and
+   the institution's AI gateway would stay server-only. Nothing is built for it now.
+3. **How the compiled documents' PDFs are made.** Release 1 uses the browser's own print
+   to PDF (section 10.8). The compiled documents of section 10.8 need something better.
+   Rendering pages in a headless browser gives the most faithful documents but adds a
+   few hundred megabytes to the Docker image. A PDF library keeps the image small but
+   lays out every document a second time. This must be settled before those documents
+   are built.
+4. **A real Canvas before the first live course.** Release 0 launches from a mock
+   platform (section 2 item 6). Before Release 1's live course, the launch must be
+   confirmed against a real Canvas. That needs an LTI 1.3 developer key from a Canvas
+   administrator at that time. The key needs the launch and the roster service.
+5. **Other symbol styles.** DeMarco and Yourdon for data flow diagrams, which is display
+   only, and UML class notation for data models are the two planned for later (section
+   1, "Symbol styles"). Neither is scheduled. Chen notation is not planned; it would
+   need model changes, because it draws attributes as separate shapes and lets
+   relationships carry attributes.
+6. **Contributor license agreements.** One is written when someone wants to contribute
+   (section 1, "License").
 
-### 14.4 Taken from Visible Analyst, and left out
+### 14.2 Taken from Visible Analyst, and left out
 
-This follows the reading of the two tutorials (section 13). The test for each point was
-whether the textbook or one of its exercises needs it.
+The two Visible Analyst tutorials (section 13) were read against this specification. The
+test for each point was whether the textbook or one of its exercises needs it.
 
 Taken into this specification:
 
 | Point | Where | Why |
 | --- | --- | --- |
-| Aliases and notes on every element | Section 3.2 | The textbook lists both among the fields of an entry (Figures 4-13, 5-6 to 5-9). The product vision said to keep them, and this document had left them out |
+| Aliases and notes on every element | Section 3.2 | The textbook lists both among the fields of an entry (Figures 4-13, 5-6 to 5-9) |
 | A meaning beside each allowed value | Section 3.3 | The textbook's data element entry is headed "Values and Meanings" (Figure 5-7) |
 | A longer description of a process | Section 3.3 | The textbook's process entry has one (Figure 4-16), and its stopping rule for decomposition is the length of that text |
 | A limit on a repeated part | Section 3.3 | Small, and a normal thing to say about data. Visible Analyst has it on every component |
@@ -1694,34 +1894,19 @@ Left out, with the reason:
 | Key synchronization that adds foreign keys by itself | The student places each foreign key, because that is the lesson (section 11.5) |
 | Class, state, activity, use case, sequence, collaboration and component diagrams, and business process diagrams | The textbook uses none of them. The tutorials show almost no checks on them |
 
-### 14.5 Settled after the exercises of every chapter were read
+### 14.3 Exercises the tool does not cover yet
 
-Every exercise, minicase and "Your Turn" box of chapters 1 to 3 and 6 to 12 was read on
-17 November 2026, 179 items in all. The notes are in
-`sources/notes/textbook-exercises-report.md`, outside the repository. None was out of the tool's reach. The
-project's author chose what to change.
-
-| Point | Settled as | Where |
-| --- | --- | --- |
-| What a project is | One scenario. A student opens a new project for each exercise that has its own | Section 3.8 |
-| Starting from given material | A starter case can hold content of every kind, and any project can be saved as one | Section 3.8 |
-| Interface prototypes | An attachment may be a file of any type | Section 10.7 |
-| An interface diagram with no data flow diagram | ISD-03 and ISD-04 are silent | Section 10.6 |
-| A test plan with nothing to point at | The requirement and the interface may be text | Section 10.5 |
-| A cost-benefit analysis alone | The cash flow table stands alone, and a line can be a quantity, a unit amount and a growth rate | Section 10.2 |
-| Choosing a conversion strategy | A small form in the migration plan | Section 10.7 |
-| Levels of requirement | User requirements, and two types of functional requirement | Section 10.3 |
-| A storage estimate from given record sizes | A typed record size, and growth as a yearly percentage | Section 11.6 |
-| A matrix by entity alone | An entity with no attributes has cells of its own | Section 9.5 |
-
-Left for now, by the author's choice:
+Every exercise, minicase and "Your Turn" box of chapters 1 to 3 and 6 to 12 was read
+against this specification, 179 items in all. The notes are in
+`sources/notes/textbook-exercises-report.md`, outside the repository. None is out of the
+tool's reach, but these are left for now:
 
 | Point | What it would take |
 | --- | --- |
 | An architecture or network diagram (Chapter 7) | A new diagram kind for places, servers and links. Until then it is an attachment |
-| Second and third normal form (chapters 5 and 10) | Recorded dependencies. See section 14.3 |
+| Second and third normal form (chapters 5 and 10) | Recorded dependencies. See section 14.1 |
 | Screens and storyboards drawn in the tool (Chapter 8) | A screen record tied to the dictionary, or a drawing editor. Until then they are attachments |
-| Structure chart connectors (Chapter 9, exercise D) | Two more symbols. The student writes them in words. See section 14.2, point 5 |
+| Structure chart connectors (Chapter 9, exercise D) | Two more symbols. The student writes them in words (section 11.3) |
 
 Three exercises cannot be done as printed, because of errors in the textbook: exercises
 K and L of Chapter 9 and exercise J of Chapter 10.

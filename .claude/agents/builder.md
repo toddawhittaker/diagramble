@@ -42,8 +42,10 @@ Rules:
   tests, sample data or help text. Starter cases and test cases are original.
   Cite the book by chapter, figure and printed page.
 - Diagramble supports the book; it is not a learning management system.
-  Nothing deals with assignments, handing work in, grades, due dates or class
-  lists unless the task says so (`prototype/README.md`).
+  Nothing deals with assignments, handing work in, grades or due dates unless
+  the task says so. The exceptions are course settings and the Release 2 course
+  dashboard: behavior analytics and a roster-service class list, with no
+  grades (SPEC.md section 1, "Grading" and "Course settings").
 - In a parallel epic, do not edit `docs/STATUS.md`. Put your proposed STATUS
   line (one sentence on what you delivered, plus any new open items) in
   the PR body; the fold task writes

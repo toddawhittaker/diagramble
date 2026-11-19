@@ -16,11 +16,9 @@ that is not a gap in something built goes in a GitHub issue instead.
   research and product vision, the core specification, notes from the
   textbook, the Drafting Paper style with its chips, marks and logo, and a
   clickable prototype of the first-release and second-release screens with
-  sample data and the rules running in the browser.
+  sample data and the rules running in the browser. The prototype is frozen as
+  a reference for screen layout and is deleted once `apps/web` has the Release 2
+  screens.
 
 ## Open items
 
-- The prototype's Windows high-contrast mode rules for chips and marks have
-  not been tried on Windows.
-- In the prototype's navigator, "Requirements definition" is cut short
-  beside its chips.

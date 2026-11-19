@@ -81,7 +81,8 @@ work it closes.
      code;
    - security-reviewer when the epic touches the server, accounts,
      saving, sign-in, the LMS launch, the MCP server or API keys, import
-     or export, or AI features;
+     or export, AI features, attachments and the files host, the
+     administrator interface, second factors, or retention deletion;
    - a11y-reviewer when it touches a screen or a shared component.
 10. **Fix round.** Rule on each finding: fix now through task PRs, or
     record as a STATUS open item. Land fixes the same way (step 8), also
@@ -93,7 +94,8 @@ work it closes.
     two sentences, add its new open items at one line each, and remove
     the open items it fixed; no task lists, test counts or logs. Move
     lasting rules into SPEC.md (a decision into section 1, a settled
-    question into section 14), delete the plan, and carry a `Fixes #N`
+    question into the section it concerns, taken off section 14's open
+    points), delete the plan, and carry a `Fixes #N`
     line for each issue. Check `git diff main...epic -- docs/STATUS.md`
     shows the entry.
 12. **Epic PR into main.** Cite the SPEC.md sections and how it was

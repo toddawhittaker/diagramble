@@ -43,8 +43,10 @@ would change and why.
 - Never copy the textbook's text, figures, cases or worked numbers into a
   screen, sample data or help text.
 - Diagramble supports the book; it is not a learning management system.
-  No screen deals with assignments, handing work in, grades, due dates or
-  class lists unless the task says so (`prototype/README.md`).
+  No screen deals with assignments, handing work in, grades or due dates
+  unless the task says so. The exceptions are course settings and the
+  Release 2 course dashboard: behavior analytics and a roster-service class
+  list, with no grades (SPEC.md section 1, "Grading" and "Course settings").
 
 ### Drafting Paper
 
