@@ -614,7 +614,7 @@ React Flow asks for its attribution link to stay unless a project pays for its P
 
 ### Choosing the project's license
 
-The license exists so that educators can use Diagramble freely while for-profit use pays for its upkeep. A permissive license such as MIT would let anyone sell it without paying, so the project uses the Business Source License 1.1: free for non-profit schools and for individuals, a paid license for for-profit use, and each version becomes AGPL-3.0-or-later four years after it is released.
+The license exists so that educators can use Diagramble freely while textbook publishers and other for-profits cannot take the work and sell it. A permissive license such as MIT would allow exactly that, so the project uses the Business Source License 1.1: free for non-profit schools and for individuals, a paid license for for-profit use, and each version becomes AGPL-3.0-or-later four years after it is released.
 
 The full terms are in [`LICENSE`](../LICENSE), a plain summary is in [`LICENSING.md`](../LICENSING.md), and the decision and its details are in the [core specification](SPEC.md), section 1.
 
