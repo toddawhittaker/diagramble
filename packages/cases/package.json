@@ -1,0 +1,17 @@
+{
+  "name": "@diagramble/cases",
+  "private": true,
+  "type": "module",
+  "license": "BUSL-1.1",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@diagramble/model": "*",
+    "@diagramble/rules": "*"
+  }
+}
