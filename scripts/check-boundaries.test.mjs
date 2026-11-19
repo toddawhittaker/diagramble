@@ -8,12 +8,14 @@ import { findViolations } from "./check-boundaries.mjs";
 const roots = [];
 after(() => roots.forEach((r) => rmSync(r, { recursive: true, force: true })));
 
-// Builds a package folder holding the given files, with `zod` as its one dependency.
+// Builds a package folder holding the given files, with `zod` as its one
+// dependency and `fast-check` as its one devDependency.
 function fixture(files) {
 	const root = mkdtempSync(join(tmpdir(), "boundaries-"));
 	roots.push(root);
 	const pkg = join(root, "pkg");
-	const all = { "package.json": JSON.stringify({ dependencies: { zod: "1.0.0" } }), ...files };
+	const manifest = { dependencies: { zod: "1.0.0" }, devDependencies: { "fast-check": "1.0.0" } };
+	const all = { "package.json": JSON.stringify(manifest), ...files };
 	for (const [name, text] of Object.entries(all)) {
 		mkdirSync(dirname(join(pkg, name)), { recursive: true });
 		writeFileSync(join(pkg, name), text);
@@ -66,4 +68,42 @@ test("reports the line of a multi-line import", () => {
 	);
 	assert.equal(violations.length, 1);
 	assert.match(violations[0], /src\/a\.ts:4: /);
+});
+
+test("finds an import that follows a string containing two slashes on the same line", () => {
+	for (const line of [
+		'export const m = "see a // b"; import w from "react";\n',
+		'export const u = "https://example.com/a // b"; import w from "react";\n',
+	]) {
+		const violations = findViolations(fixture({ "src/a.ts": line }));
+		assert.equal(violations.length, 1, line);
+		assert.match(violations[0], /src\/a\.ts:1: .*"react"/);
+	}
+});
+
+test("allows an import inside a block comment", () => {
+	const pkg = fixture({ "src/a.ts": '/*\nimport w from "react";\n*/\nexport const a = 1;\n' });
+	assert.deepEqual(findViolations(pkg), []);
+});
+
+for (const [kind, directive] of [
+	["path", '/// <reference path="./b.ts" />'],
+	["types", '/// <reference types="node" />'],
+	["lib", '/// <reference lib="dom" />'],
+]) {
+	test(`rejects a ${kind} reference directive and names its line`, () => {
+		const source = `export const a = 1;\n${directive}\n`;
+		const violations = findViolations(fixture({ "src/a.ts": source }));
+		assert.equal(violations.length, 1);
+		assert.match(violations[0], /src\/a\.ts:2: .*reference/);
+	});
+}
+
+test("allows a listed devDependency in a test file only", () => {
+	const source = 'import fc from "fast-check";\nexport { fc };\n';
+	assert.deepEqual(findViolations(fixture({ "src/a.test.ts": source })), []);
+	assert.deepEqual(findViolations(fixture({ "src/a.test.tsx": source })), []);
+	const violations = findViolations(fixture({ "src/a.ts": source }));
+	assert.equal(violations.length, 1);
+	assert.match(violations[0], /"fast-check"/);
 });
