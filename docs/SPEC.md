@@ -30,7 +30,7 @@ document wins. Section 14 records the smaller points settled the same day.
 
 | Decision | Choice | Effect |
 | --- | --- | --- |
-| License | Business Source License 1.1, decided on 18 November 2026. Free production use for non-profit organizations (including credit-bearing tuition), individuals' own study and teaching (including students at for-profit schools), and a one-time paid setup for a non-profit that hosts the tool itself, all only with a copy obtained free or from the author. A commercial license is needed for any other use by a for-profit organization; for a company paid to run a college's courses that use it; for selling or bundling; for any recurring charge for hosting, operating, maintaining or supporting it, even to a non-profit; and for paid training that earns no academic credit. A "charge" includes indirect income such as advertising, data, revenue shares and paid bundles. Each version becomes AGPL-3.0-or-later four years after it is published. The full terms are in `LICENSE`, and a plain-language summary is in `LICENSING.md` | It is not an open source license. No dependency may be under the GPL or the AGPL alone, because those would require the whole tool to use the same license. Libraries under the Eclipse Public License are allowed. elkjs is used under its "EPL-2.0" option, which section 14 confirms. Outside contributions need a contributor license agreement, so that commercial licenses can be sold |
+| License | Business Source License 1.1, decided on 18 November 2026. Free production use for non-profit organizations (including credit-bearing tuition), individuals' own study and teaching (including students at for-profit schools), and a one-time paid setup for a non-profit that hosts the tool itself, all only with a copy obtained free or from the author. A commercial license is needed for any other use by a for-profit organization; for a company paid to run a college's courses that use it; for selling or bundling; for any recurring charge for hosting, operating, maintaining or supporting it, even to a non-profit; and for paid training that earns no academic credit. A "charge" includes indirect income such as advertising, data, revenue shares and paid bundles. Each version becomes AGPL-3.0-or-later four years after it is published. The full terms are in `LICENSE`, and a plain-language summary is in `LICENSING.md` | It is not an open source license. No dependency may be under the GPL or the AGPL alone, because those would require the whole tool to use the same license. Libraries under the Eclipse Public License are allowed. elkjs is used under its "EPL-2.0" option, which section 14 confirms. Outside contributions would need a contributor license agreement, so that commercial licenses can be sold. Writing one is deferred until someone wants to contribute, decided on 18 November 2026 |
 | First deployment | Hosted by the project's author | The trial launch in Release 0 runs against that deployment. Who hosts for other institutions is not decided |
 | Textbook | Dennis, Wixom and Roth, *Systems Analysis and Design*, 8th edition (Wiley, 2022) | The tool is built for this book. It sets the symbol style, the names of things, the limits and the wording of the rules. See section 13 |
 | Course coverage | Chapters 1 to 12. Chapter 13, on agile methods, is not covered | The design diagrams of chapters 9 and 10 join the roadmap in the second release. None is in Release 0 |
@@ -41,7 +41,7 @@ document wins. Section 14 records the smaller points settled the same day.
 | Other chapters | Checked forms for chapters 1, 3, 6 and 11. The interface structure diagram for chapter 8. A project binder for everything else. All of it exports to PDF, in the second release | See section 10. Not built in Release 0 |
 | Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again, decided on 18 November 2026 | See section 3.9. Since 18 November 2026, Release 0 has a database and saves each accepted command (section 2). The project list, copying, renaming, deleting, export and import come in Release 1 |
 | Instructors' AI agents | A Model Context Protocol (MCP) server lets an instructor's own AI agent build scenarios and starter cases, using a personal API key, decided on 18 November 2026 | See section 7.1. Built in Release 1, decided on 18 November 2026 |
-| Grading | None, decided on 18 November 2026. Diagramble sends Canvas no score and keeps no rubrics or comments on submissions, The Canvas launch only signs a person in and opens their work. Assignment and Grade Services, Deep Linking and LTI Advantage certification are dropped from every plan. Whether the course dashboard reads the class list from Canvas's roster service is open (section 14.3) | Students hand in the exported PDF through Canvas (section 3.9), and may attach their project file too. The instructor grades in Canvas. A course dashboard of student behavior, without grades, is a Release 2 candidate; for now its student list is the people who launched from the course |
+| Grading | None, decided on 18 November 2026. Diagramble sends Canvas no score and keeps no rubrics or comments on submissions, The Canvas launch only signs a person in and opens their work. Assignment and Grade Services, Deep Linking and LTI Advantage certification are dropped from every plan. The course dashboard reads the class list from Canvas's roster service (LTI Names and Role Provisioning Services, NRPS), decided on 18 November 2026 | Students hand in the exported PDF through Canvas (section 3.9), and may attach their project file too. The instructor grades in Canvas. A course dashboard of student behavior, without grades, is a Release 2 candidate. It fetches the class list from the roster service each time the instructor opens it, and does not copy or keep it |
 | Course settings | One small settings record per Canvas course, decided on 18 November 2026. The launch says which course and whether the person is an instructor. An instructor sets one AI assistance level (0 to 4) and one rule profile for the course, and every student launched from it gets them. Nothing about assignments is stored | See section 7 item 4. Not built in Release 0, except that an account may record the course it launched from |
 | Element identifiers | Made by whoever creates the item and carried in the creating command, decided on 18 November 2026 | See sections 3.2, 4.1 and 14.6 |
 | Stack | TypeScript everywhere | One shared package holds the model and rules and runs in both browser and server |
@@ -54,8 +54,9 @@ document wins. Section 14 records the smaller points settled the same day.
 | Flow identity | Separate flow elements, each carrying a shared dictionary definition | See section 3.3 |
 | AI | Agent integration must be possible from the start | See section 7. No AI feature is built in Release 0 |
 | Accessibility | Essential, decided on 18 November 2026. Students with disabilities must be able to do all their work. The target is the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA | The keyboard outline of section 2 item 5 is the first step. Every screen is held to the target |
-| Data retention | A requirement before Release 1's live course, decided on 18 November 2026. An instructor can archive an old course, which makes it read-only for everyone while its students keep their projects. A retention policy decides how long logs, analytics, AI usage records and archived courses are kept before they are deleted. An account can be deleted | The numbers, and who sets them, are open (section 14.3) |
-| Symbol styles | Release 1 draws only the textbook's style: Gane and Sarson for data flow diagrams and the textbook's entity relationship notation, decided on 18 November 2026 | Other styles may come later, chosen per Canvas course by the instructor in the course settings of section 7 item 4. The candidates are open (section 14.3) |
+| Data retention | A requirement before Release 1's live course, decided on 18 November 2026. An instructor can archive an old course, which makes it read-only for everyone while its students keep their projects. A retention policy decides how long logs, analytics, AI usage records and archived courses are kept before they are deleted. An account can be deleted | The system administrator sets the periods ("Administration" below). The default periods are open (section 14.3) |
+| Administration | An administrator interface, decided on 18 November 2026. Each deployment has one system administrator, above instructors. The administrator sets the data retention periods, and later manages the ways of signing in, such as email magic links | Backups, restore, monitoring and health checks are described in an operations document. The administrator interface shows their state, such as the server's status and when the last backup ran. How the first administrator is created is open (section 14.3) |
+| Symbol styles | Release 1 draws only the textbook's style: Gane and Sarson for data flow diagrams and the textbook's entity relationship notation, decided on 18 November 2026 | Two styles are planned for later, decided on 18 November 2026: DeMarco and Yourdon for data flow diagrams, and the Unified Modeling Language (UML) class notation for data models. The instructor would choose one per Canvas course in the course settings of section 7 item 4 (section 14.3) |
 
 ## 2. Scope of Release 0
 
@@ -68,8 +69,9 @@ In scope:
 3. The three test cases in section 6, passing as automated tests.
 4. A minimal canvas that shows one model on a context diagram and its child diagrams.
 5. A minimal outline view in which a keyboard-only user can build a context diagram.
-6. A trial launch from a Canvas test course that signs the student in and opens their
-   saved project.
+6. A launch from a mock LTI 1.3 platform, including one inside a frame, that signs the
+   user in and opens their saved project. The mock replaces a real Canvas for Release 0,
+   decided on 18 November 2026 (section 12).
 7. Accounts and saving to the server, added on 18 November 2026. PostgreSQL, reached
    through Kysely, stores accounts, sign-in methods, sessions, launch nonces and
    projects. Each command the server accepts is saved before the next one is applied, as
@@ -286,7 +288,10 @@ saved.
 
 **Only one tab edits a project at a time.** Every other tab showing the same project is
 read-only and says so plainly. A read-only tab offers a way to take over editing, which
-makes the tab that was editing read-only. Decided on 18 November 2026.
+makes the tab that was editing read-only. Decided on 18 November 2026. An instructor's MCP
+agent (section 7.1) counts as an editor too: while it edits one of the instructor's
+projects, every tab the instructor has open on that project is read-only and says that
+the agent is working. Students' projects are never open to an agent.
 
 **A student has many projects.** A project list shows each project's name and when it was
 last changed. From it the student can open a project, start a new one (empty, or from a
@@ -301,8 +306,10 @@ else. It is not the way to hand work in. Students hand in the PDF of section 10.
   `.diagramble.json`. It holds the whole project: every element, view and setting, the
   log, and the binder's attached files. It holds nothing about the student, such as a
   name or account.
-- The format is documented and kept stable, so that no student's work is locked in and
-  other tools can read it.
+- The format is documented but need not stay the same forever. A file exported by a
+  major release imports into every later release for as long as that major release is
+  supported. Files from Release 0 and other pre-releases need not import. There is no
+  promise of a schema contract for outside tools. Decided on 18 November 2026.
 - Importing a file always makes a new project in the list. It never replaces an existing
   project.
 - Before importing, the tool checks the file. A file made by an older version is brought
@@ -669,8 +676,8 @@ No AI feature is built in Release 0. These requirements make sure the core does 
 have to change when one is added. They follow the AI strategy in section 8 of the
 product vision.
 
-1. **The model has a documented text form.** `getModel` returns stable JSON under a
-   published schema. `getOutline` returns the same content as short plain text, which
+1. **The model has a documented text form.** `getModel` returns JSON under a documented
+   schema, which changes only as section 3.9 allows for project files. `getOutline` returns the same content as short plain text, which
    costs less to send to a model.
 2. **Commands and queries are the tool surface.** Because each has a name, an argument
    schema and a description, each can be offered to an AI model as a tool with no new
@@ -715,13 +722,14 @@ product vision.
 An instructor can ask their own AI agent to build a scenario, such as "a small bakery's
 ordering system, with a level 0 diagram that has two balancing errors for the students
 to find." The agent works through a Model Context Protocol (MCP) server that Diagramble
-provides. This is separate from the student assistance levels of item 4 above, and it
-never touches a student's work.
+provides. This is separate from the student assistance levels of item 4 above. MCP
+agents are for instructors only, and no agent ever reaches a student's project.
 
 - **An API key is needed.** An instructor creates a personal API key in their account,
   names it, and can revoke it at any time. The key is shown once, when it is made, and
   the server keeps only a hash of it. Each key acts as its owner and reaches only its
-  owner's own projects. Every request is logged against the key.
+  owner's own projects. Every request is logged against the key. Only an instructor can
+  make a key.
 - **The tools are the commands and queries of section 4,** offered as MCP tools as items
   1 and 2 above describe, plus making a project, saving a project as a starter case
   (section 3.8) and exporting a project file (section 3.9).
@@ -731,6 +739,9 @@ never touches a student's work.
 - **What the agent makes is marked.** Elements it creates have the `origin` `ai` in the
   instructor's project, so the instructor can review them. Saving the project as a
   starter case marks every element as given, like any other starter case.
+- **The instructor's open view is read-only while the agent works.** If the instructor
+  has the project open in a tab, that tab becomes read-only and says the agent is
+  editing, as section 3.9's one-editing-tab rule describes.
 - **The agent and its AI provider are the instructor's own.** Diagramble makes no AI
   requests for this and pays for none.
 
@@ -1535,6 +1546,7 @@ for each month.
 | `packages/cases` | The test cases in section 6 as command lists and expected findings | Tests |
 | `apps/web` | Canvas and outline view | Browser |
 | `apps/server` | Storage, Canvas launch, and later the AI gateway | Server |
+| `packages/mock-lti` | A mock LTI 1.3 platform: people and courses to launch as, launching inside a frame, a roster service, and signed launches with deliberate defects for negative tests. A development and test tool, never in the Docker image | Development, CI and the Release 0 trial |
 
 | Need | Choice | License |
 | --- | --- | --- |
@@ -1765,28 +1777,25 @@ project's author confirmed all eight on 17 November 2026. None affects Release 0
    the image small but lays out every document a second time. This must be settled
    before the export of section 10.8 is built.
 
-7. **Which Canvas the trial uses.** The institution's Canvas test instance needs an LTI
-   1.3 developer key from its administrator. Diagramble sends no score, so the key needs
-   only the launch. The planning note is `docs/EPICS.md` section 6.
-8. **The numbers of the retention policy.** Retention, course archiving and account
-   deletion are required before Release 1's live course (section 1, "Data retention").
-   Still open: how long command logs, the dashboard's analytics, AI usage records and
-   their prompt text, and archived courses are kept, and who sets those periods. The
-   deployment's administrator is the likely answer. Who may see what also needs writing
-   down.
-9. **Other symbol styles.** Candidates, for the user to choose among: DeMarco and Yourdon
-   for data flow diagrams, which is display only; and Chen notation and the Unified
-   Modeling Language (UML) class-diagram notation for entity relationship diagrams. Chen
-   needs model changes, because it draws attributes as separate shapes and lets
-   relationships carry attributes. A chosen style would be set per Canvas course.
-10. **An instructor's agent editing an open project.** An instructor's MCP agent (section
-    7.1) is a second writer. What happens when it edits a project that is open for
-    editing in a tab is not decided.
-11. **The roster service for the dashboard.** The course dashboard could read the class
-    list from Canvas's roster service (LTI Names and Role Provisioning Services). It would
-    then show students who have never launched, but the administrator must allow that
-    Canvas service and Diagramble would hold more student data. Otherwise it keeps
-    listing only the people who have launched.
+7. **A real Canvas before the first live course.** Release 0 launches from a mock
+   platform (section 2 item 6). Before Release 1's live course, the launch must be
+   confirmed against a real Canvas. That needs an LTI 1.3 developer key from a Canvas
+   administrator at that time. The key needs the launch and the roster service, and no
+   score.
+8. **The default retention periods.** The system administrator sets the periods (section
+   1, "Administration"). Still open: the defaults for command logs, the dashboard's
+   analytics, AI usage records and their prompt text, and archived courses. Who may see
+   what also needs writing down.
+9. **Other symbol styles.** DeMarco and Yourdon for data flow diagrams, which is display
+   only, and UML class notation for data models are the two planned for later (section
+   1, "Symbol styles"). Neither is scheduled. Chen notation is not planned; it would
+   need model changes, because it draws attributes as separate shapes and lets
+   relationships carry attributes.
+10. **How the first administrator is created.** Each deployment has one system
+    administrator (section 1, "Administration"), and how that account first comes to
+    exist is not decided.
+11. **Contributor license agreements.** Deferred until someone wants to contribute
+    (section 1, "License").
 12. **Binder attachments: storage, display and export.** Release 2. Notes so far:
     attachments can be shown safely if they are served from a separate origin (a domain
     other than the app's, as many sites do for user content) with a sandboxing content
@@ -1876,14 +1885,21 @@ The user settled these while the epics were planned (`docs/EPICS.md`).
 | --- | --- | --- |
 | A database in Release 0 | Yes. It holds accounts, sign-in methods, sessions, launch nonces and saved projects | Sections 2 and 3.9 |
 | Element identifiers | Made by the creator and carried in the creating command: 10 random lowercase letters and digits, unique within a project only | Sections 3.2 and 4.1 |
-| Grading | None. No score is sent to Canvas, and there are no rubrics or submission comments. A course dashboard of behavior, without grades, may come in Release 2. Whether it reads the roster service is open | Sections 1 and 14.3 |
+| Grading | None. No score is sent to Canvas, and there are no rubrics or submission comments. A course dashboard of behavior, without grades, may come in Release 2. It reads the roster service (row below) | Section 1 |
 | The AI assistance level | Set per Canvas course, with the rule profile | Section 1 and section 7 item 4 |
 | When AI comes | The instructors' MCP server in Release 1; student-facing AI in Release 2 | Sections 1 and 7 |
-| Data retention | Required before Release 1's live course: course archiving, a retention policy and account deletion. The periods are open | Sections 1 and 14.3 |
+| Data retention | Required before Release 1's live course: course archiving, a retention policy and account deletion. The system administrator sets the periods; the defaults are open | Sections 1 and 14.3 |
 | Accessibility | Essential. The target is WCAG 2.2 Level AA | Section 1 |
 | Instructors and AI prompts | Instructors never see students' prompts or responses. AI use is counted in requests and tokens, per student and per course, and the dashboard may show the counts | Section 7 item 7 |
 | AI keys and providers | The institution supplies and protects the key and chooses the provider. Diagramble does not vet providers | Sections 1 and 7 item 7 |
-| Symbol styles | Release 1 draws only the textbook's styles. Others may come later, per Canvas course | Sections 1 and 14.3 |
+| Symbol styles | Release 1 draws only the textbook's styles. Others may come later, per Canvas course (row below) | Sections 1 and 14.3 |
 | Group work | Deferred, with no release | VISION.md section 10 |
 | Several tabs on one project | One tab edits and the others are read-only, with a way to take over. Undo reaches only the current editing session | Sections 3.9 and 4.1 |
 | Release 2's measure of teaching value | The instructor's feedback as the tool is used | VISION.md section 11 |
+| The roster service | The course dashboard reads the class list from Canvas's roster service (NRPS) when the instructor opens it, and does not copy or keep it | Section 1, "Grading" |
+| An administrator interface | One system administrator per deployment sets retention periods, and later manages ways of signing in. Backups, restore, monitoring and health are in an operations document and shown in the interface. The default periods and how the first administrator is made are open | Sections 1 and 14.3 |
+| Symbol styles planned for later | DeMarco and Yourdon for data flow diagrams, and UML class notation for data models, set per course by the instructor. Chen needs model changes and is not planned | Sections 1 and 14.3 |
+| An instructor's agent and an open project | While an instructor's MCP agent edits a project, the instructor's open tabs on it are read-only and say so. Agents are for instructors only and never reach a student's project | Sections 3.9 and 7.1 |
+| Project file support | A file from a major release imports in later releases while that major release is supported. Files from Release 0 and other pre-releases need not. No schema contract for outside tools | Section 3.9 and section 7 item 1 |
+| Contributor agreements | Deferred until someone wants to contribute | Sections 1 and 14.3 |
+| The Release 0 launch | Tested against a mock LTI 1.3 platform in `packages/mock-lti`, not a real Canvas. A real Canvas is confirmed before Release 1's live course | Sections 2, 12 and 14.3 |

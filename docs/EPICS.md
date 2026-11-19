@@ -55,6 +55,7 @@ file in common. These rules make that hold.
 | `.github/workflows/ci.yml`, `.github/dependabot.yml` | Epic 1 | No Release 0 epic |
 | A workspace's `package.json` and `tsconfig.json` | The epic that owns the workspace | Dependency tasks |
 | `Dockerfile`, `compose.yaml`, `.dockerignore` | Epic 3 | Epic 7, to serve the web app's build |
+| `packages/mock-lti` | Epic 3 | Epic 7, for the trial's people and courses |
 | CLAUDE.md's commands table, WORKFLOW.md's "Local development" and "CI", the `epic-run` skill | Epic 1 | Fold tasks |
 | `docs/STATUS.md`, `docs/SPEC.md` | Fold tasks, by adding | Nobody else |
 
@@ -72,7 +73,7 @@ Release 0 proves the risky parts (VISION.md section 11, "Release 0"; SPEC.md sec
 | --- | --- | --- |
 | Balancing through the dictionary is right on three cases, one with a flow split into parts | 2, 3 | Epic 4 |
 | One element on two diagrams is renamed once, and both update | 1, 4 | Epic 2 in the model, Epic 5 on screen |
-| A trial launch from a Canvas test course signs the student in and opens their saved project | 6, 7 | Epic 3, then Epic 6, then Epic 7 |
+| A launch from a mock LTI 1.3 platform, including one inside a frame, signs the user in and opens their saved project | 6, 7 | Epic 3, then Epic 6, then Epic 7 |
 | A keyboard-only user builds a context diagram in the outline view | 5 | Epic 5 |
 
 ### Epic 1: Foundation
@@ -134,9 +135,15 @@ the user and its fold records them in SPEC.md section 3.6.
 ### Epic 3: Server and Canvas launch
 
 Serves SPEC.md section 1 (the rows "Server framework" to "Sign-in") and section 12, and
-VISION.md section 5, "Canvas through LTI 1.3". Owns `apps/server` and the Docker files.
+VISION.md section 5, "Canvas through LTI 1.3". Owns `apps/server`, `packages/mock-lti` and
+the Docker files.
 Depends on Epic 1. Runs beside Epics 2, 4 and 5. Size M.
 
+- The epic's architect run starts by reading the `packages/auth` and `packages/mock-lms`
+  packages of Portikus, the author's own project (MIT license, on the same Kysely and `jose` stack). Portikus already has a tested LTI 1.3 layer (login, token checks,
+  state and nonce, roles, the tool's key, platform registrations, the roster service),
+  a mock platform, and sign-in methods keyed by issuer and subject. The epic ports what
+  fits, adapted to Fastify and to SPEC.md. Deep linking is not needed.
 - A Fastify server with Zod-checked settings and requests.
 - The Learning Tools Interoperability (LTI) 1.3 login and launch on `jose`: state, nonce,
   signature, issuer, audience and deployment checks, and the tool's public key set. One
@@ -147,12 +154,17 @@ Depends on Epic 1. Runs beside Epics 2, 4 and 5. Size M.
   sign-in method keyed by the token's issuer and subject; a session cookie that points to
   a stored session. The launch's course and whether the person is an instructor are kept
   only if Epic 6 needs them to find the student's project for that course.
-- No score return, Deep Linking or roster service (SPEC.md section 1, "Grading").
+- No score return or Deep Linking (SPEC.md section 1, "Grading"). The roster service
+  comes with the course dashboard, R2-m.
+- A mock LTI 1.3 platform in `packages/mock-lti` for development, CI and the Release 0
+  trial (SPEC.md sections 2 item 6 and 12): people and courses to launch as, launching
+  inside a frame, a roster service, and a signed-launch generator with deliberate
+  defects for negative tests. It is never in the Docker image.
 - The Docker image, and the Compose file that adds PostgreSQL.
-- Tests against a fake platform whose good and tampered tokens are signed in the test.
+- Tests against the mock platform, with good launches and launches carrying each defect.
 
-Exit: a launch from the Canvas test course (Q4) reaches the deployed server and signs the
-user in. The security reviewer has run.
+Exit: a launch from the mock platform, including one inside a frame, reaches the deployed
+server and signs the user in. The security reviewer has run.
 
 ### Epic 4: Rules and test cases
 
@@ -224,7 +236,7 @@ Depends on Epics 4, 5 and 6. Size S.
   app lists its findings. A read-only tab shows Epic 6's read-only notice and takeover.
 - The web store sends each accepted command through Epic 6's save queue, and the top bar
   says when the project was last saved.
-- The trial in the Canvas test course, then the release gate's whole-system review by the
+- The trial from the mock platform, then the release gate's whole-system review by the
   architect (WORKFLOW.md, "Epic plans"), its findings filed as issues.
 
 Exit: all four Release 0 exit criteria shown on the deployed server, including a second
@@ -272,8 +284,9 @@ section 10, Level 1). SPEC.md sections 8 and 9 fix its new parts.
 | R1-f | Canvas launch for live sections | Several platform registrations and key rotation (VISION.md section 10, item 16). No score is sent | Release 0 |
 | R1-g | Project document as PDF | The Release 1 exit criterion on a PDF. Needs SPEC.md section 14.3 item 6 settled, and SPEC.md to say which part of section 10.8 comes in Release 1 | R1-c, R1-d, R1-e |
 | R1-h | Keyboard and screen reader | The outline as a full keyboard editor for every Release 1 kind, and a screen-reader pass (VISION.md section 10, item 13) | R1-c, R1-d, R1-e |
-| R1-i | Instructor MCP server | SPEC.md section 7.1: personal API keys kept as hashes, revocable and logged, and Model Context Protocol (MCP) tools made from the command and query registry. Decided for Release 1 on 18 November 2026 | R1-a, R1-b |
-| R1-k | Retention, archiving and account deletion | SPEC.md section 1, "Data retention": an instructor archives a course, which makes it read-only while students keep their projects; a retention policy deletes old logs, analytics, AI usage records and archived courses; an account can be deleted. Needed before the live course. Needs SPEC.md section 14.3 item 8 settled. The security reviewer runs | R1-a, R1-f |
+| R1-i | Instructor MCP server | SPEC.md section 7.1: personal API keys kept as hashes, revocable and logged, and Model Context Protocol (MCP) tools made from the command and query registry. Keys are for instructors only. While the agent edits, the instructor's open tabs on that project are read-only and say so. The architect run reads how Portikus's `packages/auth` stores API keys as hashes and ports what fits. Decided for Release 1 on 18 November 2026 | R1-a, R1-b |
+| R1-k | Retention, archiving and account deletion | SPEC.md section 1, "Data retention": an instructor archives a course, which makes it read-only while students keep their projects; a retention policy deletes old logs, analytics, AI usage records and archived courses after the periods the administrator sets in R1-l; an account can be deleted. Needed before the live course. Needs the default periods of SPEC.md section 14.3 item 8. The security reviewer runs | R1-a, R1-f, R1-l |
+| R1-l | Administrator interface and operations | SPEC.md section 1, "Administration": one system administrator per deployment, a way to make the first one (SPEC.md section 14.3 item 10), retention period settings, an operations document for backup, restore and monitoring, and their state shown in the interface (server status, last backup). Managing later ways of signing in, such as email magic links, joins it when they are built; the architect run then reads Portikus's `packages/auth` for its OpenID Connect sign-in. The security reviewer runs | R1-f |
 | R1-j | Checked against the book | The exit criteria on chapters 4 and 5, on Visible Analyst's checks, and on a student finishing the starter case alone. It needs `sources/`, so it runs from the main checkout | All of the above |
 
 ## 4. Release 2 candidates
@@ -294,7 +307,7 @@ section 10, Level 2). SPEC.md sections 7, 10 and 11 fix most of it.
 | R2-j | Structure chart and program specification | SPEC.md sections 11.3 and 11.4 | R2-h |
 | R2-k | Physical data model and storage estimate | SPEC.md sections 11.5 and 11.6 | R2-h |
 | R2-l | Accessibility audit | An independent audit and a published conformance report | The screens of R2-c to R2-k |
-| R2-m | Course dashboard | Behavior analytics per Canvas course, such as time spent, worked out from the saved command log. It may show R2-a's counts of AI requests and tokens, never prompts or responses. Its student list is the people who launched from the course, unless SPEC.md section 14.3 item 11 settles on the roster service. No grades. Students are told what it shows | Release 0's saving, R2-a, R1-k |
+| R2-m | Course dashboard | Behavior analytics per Canvas course, such as time spent, worked out from the saved command log. It may show R2-a's counts of AI requests and tokens, never prompts or responses. Its class list comes from Canvas's roster service (Names and Role Provisioning Services, NRPS), fetched when the instructor opens it and not kept (SPEC.md section 1, "Grading"). The architect run reads Portikus's roster client in `packages/auth`. No grades. Students are told what it shows | Release 0's saving, R2-a, R1-k |
 
 There is no R2-b. It held Canvas settings per link and LTI Advantage certification, both
 dropped on 18 November 2026 (SPEC.md section 1, "Grading").
@@ -303,7 +316,8 @@ The experimental track follows R2-a: assistance levels 3 and 4, where an agent c
 a draft or proposes commands through `preview` for the student to accept (SPEC.md section
 7 items 4 and 5; VISION.md section 10, Level 4). Each ships alone, behind its own exit
 criteria. Group projects were deferred with no release on 18 November 2026. Other symbol styles,
-including Chen notation, wait on SPEC.md section 14.3 item 9. SQL schema export and guided
+DeMarco and Yourdon and UML class notation, are planned but unscheduled (SPEC.md section
+14.3 item 9). SQL schema export and guided
 workflows have no SPEC.md section yet, so they cannot be planned.
 
 ## 5. Lanes
@@ -319,17 +333,10 @@ Epic 1 Foundation
 | Stage | Epics that can run at once |
 | --- | --- |
 | Release 0 | Epic 1 alone; then Epics 2 and 3; then Epics 4 and 5, with Epic 3 if it is still running; then Epic 6 once Epics 2 and 3 have merged; then Epic 7 |
-| Release 1 | R1-a, R1-c, R1-d and R1-e; then R1-b, R1-f and R1-i; then R1-g, R1-h and R1-k; then R1-j |
+| Release 1 | R1-a, R1-c, R1-d and R1-e; then R1-b, R1-f and R1-i; then R1-g, R1-h and R1-l; then R1-k; then R1-j |
 | Release 2 | R2-a, R2-c, R2-d, R2-e and R2-h; then R2-f, R2-i, R2-j, R2-k and R2-m; then R2-g and R2-l |
 
 ## 6. Questions to settle before an epic starts
 
-The user settled the other questions on 18 November 2026. SPEC.md section 14.6 records
-the answers.
-
-**Q4. Which Canvas does the trial use? Start now; Epic 3 needs it.** (a) The
-institution's Canvas test or beta instance, with an LTI 1.3 developer key from its
-administrator. (b) Canvas's open-source code run locally: no approval needed, but heavy.
-Recommended: (a). Diagramble sends no score, so the key needs only the launch. The key
-needs the trial server's public HTTPS address, so hosting must be ready by the end of
-Epic 3.
+None are open. The user settled every question on 18 November 2026, and SPEC.md section
+14.6 records the answers.

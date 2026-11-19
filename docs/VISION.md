@@ -251,7 +251,7 @@ The teaching advantage is feedback that arrives while the student is modeling an
 5. Grade the PDFs that students hand in, in Canvas, with Canvas's own tools. A student may also attach their exported project file, which the instructor imports as a new project in their own account to look at it.
 6. Archive the course when it ends. It becomes read-only for everyone, and its students keep their projects.
 
-On 18 November 2026 the user decided that Diagramble does no grading. It keeps no rubrics or comments on submissions, and sends Canvas no score. For now the dashboard lists the people who have launched from the course; whether it reads Canvas's roster service is an open point (SPEC.md section 14.3), and students must be told what it shows. An earlier version of this workflow had grading in it; the rows it touches in sections 5, 10 and 11 are marked.
+On 18 November 2026 the user decided that Diagramble does no grading. It keeps no rubrics or comments on submissions, and sends Canvas no score. The dashboard reads the class list from Canvas's roster service each time the instructor opens it, and does not keep a copy, decided on 18 November 2026 (SPEC.md section 1, "Grading"). Students must be told what it shows. An earlier version of this workflow had grading in it; the rows it touches in sections 5, 10 and 11 are marked.
 
 ### Core engine versus instructional scaffolding
 
@@ -306,8 +306,9 @@ Diagramble does not grade. On 18 November 2026 the user dropped rule-scored rubr
 | Service | What it does for this product |
 | --- | --- |
 | [LTI 1.3 launch](https://www.imsglobal.org/spec/lti/v1p3/) | Canvas signs the user in and passes their role and course. No separate account. The course decides the rule profile and AI assistance level |
+| [Names and Role Provisioning 2.0](https://www.imsglobal.org/spec/lti-nrps/v2p0) (the roster) | The course dashboard fetches the class list when the instructor opens it, and keeps no copy. Restored on 18 November 2026 |
 
-The launch is the only Canvas service used. On 18 November 2026 the user dropped [Deep Linking 2.0](https://www.imsglobal.org/spec/lti-dl/v2p0), [Assignment and Grade Services 2.0](https://www.imsglobal.org/spec/lti-ags/v2p0/) (score return), [Names and Role Provisioning 2.0](https://www.imsglobal.org/spec/lti-nrps/v2p0) (the roster) and LTI Advantage certification, because Diagramble does no grading and does not read the roster.
+The launch and the roster are the only Canvas services used. On 18 November 2026 the user dropped [Deep Linking 2.0](https://www.imsglobal.org/spec/lti-dl/v2p0), [Assignment and Grade Services 2.0](https://www.imsglobal.org/spec/lti-ags/v2p0/) (score return) and LTI Advantage certification, because Diagramble does no grading. The roster was dropped the same day and then restored for the course dashboard.
 
 The newer [Asset Processor placement](https://developerdocs.instructure.com/services/canvas/external-tools/lti/file.document_processor) handles submitted files, so it suits a report on an exported document more than live modeling.
 
@@ -322,7 +323,7 @@ The newer [Asset Processor placement](https://developerdocs.instructure.com/serv
 
 - **Student records.** United States universities share student records with vendors under a "school official" arrangement that needs a written agreement and limits use of the data. The exact regulatory text was not verified in this research.
 - **Security review.** Campuses usually ask for the [Higher Education Community Vendor Assessment Toolkit](https://www.educause.edu/higher-education-community-vendor-assessment-toolkit) questionnaire, and for larger purchases an independent security audit report.
-- **Data retention.** Course archiving, a retention policy for logs, analytics, AI usage records and archived courses, and account deletion are needed before the first live course, decided on 18 November 2026. The periods are open (SPEC.md section 14.3).
+- **Data retention.** Course archiving, a retention policy for logs, analytics, AI usage records and archived courses, and account deletion are needed before the first live course, decided on 18 November 2026. The deployment's system administrator sets the periods; the defaults are open (SPEC.md section 14.3).
 - **Running cost.** The tool is free for colleges, but running it is not. Someone must host the server, and AI features cost money per request. Visible Analyst's own student token is $49 for six months. That token is the cost this project removes.
 
 ## 6. Proposed product vision
@@ -729,8 +730,8 @@ Items 1, 3 and 9 carry the technical risk. Item 13 is in Level 1 because accessi
 | Dropped on 18 November 2026: rubrics with rule-scored rows and judgment rows | High | High | Medium | L | Rule engine, snapshots |
 | Dropped on 18 November 2026: comments on elements, reusable comments, resubmission comparison | High | High | Medium | L | Snapshots |
 | Dropped on 18 November 2026: instructor dashboard of progress and common failures | Medium | High | Medium | M | Roster |
-| Course dashboard of student behavior, such as time spent, from the saved command log, listing people who launched from the course. No grades and no roster service. Added on 18 November 2026 | Medium | High | Medium | M | Saving, course settings |
-| Dropped on 18 November 2026: Deep Linking, roster service and LTI certification | Low | High | Medium | M | Basic LTI |
+| Course dashboard of student behavior, such as time spent, from the saved command log, listing the class from the roster service. No grades. Added on 18 November 2026 | Medium | High | Medium | M | Saving, course settings, roster |
+| Dropped on 18 November 2026: Deep Linking and LTI certification. The roster service was restored the same day for the course dashboard | Low | High | Medium | M | Basic LTI |
 | Case library and instructor authoring of cases and starters | High | High | Low | M | Profiles |
 | Physical data model built from the logical ERD: tables, fields, primary keys, and foreign keys shown as a step (Chapter 10) | High | Medium | Medium | M | ERD |
 | SQL schema export in one or two dialects | Medium | Medium | Low | S | ERD |
@@ -800,7 +801,7 @@ A throwaway-quality prototype of the three things most likely to fail.
 | --- | --- |
 | Balancing through the dictionary gives correct results on three textbook cases, including a flow split into parts on the child diagram | This is the main differentiator and the hardest rule |
 | One element appears on two diagrams, is renamed once, and both update | Proves the model and view separation |
-| A trial launch from a Canvas test course signs the student in and opens their saved project | Removes the main integration unknown. The user decided on 18 November 2026 that no score is sent |
+| A launch from a mock LTI 1.3 platform, including one inside a frame, signs the user in and opens their saved project | Removes the main integration unknown without waiting for a Canvas developer key. The user decided on 18 November 2026 that no score is sent and that the mock replaces a real Canvas here |
 | A keyboard-only user builds a context diagram in the outline view | Shows accessibility is feasible before the canvas design hardens |
 
 ### Release 1: course-ready first release (Level 1)
@@ -815,6 +816,7 @@ A throwaway-quality prototype of the three things most likely to fail.
 | The diagrams in Chapters 4 and 5 of the textbook can be built in the tool, and every finding they produce has been reviewed | The tool and the book must not contradict each other in front of students |
 | A project exports to a PDF that an instructor accepts as a submission document | Students hand work in through Canvas as that PDF |
 | An instructor can archive a course, a retention policy deletes old records, and an account can be deleted | Student data is not kept forever. Added on 18 November 2026 |
+| The launch works against a real Canvas, which needs a developer key from a Canvas administrator at that time | Release 0 tested only a mock platform. Added on 18 November 2026 |
 | An instructor's own AI agent builds a starter case through the Model Context Protocol (MCP) server, with a personal API key | Instructors can make scenarios quickly. Added on 18 November 2026, when the user placed the MCP server in this release |
 
 ### Release 2: complete educational environment (Level 2)
