@@ -147,8 +147,7 @@ Depends on Epic 1. Runs beside Epics 2, 4 and 5. Size M.
   sign-in method keyed by the token's issuer and subject; a session cookie that points to
   a stored session. The launch's course and whether the person is an instructor are kept
   only if Epic 6 needs them to find the student's project for that course.
-- No score return, Deep Linking or roster service (SPEC.md section 1, "Grading and class
-  management").
+- No score return, Deep Linking or roster service (SPEC.md section 1, "Grading").
 - The Docker image, and the Compose file that adds PostgreSQL.
 - Tests against a fake platform whose good and tampered tokens are signed in the test.
 
@@ -262,7 +261,7 @@ section 10, Level 1). SPEC.md sections 8 and 9 fix its new parts.
 | Code | Epic | What it does | Depends on |
 | --- | --- | --- | --- |
 | R1-a | Project list | SPEC.md section 3.9: the project list, starting a new project, and copying, renaming and deleting one, over Release 0's saving | Release 0 |
-| R1-b | Project files and starter cases | Export and import with version upgrades and plain refusals (section 3.9), saving a project as a starter case (section 3.8), two shipped starter cases and symbol help (VISION.md section 10, item 17) | R1-a |
+| R1-b | Project files and starter cases | Export and import with version upgrades and plain refusals (section 3.9), saving a project as a starter case (section 3.8), two shipped starter cases and symbol help (VISION.md section 10, item 17). Import is a security boundary: the security reviewer runs, and the exit includes tests built from section 3.9's "Import fails safe" list, with fuzzed and hand-crafted hostile files | R1-a |
 | R1-c | Data flow diagrams and dictionary, complete | The Release 1 commands and queries of section 4, the settings of section 3.7, the full editor, the dictionary screen, the problems panel, where-used, safe rename and delete, and the DeMarco and Yourdon display (VISION.md section 10, items 3 to 5, 11, 12) | Release 0 |
 | R1-d | Use case forms | SPEC.md section 8: kinds, rules, worked-out views and the form screen | Release 0 |
 | R1-e | Entity relationship diagram and CRUD matrix | SPEC.md section 9, including the checks against the process model | Release 0 |
@@ -290,9 +289,10 @@ section 10, Level 2). SPEC.md sections 7, 10 and 11 fix most of it.
 | R2-j | Structure chart and program specification | SPEC.md sections 11.3 and 11.4 | R2-h |
 | R2-k | Physical data model and storage estimate | SPEC.md sections 11.5 and 11.6 | R2-h |
 | R2-l | Accessibility audit | An independent audit and a published conformance report | The screens of R2-c to R2-k |
+| R2-m | Course dashboard | Behavior analytics per Canvas course, such as time spent, worked out from the saved command log. Its student list is the people who launched from the course, not the roster service. No grades. Students are told what it shows. Needs SPEC.md section 14.3 item 8 settled | Release 0's saving, R2-a's course settings |
 
 There is no R2-b. It held Canvas settings per link and LTI Advantage certification, both
-dropped on 18 November 2026 (SPEC.md section 1, "Grading and class management").
+dropped on 18 November 2026 (SPEC.md section 1, "Grading").
 
 The experimental track follows R2-a: assistance levels 3 and 4, where an agent critiques
 a draft or proposes commands through `preview` for the student to accept (SPEC.md section
@@ -314,7 +314,7 @@ Epic 1 Foundation
 | --- | --- |
 | Release 0 | Epic 1 alone; then Epics 2 and 3; then Epics 4 and 5, with Epic 3 if it is still running; then Epic 6 once Epics 2 and 3 have merged; then Epic 7 |
 | Release 1 | R1-a, R1-c, R1-d and R1-e; then R1-b, R1-f and R1-i; then R1-g and R1-h; then R1-j |
-| Release 2 | R2-a, R2-c, R2-d, R2-e and R2-h; then R2-f, R2-i, R2-j and R2-k; then R2-g and R2-l |
+| Release 2 | R2-a, R2-c, R2-d, R2-e and R2-h; then R2-f, R2-i, R2-j, R2-k and R2-m; then R2-g and R2-l |
 
 ## 6. Questions to settle before an epic starts
 

@@ -41,7 +41,7 @@ document wins. Section 14 records the smaller points settled the same day.
 | Other chapters | Checked forms for chapters 1, 3, 6 and 11. The interface structure diagram for chapter 8. A project binder for everything else. All of it exports to PDF, in the second release | See section 10. Not built in Release 0 |
 | Saving | Every change is saved to the server as it is made, in the student's own account. A project can also be exported to a file and imported again, decided on 18 November 2026 | See section 3.9. Since 18 November 2026, Release 0 has a database and saves each accepted command (section 2). The project list, copying, renaming, deleting, export and import come in Release 1 |
 | Instructors' AI agents | A Model Context Protocol (MCP) server lets an instructor's own AI agent build scenarios and starter cases, using a personal API key, decided on 18 November 2026 | See section 7.1. Built in Release 1, decided on 18 November 2026 |
-| Grading and class management | None, decided on 18 November 2026. Diagramble sends Canvas no score and keeps no assignments, rubrics, roster, instructor dashboard or comments on submissions. The Canvas launch only signs a person in and opens their work. Assignment and Grade Services, Deep Linking, Names and Role Provisioning and LTI Advantage certification are dropped from every plan | Students hand in the exported PDF through Canvas (section 3.9), and the instructor grades it there |
+| Grading | None, decided on 18 November 2026. Diagramble sends Canvas no score and keeps no rubrics or comments on submissions, and does not read the Canvas roster. The Canvas launch only signs a person in and opens their work. Assignment and Grade Services, Deep Linking, Names and Role Provisioning and LTI Advantage certification are dropped from every plan | Students hand in the exported PDF through Canvas (section 3.9), and may attach their project file too. The instructor grades in Canvas. A course dashboard of student behavior, without grades, is a Release 2 candidate; its student list is the people who launched from the course |
 | Course settings | One small settings record per Canvas course, decided on 18 November 2026. The launch says which course and whether the person is an instructor. An instructor sets one AI assistance level (0 to 4) and one rule profile for the course, and every student launched from it gets them. Nothing about assignments is stored | See section 7 item 4. Not built in Release 0, except that an account may record the course it launched from |
 | Element identifiers | Made by whoever creates the item and carried in the creating command, decided on 18 November 2026 | See sections 3.2, 4.1 and 14.6 |
 | Stack | TypeScript everywhere | One shared package holds the model and rules and runs in both browser and server |
@@ -77,8 +77,8 @@ Out of scope: use case forms (section 8), the ERD and the CRUD matrix (section 9
 forms, diagram and binder of section 10, the design diagrams of the textbook's chapters 9
 and 10 (section 11), the project list and copying, renaming and deleting projects,
 project files and their export and import (section 3.9), course settings (section 7
-item 4), export to PDF, AI features, real-time editing, and visual polish. Grading and
-class management are out of every release (section 1).
+item 4), export to PDF, AI features, real-time editing, and visual polish.
+Grading is out of every release (section 1).
 
 Exit criteria are those in section 11 of the product vision under "Release 0".
 
@@ -305,6 +305,29 @@ else. It is not the way to hand work in. Students hand in the PDF of section 10.
 - This is how an instructor gives a class a scenario. They build it, save it as a starter
   case, export the file and post it in Canvas, and each student imports it as their own
   new project. An instructor's AI agent can build the scenario for them (section 7.1).
+- A student may attach their project file to what they hand in through Canvas. The
+  instructor imports it to look at it. That makes a new project in the instructor's
+  account and never touches the student's own copy.
+
+**Import fails safe.** A file may come from anyone, so import is a security boundary:
+
+1. Every imported file is treated as hostile.
+2. The server checks it, not only the browser.
+3. The file's size is checked against a limit before it is parsed.
+4. Nesting depth, string lengths and element counts have limits.
+5. Keys such as `__proto__`, `constructor` and `prototype` are refused.
+6. The file is checked against the strict schema. Unknown fields are refused, not
+   dropped.
+7. A version upgrade runs only on a file that passed the check for its own version. The
+   result is checked again against the current schema and every invariant of section 3.4.
+8. Anything that fails refuses the whole file. Nothing is partly imported. The refusal is
+   a plain sentence with no internal detail.
+9. Imported text is never rendered as HTML anywhere, including the PDF export.
+10. Imported `origin` values and the log are kept but marked unverified, and the project
+    is marked as imported.
+11. Text from an imported file that reaches an AI model, whether student AI or an
+    instructor's agent, is data, never instructions. It must not widen the tools offered.
+12. Attachments, when they exist, are never served inline from the app's domain.
 
 ## 4. Commands and queries
 
@@ -1727,6 +1750,9 @@ project's author confirmed all eight on 17 November 2026. None affects Release 0
 7. **Which Canvas the trial uses.** The institution's Canvas test instance needs an LTI
    1.3 developer key from its administrator. Diagramble sends no score, so the key needs
    only the launch. The planning note is `docs/EPICS.md` section 6.
+8. **Privacy of logs and analytics.** No rule yet says how long command logs and the
+   dashboard's analytics are kept, how an account is deleted, or who may see what. This
+   must be settled before Release 1's live course.
 
 ### 14.4 Taken from Visible Analyst, and left out
 
@@ -1806,6 +1832,6 @@ The user settled these while the epics were planned (`docs/EPICS.md`).
 | --- | --- | --- |
 | A database in Release 0 | Yes. It holds accounts, sign-in methods, sessions, launch nonces and saved projects | Sections 2 and 3.9 |
 | Element identifiers | Made by the creator and carried in the creating command: 10 random lowercase letters and digits, unique within a project only | Sections 3.2 and 4.1 |
-| Grading and class management | None. No score is sent to Canvas, and there are no assignments, rubrics, roster or dashboard | Section 1 |
+| Grading | None. No score is sent to Canvas, and there are no rubrics, submission comments or roster service. A course dashboard of behavior, without grades, may come in Release 2 | Section 1 |
 | The AI assistance level | Set per Canvas course, with the rule profile | Section 1 and section 7 item 4 |
 | When AI comes | The instructors' MCP server in Release 1; student-facing AI in Release 2 | Sections 1 and 7 |

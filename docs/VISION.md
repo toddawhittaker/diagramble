@@ -247,9 +247,10 @@ The teaching advantage is feedback that arrives while the student is modeling an
 1. Add Diagramble to the Canvas course.
 2. Set the course's rule profile and its AI assistance level. Every student launched from that course gets both.
 3. Optionally give the class a starter case, such as a finished context diagram, as a file posted in Canvas.
-4. Grade the PDFs that students hand in, in Canvas, with Canvas's own tools.
+4. Watch the course dashboard: how students work, such as time spent, worked out from the saved command log. No grades are shown.
+5. Grade the PDFs that students hand in, in Canvas, with Canvas's own tools. A student may also attach their exported project file, which the instructor imports as a new project in their own account to look at it.
 
-On 18 November 2026 the user decided that Diagramble does no grading and no class management. It keeps no assignments, rubrics, roster, dashboard or comments on submissions, and it sends Canvas no score. The launch only signs a person in and opens their work. An earlier version of this workflow had all of those; the rows they touch in sections 5, 10 and 11 are marked.
+On 18 November 2026 the user decided that Diagramble does no grading. It keeps no rubrics or comments on submissions, sends Canvas no score, and does not read the Canvas roster. The dashboard lists the people who have launched from the course, and students must be told what it shows. An earlier version of this workflow had grading in it; the rows it touches in sections 5, 10 and 11 are marked.
 
 ### Core engine versus instructional scaffolding
 
@@ -266,7 +267,8 @@ Keeping these apart matters. The core must be correct for any user, including a 
 | Symbol and rule glossary, context help | Scaffolding | Content, not engine |
 | Restricting notations and constructs | Scaffolding built on a core feature | The palette is filtered by the profile |
 | Starter projects and case studies | Scaffolding | Content library |
-| Rubrics, dashboards, comments, resubmission | Dropped on 18 November 2026 | Canvas does these |
+| Rubrics, comments, resubmission | Dropped on 18 November 2026 | Canvas does these |
+| Course dashboard of student behavior | Scaffolding | Worked out from the saved command log. No grades |
 | Learning management system launch, for sign-in only | Integration | Separate boundary from both |
 | AI assistance levels | Scaffolding | Enforced by the server, set per course |
 
@@ -304,7 +306,7 @@ Diagramble does not grade. On 18 November 2026 the user dropped rule-scored rubr
 | --- | --- |
 | [LTI 1.3 launch](https://www.imsglobal.org/spec/lti/v1p3/) | Canvas signs the user in and passes their role and course. No separate account. The course decides the rule profile and AI assistance level |
 
-The launch is the only Canvas service used. On 18 November 2026 the user dropped [Deep Linking 2.0](https://www.imsglobal.org/spec/lti-dl/v2p0), [Assignment and Grade Services 2.0](https://www.imsglobal.org/spec/lti-ags/v2p0/) (score return), [Names and Role Provisioning 2.0](https://www.imsglobal.org/spec/lti-nrps/v2p0) (the roster) and LTI Advantage certification, because Diagramble does no grading or class management.
+The launch is the only Canvas service used. On 18 November 2026 the user dropped [Deep Linking 2.0](https://www.imsglobal.org/spec/lti-dl/v2p0), [Assignment and Grade Services 2.0](https://www.imsglobal.org/spec/lti-ags/v2p0/) (score return), [Names and Role Provisioning 2.0](https://www.imsglobal.org/spec/lti-nrps/v2p0) (the roster) and LTI Advantage certification, because Diagramble does no grading and does not read the roster.
 
 The newer [Asset Processor placement](https://developerdocs.instructure.com/services/canvas/external-tools/lti/file.document_processor) handles submitted files, so it suits a report on an exported document more than live modeling.
 
@@ -725,6 +727,7 @@ Items 1, 3 and 9 carry the technical risk. Item 13 is in Level 1 because accessi
 | Dropped on 18 November 2026: rubrics with rule-scored rows and judgment rows | High | High | Medium | L | Rule engine, snapshots |
 | Dropped on 18 November 2026: comments on elements, reusable comments, resubmission comparison | High | High | Medium | L | Snapshots |
 | Dropped on 18 November 2026: instructor dashboard of progress and common failures | Medium | High | Medium | M | Roster |
+| Course dashboard of student behavior, such as time spent, from the saved command log, listing people who launched from the course. No grades and no roster service. Added on 18 November 2026 | Medium | High | Medium | M | Saving, course settings |
 | Dropped on 18 November 2026: Deep Linking, roster service and LTI certification | Low | High | Medium | M | Basic LTI |
 | Case library and instructor authoring of cases and starters | High | High | Low | M | Profiles |
 | Physical data model built from the logical ERD: tables, fields, primary keys, and foreign keys shown as a step (Chapter 10) | High | Medium | Medium | M | ERD |
@@ -816,6 +819,7 @@ A throwaway-quality prototype of the three things most likely to fail.
 | Exit criterion | Why it matters |
 | --- | --- |
 | An instructor sets the rule profile and AI level for a Canvas course, and every student launched from it gets them | The instructor controls the course without grading in the tool |
+| An instructor sees a course dashboard of how students worked, worked out from the saved command log, and students are told what it shows | Evidence of process without grades in the tool |
 | An independent accessibility audit supports a published conformance report at WCAG 2.1 Level AA | Purchasing gate for public universities |
 | AI levels 0 to 2 are enforced by the server and every exchange is logged | Assessment mode is credible |
 | A classroom comparison shows explanations and hints do not reduce unassisted performance | Guards against the harm found in the research |
