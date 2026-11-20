@@ -32,7 +32,7 @@ export const DataFlow = z.strictObject({
   diagramId: Id.meta({ description: "The one diagram the flow belongs to." }),
   sourceId: Id.nullable().meta({ description: "The element the flow starts from, or null while unattached." }),
   targetId: Id.nullable().meta({ description: "The element the flow ends at, or null while unattached." }),
-  dataId: Id.nullable().meta({ description: "The data structure or data element the flow carries; its name is the flow's label." }),
+  dataId: Id.meta({ description: "The one data structure or data element the flow carries; its name is the flow's label." }),
 });
 export type DataFlow = z.infer<typeof DataFlow>;
 
@@ -40,6 +40,6 @@ export const ControlFlow = z.strictObject({
   kind: z.literal("controlFlow"),
   ...commonFields,
   diagramId: Id.meta({ description: "The one diagram the control flow belongs to." }),
-  targetId: Id.nullable().meta({ description: "The process the event starts, or null while unattached." }),
+  targetId: Id.meta({ description: "The process the event starts, shown on the control flow's diagram." }),
 });
 export type ControlFlow = z.infer<typeof ControlFlow>;

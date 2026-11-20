@@ -317,17 +317,9 @@
                 "description": "The element the flow ends at, or null while unattached."
               },
               "dataId": {
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "pattern": "^[A-Za-z0-9_-]{1,64}$",
-                    "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "description": "The data structure or data element the flow carries; its name is the flow's label."
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "The one data structure or data element the flow carries; its name is the flow's label."
               }
             },
             "required": [
@@ -391,17 +383,9 @@
                 "description": "The one diagram the control flow belongs to."
               },
               "targetId": {
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "pattern": "^[A-Za-z0-9_-]{1,64}$",
-                    "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "description": "The process the event starts, or null while unattached."
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "The process the event starts, shown on the control flow's diagram."
               }
             },
             "required": [
