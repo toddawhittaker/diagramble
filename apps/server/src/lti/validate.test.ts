@@ -200,6 +200,8 @@ describe("the claims, one at a time", () => {
     ["an audience list without this client", { aud: ["other"] }, "wrong_audience"],
     ["several audiences with no azp", { aud: [CLIENT_ID, "other"] }, "wrong_audience"],
     ["several audiences with another azp", { aud: [CLIENT_ID, "other"], azp: "other" }, "wrong_audience"],
+    ["one audience with another azp", { azp: "other" }, "wrong_audience"],
+    ["a one-item audience list with another azp", { aud: [CLIENT_ID], azp: "other" }, "wrong_audience"],
     ["no audience", { aud: undefined }, "wrong_audience"],
     ["no exp", { exp: undefined }, "expired"],
     ["a string exp", { exp: "soon" }, "expired"],

@@ -21,6 +21,12 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     .addColumn("expires_at", "timestamptz", (col) => col.notNull())
     .addColumn("created_at", "timestamptz", (col) => col.notNull().defaultTo(sql`now()`))
     .execute();
+  // Expired states are swept by their expiry time.
+  await db.schema
+    .createIndex("lti_login_states_expires_at_idx")
+    .on("lti_login_states")
+    .column("expires_at")
+    .execute();
 
   await db.schema
     .createTable("courses")

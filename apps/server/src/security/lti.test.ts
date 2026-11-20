@@ -344,9 +344,16 @@ describe("the launch's Origin", () => {
     expect((await rawLaunch(app, form, begun.stateCookie, PLATFORM)).statusCode).toBe(303);
   });
 
+  test("a listed frame origin is accepted", async () => {
+    const begun = await begin();
+    const form = { state: begun.state, id_token: await tokenFor(begun) };
+    expect((await rawLaunch(app, form, begun.stateCookie, "https://school.instructure.com")).statusCode).toBe(303);
+  });
+
   test.each([
     ["the app's own origin", HTTPS_ORIGIN],
     ["another site", "https://evil.example"],
+    ["a frame origin's host on another port", "https://school.instructure.com:8443"],
     ["the platform's host on another scheme", PLATFORM.replace("https:", "http:")],
     ["the platform's host on another port", `${PLATFORM}:8443`],
     ["the platform's host with a path", `${PLATFORM}/`],
@@ -473,9 +480,11 @@ describe("the cookies", () => {
     expect(setCookieLines(run.launch).some((l) => l.startsWith("__Host-"))).toBe(false);
   });
 
-  test("a launch refused for any reason sets no session cookie and keeps the state cookie", async () => {
+  test("a launch refused after the state is read sets no session cookie and clears the state cookie", async () => {
     const run = await launch({ person: sam, defect: "wrong_aud" });
-    expect(setCookieLines(run.launch)).toEqual([]);
+    const lines = setCookieLines(run.launch);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toMatch(/^__Host-diagramble-lti-state=;.*Max-Age=0/);
   });
 
   test("a password sign-in stays SameSite=Lax, is not Partitioned, and clears a partitioned cookie of its name", async () => {
@@ -601,7 +610,7 @@ describe("the account a launch signs in", () => {
     expectRefusal(run.launch, 403);
     expect(refusalReasons()).toEqual(["account_disabled"]);
     expect(await count("sessions")).toBe(sessions);
-    expect(setCookieLines(run.launch)).toEqual([]);
+    expect(setCookieLines(run.launch).map((l) => l.split("=")[0])).toEqual(["__Host-diagramble-lti-state"]);
   });
 
   test("a launch never signs into a password account with the same login", async () => {

@@ -5,7 +5,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { createRemoteJWKSet, type JWTVerifyGetKey } from "jose";
 import type { Kysely } from "kysely";
-import { cookieName, endSession, launchCookieOptions, startSession } from "../accounts/sessions.ts";
+import { cookieName, cookieOptions, endSession, launchCookieOptions, startSession } from "../accounts/sessions.ts";
 import { createLtiAccount, findLtiMethod } from "../accounts/store.ts";
 import type { Database } from "../db/schema.ts";
 import type { Settings } from "../settings.ts";
@@ -45,9 +45,19 @@ export function ltiRoutes(
   },
 ): void {
   const sessionCookie = cookieName(settings);
-  const platformOrigin = new URL(lti.authUrl).origin;
+  // The launch comes from the platform's sign-in page or from a page that frames the
+  // app, never from the app itself (SPEC.md section 1, "Canvas launch").
+  const launchOrigins = new Set([new URL(lti.authUrl).origin, ...lti.frameOrigins]);
+  launchOrigins.delete(settings.appOrigin);
   const stateCookie = stateCookieName(settings);
-  const { maxAge: _maxAge, ...clearState } = stateCookieOptions();
+  const cleared = { maxAge: 0, expires: new Date(0) };
+  const password = cookieOptions(settings);
+  const clearStateLine = app.serializeCookie(stateCookie, "", { ...stateCookieOptions(), secure: true, ...cleared });
+  const clearPasswordSessionLine = app.serializeCookie(sessionCookie, "", {
+    ...password,
+    secure: password.secure === true,
+    ...cleared,
+  });
 
   /** The refusal page, with the reason in the log line only. */
   function refuse(request: FastifyRequest, reply: FastifyReply, status: number, reason: string): FastifyReply {
@@ -76,12 +86,18 @@ export function ltiRoutes(
 
   app.post("/lti/launch", async (request, reply) => {
     // The guard exempts this route from the app's own Origin; only the platform's will do.
-    if (request.headers.origin !== platformOrigin) return refuse(request, reply, 403, "wrong_origin");
+    const origin = request.headers.origin;
+    if (origin === undefined || !launchOrigins.has(origin)) return refuse(request, reply, 403, "wrong_origin");
+    // From here on a refusal also clears the state cookie, which no later launch can use.
+    const refuseAndClear = (status: number, reason: string): FastifyReply => {
+      reply.header("set-cookie", clearStateLine);
+      return refuse(request, reply, status, reason);
+    };
     const state = field(request.body, "state");
     const stateProblem = checkLaunchState(state, request.cookies[stateCookie]);
-    if (stateProblem) return refuse(request, reply, 401, stateProblem);
+    if (stateProblem) return refuseAndClear(401, stateProblem);
     const nonce = await consumeLoginState(db, state as string, new Date(now()));
-    if (nonce === undefined) return refuse(request, reply, 401, "state_unknown");
+    if (nonce === undefined) return refuseAndClear(401, "state_unknown");
     const idToken = field(request.body, "id_token") ?? "";
     const checked = await validateLaunch(idToken, {
       settings: lti,
@@ -90,7 +106,7 @@ export function ltiRoutes(
       appOrigin: settings.appOrigin,
       now: new Date(now()),
     });
-    if (!checked.ok) return refuse(request, reply, 401, checked.reason);
+    if (!checked.ok) return refuseAndClear(401, checked.reason);
     const { launch } = checked;
 
     const method =
@@ -101,7 +117,7 @@ export function ltiRoutes(
         loginId: launch.loginId,
         email: launch.email,
       }));
-    if (method.disabled) return refuse(request, reply, 403, "account_disabled");
+    if (method.disabled) return refuseAndClear(403, "account_disabled");
 
     const courseId = await upsertCourse(db, {
       issuer: launch.issuer,
@@ -113,9 +129,15 @@ export function ltiRoutes(
     const sent = request.cookies[sessionCookie];
     if (sent) await endSession(db, sent);
     const token = await startSession(db, method, new Date(now()));
+    // A password session of the same name, SameSite=Lax and unpartitioned, may still be
+    // in the browser; it would be sent first and win, so the launch clears it. The
+    // plug-in keeps one cookie per name, so the lines are written here.
     return reply
-      .setCookie(sessionCookie, token, launchCookieOptions())
-      .clearCookie(stateCookie, clearState)
+      .header("set-cookie", [
+        app.serializeCookie(sessionCookie, token, { ...launchCookieOptions(), secure: true }),
+        clearPasswordSessionLine,
+        clearStateLine,
+      ])
       .code(303)
       .header("location", `/?course=${encodeURIComponent(courseId)}`)
       .send();

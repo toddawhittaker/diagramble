@@ -210,6 +210,32 @@ describe("the course page", () => {
   });
 });
 
+describe("the pages", () => {
+  it("send a referrer policy that keeps the Origin header on the auto-posted form", async () => {
+    const res = await fetch(`${base}/`);
+    expect(res.headers.get("referrer-policy")).toBe("strict-origin-when-cross-origin");
+  });
+
+  it("declare both color schemes", async () => {
+    expect(await (await fetch(`${base}/`)).text()).toContain('<meta name="color-scheme" content="light dark">');
+  });
+
+  it("put the auto-posted form in a main landmark with a line of text", async () => {
+    const framed = await start({ person: "sam", course: "is420", frame: "1" });
+    const course = await (await fetch(`${base}${framed.location}`)).text();
+    const src = /<iframe title="Diagramble" src="([^"]+)"/.exec(course)?.[1] ?? "";
+    const inner = await (await fetch(`${base}${src.replaceAll("&amp;", "&")}`)).text();
+    expect(inner).toMatch(/<main>\s*<p>Continuing to Diagramble…<\/p>\s*<form/);
+    expect(inner).toMatch(/<\/form>[\s\S]*<\/main>/);
+  });
+
+  it("let the course page's frame fill the width", async () => {
+    const framed = await start({ person: "sam", course: "is420", frame: "1" });
+    const course = await (await fetch(`${base}${framed.location}`)).text();
+    expect(course).toContain("iframe{width:100%;height:min(36rem, 80vh)");
+  });
+});
+
 describe("/jwks", () => {
   it("serves one public RS256 key with no private member", async () => {
     const res = await fetch(`${base}/jwks`);

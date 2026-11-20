@@ -24,7 +24,7 @@ export function renderRefusalPage(): string {
 <body>
   <main class="sign-in">
     <h1>Could not sign in</h1>
-    <p class="sign-in-alert" role="alert"><span>${REFUSAL_SENTENCE}</span></p>
+    <p class="sign-in-alert"><span>${REFUSAL_SENTENCE}</span></p>
   </main>
 </body>
 </html>

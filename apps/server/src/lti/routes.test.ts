@@ -139,6 +139,19 @@ describe("a good launch", () => {
     expect(state).toMatch(/; Partitioned/);
   });
 
+  test("clears an older unpartitioned SameSite=Lax cookie of the same name", async () => {
+    const { launch: response } = await launch({ person: sam });
+    const lines = setCookieLines(response).filter((l) => l.startsWith(`${HTTPS_COOKIE}=`));
+    expect(lines).toHaveLength(2);
+    const cleared = lines.find((l) => l.startsWith(`${HTTPS_COOKIE}=;`))!;
+    expect(cleared).toMatch(/; SameSite=Lax/);
+    expect(cleared).toMatch(/Max-Age=0/);
+    expect(cleared).not.toMatch(/Partitioned/);
+    const session = lines.find((l) => l !== cleared)!;
+    expect(session).toMatch(/; Partitioned/);
+    expect(session).toMatch(/; SameSite=None/);
+  });
+
   test("a second launch reuses the account and refreshes the role", async () => {
     await launch({ person: ivy, role: "Learner" });
     const first = await findLtiMethod(testDb.db, PLATFORM, ivy.sub);
@@ -189,6 +202,7 @@ describe("the launch's Origin", () => {
     ["null", "null"],
     ["the app's own", HTTPS_ORIGIN],
     ["another site", "https://evil.example"],
+    ["a Canvas host's other port", "https://school.instructure.com:8443"],
   ])("%s is refused with 403", async (_name, origin) => {
     const run = await launch({ person: sam });
     const headers: Record<string, string> = { "content-type": "application/x-www-form-urlencoded", cookie: run.stateCookie };
@@ -203,7 +217,36 @@ describe("the launch's Origin", () => {
   });
 });
 
+describe("the launch's accepted Origins", () => {
+  test.each([
+    ["the platform's", PLATFORM],
+    ["a listed frame origin", FRAME_ORIGINS[1]!],
+  ])("%s is accepted", async (_name, origin) => {
+    const { launch: response } = await launch({ person: sam, headers: { origin } });
+    expect(response.statusCode).toBe(303);
+  });
+});
+
+/** The line that clears the state cookie, if the reply has one. */
+const stateCleared = (response: Awaited<ReturnType<typeof postLaunch>>) =>
+  setCookieLines(response).find((l) => l.startsWith(`${STATE_COOKIE}=;`) && /Max-Age=0|Expires=Thu, 01 Jan 1970/.test(l));
+
 describe("refusals", () => {
+  test("the refusal page states its sentence once, with no live region", async () => {
+    const { launch: response } = await launch({ person: sam, defect: "expired" });
+    expect(response.body).toContain(REFUSAL_SENTENCE);
+    expect(response.body).not.toContain('role="alert"');
+  });
+
+  test("a refused launch clears the state cookie", async () => {
+    const run = await launch({ person: sam, defect: "bad_signature" });
+    expectRefused(run.launch, 401);
+    expect(stateCleared(run.launch)).toMatch(/; Partitioned/);
+    const first = await launch({ person: sam });
+    const other = await launch({ person: sam });
+    expect(stateCleared(await postLaunch(app, first.form, other.stateCookie))).toBeDefined();
+  });
+
   test("a replayed launch, same token and state, is refused at the state step", async () => {
     const run = await launch({ person: sam });
     expect(run.launch.statusCode).toBe(303);
@@ -304,6 +347,18 @@ describe("with no LTI settings", () => {
       headers: { origin: HTTPS_ORIGIN, cookie: `${HTTPS_COOKIE}=${token}` },
     });
     expect(response.statusCode).toBe(404);
+  });
+});
+
+describe("sign-out", () => {
+  test("clears both the SameSite=Lax cookie and the partitioned one of the same name", async () => {
+    const response = await app.inject({ method: "POST", url: "/sign-out", headers: { origin: HTTPS_ORIGIN } });
+    expect(response.statusCode).toBe(303);
+    const lines = setCookieLines(response).filter((l) => l.startsWith(`${HTTPS_COOKIE}=;`));
+    expect(lines).toHaveLength(2);
+    for (const line of lines) expect(line).toMatch(/Max-Age=0/);
+    expect(lines.find((l) => /; Partitioned/.test(l))).toMatch(/; SameSite=None/);
+    expect(lines.find((l) => !/Partitioned/.test(l))).toMatch(/; SameSite=Lax/);
   });
 });
 
