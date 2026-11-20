@@ -1,0 +1,828 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The project's name."
+        },
+        "topDiagramId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$",
+              "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The highest diagram the project is expected to contain; null only before the project has a diagram."
+        },
+        "showFindings": {
+          "type": "string",
+          "enum": [
+            "always",
+            "onRequest"
+          ],
+          "description": "Whether findings are shown always or only when the student asks."
+        },
+        "caseText": {
+          "type": "string",
+          "description": "The case description the exercise starts from. May be empty."
+        }
+      },
+      "required": [
+        "name",
+        "topDiagramId",
+        "showFindings",
+        "caseText"
+      ],
+      "additionalProperties": false
+    },
+    "elements": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_-]{1,64}$",
+        "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "process"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+              },
+              "name": {
+                "type": "string",
+                "description": "The element's name. May be empty while work is in progress."
+              },
+              "description": {
+                "type": "string",
+                "description": "A short description. May be empty."
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Other names the business uses for the same thing."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Working notes and open questions. Never checked."
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "student",
+                  "starter",
+                  "ai"
+                ],
+                "description": "Who created the element: the student, a starter case, or an AI model."
+              },
+              "parentProcessId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                    "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The process this one decomposes, or null for process 0."
+              },
+              "ordinal": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "The last part of the process number. 0 only for process 0."
+              },
+              "processDescription": {
+                "type": "string",
+                "description": "The longer step-by-step text of what the process does."
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "name",
+              "description",
+              "aliases",
+              "notes",
+              "origin",
+              "parentProcessId",
+              "ordinal",
+              "processDescription"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "externalEntity"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+              },
+              "name": {
+                "type": "string",
+                "description": "The element's name. May be empty while work is in progress."
+              },
+              "description": {
+                "type": "string",
+                "description": "A short description. May be empty."
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Other names the business uses for the same thing."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Working notes and open questions. Never checked."
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "student",
+                  "starter",
+                  "ai"
+                ],
+                "description": "Who created the element: the student, a starter case, or an AI model."
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "name",
+              "description",
+              "aliases",
+              "notes",
+              "origin"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "dataStore"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+              },
+              "name": {
+                "type": "string",
+                "description": "The element's name. May be empty while work is in progress."
+              },
+              "description": {
+                "type": "string",
+                "description": "A short description. May be empty."
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Other names the business uses for the same thing."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Working notes and open questions. Never checked."
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "student",
+                  "starter",
+                  "ai"
+                ],
+                "description": "Who created the element: the student, a starter case, or an AI model."
+              },
+              "ordinal": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991,
+                "description": "The number in the store's label, D followed by this number. Never renumbered."
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "name",
+              "description",
+              "aliases",
+              "notes",
+              "origin",
+              "ordinal"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "dataFlow"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+              },
+              "name": {
+                "type": "string",
+                "description": "The element's name. May be empty while work is in progress."
+              },
+              "description": {
+                "type": "string",
+                "description": "A short description. May be empty."
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Other names the business uses for the same thing."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Working notes and open questions. Never checked."
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "student",
+                  "starter",
+                  "ai"
+                ],
+                "description": "Who created the element: the student, a starter case, or an AI model."
+              },
+              "diagramId": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "The one diagram the flow belongs to."
+              },
+              "sourceId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                    "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The element the flow starts from, or null while unattached."
+              },
+              "targetId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                    "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The element the flow ends at, or null while unattached."
+              },
+              "dataId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                    "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The data structure or data element the flow carries; its name is the flow's label."
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "name",
+              "description",
+              "aliases",
+              "notes",
+              "origin",
+              "diagramId",
+              "sourceId",
+              "targetId",
+              "dataId"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "controlFlow"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+              },
+              "name": {
+                "type": "string",
+                "description": "The element's name. May be empty while work is in progress."
+              },
+              "description": {
+                "type": "string",
+                "description": "A short description. May be empty."
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Other names the business uses for the same thing."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Working notes and open questions. Never checked."
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "student",
+                  "starter",
+                  "ai"
+                ],
+                "description": "Who created the element: the student, a starter case, or an AI model."
+              },
+              "diagramId": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "The one diagram the control flow belongs to."
+              },
+              "targetId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                    "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The process the event starts, or null while unattached."
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "name",
+              "description",
+              "aliases",
+              "notes",
+              "origin",
+              "diagramId",
+              "targetId"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "dataStructure"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+              },
+              "name": {
+                "type": "string",
+                "description": "The element's name. May be empty while work is in progress."
+              },
+              "description": {
+                "type": "string",
+                "description": "A short description. May be empty."
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Other names the business uses for the same thing."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Working notes and open questions. Never checked."
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "student",
+                  "starter",
+                  "ai"
+                ],
+                "description": "Who created the element: the student, a starter case, or an AI model."
+              },
+              "components": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "dataId": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                      "description": "The data structure or data element that is part of this structure."
+                    },
+                    "occurs": {
+                      "type": "string",
+                      "enum": [
+                        "once",
+                        "optional",
+                        "many"
+                      ],
+                      "description": "How often the part occurs."
+                    },
+                    "limit": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The most times the part can occur, used only when occurs is many; null for no limit."
+                    }
+                  },
+                  "required": [
+                    "dataId",
+                    "occurs",
+                    "limit"
+                  ],
+                  "additionalProperties": false
+                },
+                "description": "The parts of the structure, in order."
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "name",
+              "description",
+              "aliases",
+              "notes",
+              "origin",
+              "components"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "dataElement"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+              },
+              "name": {
+                "type": "string",
+                "description": "The element's name. May be empty while work is in progress."
+              },
+              "description": {
+                "type": "string",
+                "description": "A short description. May be empty."
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Other names the business uses for the same thing."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Working notes and open questions. Never checked."
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "student",
+                  "starter",
+                  "ai"
+                ],
+                "description": "Who created the element: the student, a starter case, or an AI model."
+              },
+              "dataType": {
+                "type": "string",
+                "description": "The type of the data, as text, such as date or text."
+              },
+              "allowedValues": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "string"
+                    },
+                    "meaning": {
+                      "type": "string",
+                      "description": "What the value stands for."
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "meaning"
+                  ],
+                  "additionalProperties": false
+                },
+                "description": "The values the element may take, with their meanings; empty for any value."
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "name",
+              "description",
+              "aliases",
+              "notes",
+              "origin",
+              "dataType",
+              "allowedValues"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "diagram"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+              },
+              "name": {
+                "type": "string",
+                "description": "The element's name. May be empty while work is in progress."
+              },
+              "description": {
+                "type": "string",
+                "description": "A short description. May be empty."
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Other names the business uses for the same thing."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Working notes and open questions. Never checked."
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "student",
+                  "starter",
+                  "ai"
+                ],
+                "description": "Who created the element: the student, a starter case, or an AI model."
+              },
+              "diagramKind": {
+                "type": "string",
+                "enum": [
+                  "context",
+                  "dfd"
+                ],
+                "description": "The context diagram, or a data flow diagram that decomposes a process."
+              },
+              "decomposesProcessId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                    "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The process this diagram decomposes; null for the context diagram."
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "name",
+              "description",
+              "aliases",
+              "notes",
+              "origin",
+              "diagramKind",
+              "decomposesProcessId"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "description": "Every element, keyed by its id."
+    },
+    "views": {
+      "type": "object",
+      "properties": {
+        "occurrences": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+              },
+              "diagramId": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "The diagram the element is shown on."
+              },
+              "elementId": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "The element shown."
+              },
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "width": {
+                "type": "number"
+              },
+              "height": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "diagramId",
+              "elementId",
+              "x",
+              "y",
+              "width",
+              "height"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Every node occurrence, keyed by its id."
+        },
+        "routes": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+              },
+              "flowId": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "The data flow or control flow this route draws."
+              },
+              "diagramId": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "description": "The flow's diagram."
+              },
+              "sourceOccurrenceId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                    "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The occurrence the source end attaches to; null when unattached, off-diagram, or for a control flow."
+              },
+              "targetOccurrenceId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                    "description": "An identifier: 1 to 64 letters, digits, underscores or hyphens, unique within the project."
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The occurrence the target end attaches to; null when unattached or off-diagram."
+              },
+              "points": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
+                  ],
+                  "additionalProperties": false
+                },
+                "description": "The bend points of the line, in order."
+              }
+            },
+            "required": [
+              "id",
+              "flowId",
+              "diagramId",
+              "sourceOccurrenceId",
+              "targetOccurrenceId",
+              "points"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Every flow route, keyed by its id."
+        }
+      },
+      "required": [
+        "occurrences",
+        "routes"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "settings",
+    "elements",
+    "views"
+  ],
+  "additionalProperties": false,
+  "title": "Diagramble project, version 1",
+  "description": "A Diagramble project document. Each map key must equal its record's id; JSON Schema cannot say this, and the model's invariant check enforces it."
+}
