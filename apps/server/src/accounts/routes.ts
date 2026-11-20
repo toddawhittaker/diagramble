@@ -7,7 +7,7 @@ import { z } from "zod";
 import type { Database } from "../db/schema.ts";
 import type { Settings } from "../settings.ts";
 import { normalizeUsername, verifyAgainstDummy, verifyPassword } from "./password.ts";
-import { cookieName, cookieOptions, endSession, startSession } from "./sessions.ts";
+import { cookieName, cookieOptions, endSession, launchCookieOptions, startSession } from "./sessions.ts";
 import type { SignInLimiter } from "./sign-in-limit.ts";
 import { renderSignInPage, signInCss } from "./sign-in-page.ts";
 import { findPasswordMethod } from "./store.ts";
@@ -79,6 +79,16 @@ export function accountRoutes(
 ): void {
   const cookie = cookieName(settings);
   const options = cookieOptions(settings);
+  const launch = launchCookieOptions();
+  const clearLaunchCookie = {
+    httpOnly: launch.httpOnly,
+    secure: true,
+    path: launch.path,
+    sameSite: launch.sameSite,
+    partitioned: launch.partitioned,
+    expires: new Date(0),
+    maxAge: 0,
+  };
 
   app.get("/sign-in", async (request, reply) => {
     if (request.signedIn) return reply.code(303).header("location", "/").send();
@@ -110,7 +120,17 @@ export function accountRoutes(
     const sent = request.cookies[cookie];
     if (sent) await endSession(db, sent);
     const token = await startSession(db, method, new Date(now()));
-    return reply.setCookie(cookie, token, options).code(303).header("location", "/").send();
+    // A launch's partitioned cookie has the same name; clear it so the browser never
+    // sends two (SPEC.md section 1, "Canvas launch"). The plug-in keeps one cookie per
+    // name, so both lines are written here, the new session first.
+    return reply
+      .header("set-cookie", [
+        app.serializeCookie(cookie, token, { ...options, secure: options.secure === true }),
+        app.serializeCookie(cookie, "", clearLaunchCookie),
+      ])
+      .code(303)
+      .header("location", "/")
+      .send();
   });
 
   app.post("/sign-out", async (request, reply) => {

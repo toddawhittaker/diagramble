@@ -44,6 +44,23 @@ export function cookieOptions(settings: Pick<Settings, "appOrigin">): CookieSeri
   };
 }
 
+/**
+ * The options of a session made by a Canvas launch (SPEC.md section 1, "Canvas launch"):
+ * SameSite=None so the cookie travels inside Canvas's frame, and Partitioned so the
+ * browser keeps it only under the site that framed the app. Always Secure, which
+ * SameSite=None requires; browsers treat localhost as secure.
+ */
+export function launchCookieOptions(): CookieSerializeOptions {
+  return {
+    httpOnly: true,
+    secure: true,
+    path: "/",
+    sameSite: "none",
+    partitioned: true,
+    maxAge: SESSION_SECONDS,
+  };
+}
+
 /** Start a session for a sign-in method and return its token. */
 export async function startSession(
   db: Kysely<Database>,
