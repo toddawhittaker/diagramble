@@ -35,6 +35,12 @@ export const ORIGIN_EXEMPT_ROUTES: readonly string[] = [];
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
+/**
+ * What a reply carries unless it sets its own: scripts only from the app's own origin, no
+ * plug-ins, and no framing (SPEC.md section 1, "Host names").
+ */
+const DEFAULT_POLICY = "script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'";
+
 /** The routed URL, never the raw one, so a query string or path trick cannot match. */
 function routeKey(request: FastifyRequest): string | undefined {
   const url = request.routeOptions.url;
@@ -79,7 +85,7 @@ export function installGuard(
   app.addHook("onRequest", async (request, reply) => {
     reply.header("referrer-policy", "strict-origin-when-cross-origin");
     reply.header("x-content-type-options", "nosniff");
-    reply.header("content-security-policy", "frame-ancestors 'none'");
+    reply.header("content-security-policy", DEFAULT_POLICY);
     if (https) reply.header("strict-transport-security", "max-age=31536000");
 
     if (!originAllowed(request, settings.appOrigin)) {
