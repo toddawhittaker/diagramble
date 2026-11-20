@@ -44,4 +44,9 @@ describe("migrateToLatest", () => {
       "sessions_pkey",
     ]);
   });
+
+  test("throws when the recorded history names a migration that has no file", async () => {
+    await sql`insert into kysely_migration (name, timestamp) values ('0000_gone', now()::text)`.execute(testDb.db);
+    await expect(migrateToLatest(testDb.db)).rejects.toThrow(/0000_gone/);
+  });
 });

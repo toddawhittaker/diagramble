@@ -13,7 +13,7 @@ export interface AccountsTable {
   created_at: TimestampDefault;
 }
 
-/** One way an account signs in. Epic 4 adds the `lti` kind. */
+/** One way an account signs in. The `lti` kind joins the `password` kind with the course launch. */
 export interface SignInMethodsTable {
   id: Generated<string>;
   account_id: string;
