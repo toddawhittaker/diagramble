@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { occurrenceById, routeById } from "../derive.ts";
 import { Id } from "../id.ts";
 import type { AnyCommandDefinition, CommandDefinition } from "../registry.ts";
 import { Point } from "../views.ts";
@@ -11,8 +12,8 @@ const MoveOccurrenceArgs = z.strictObject({
   occurrenceId: Id.meta({ description: "The occurrence to move or resize." }),
   x: z.number().meta({ description: "The new horizontal position of the occurrence's top-left corner." }),
   y: z.number().meta({ description: "The new vertical position of the occurrence's top-left corner." }),
-  width: z.number().meta({ description: "The new width. Must be greater than zero." }),
-  height: z.number().meta({ description: "The new height. Must be greater than zero." }),
+  width: z.number().positive().meta({ description: "The new width. Must be greater than zero." }),
+  height: z.number().positive().meta({ description: "The new height. Must be greater than zero." }),
 });
 
 const moveOccurrence: CommandDefinition<z.infer<typeof MoveOccurrenceArgs>> = {
@@ -22,11 +23,8 @@ const moveOccurrence: CommandDefinition<z.infer<typeof MoveOccurrenceArgs>> = {
   args: MoveOccurrenceArgs,
   newIds: () => [],
   run(doc, args) {
-    const occurrence = doc.views.occurrences[args.occurrenceId];
+    const occurrence = occurrenceById(doc, args.occurrenceId);
     if (occurrence === undefined) return { ok: false, message: "That shape is not on any diagram." };
-    if (!(args.width > 0) || !(args.height > 0)) {
-      return { ok: false, message: "A shape must be wider and taller than zero." };
-    }
     occurrence.x = args.x;
     occurrence.y = args.y;
     occurrence.width = args.width;
@@ -47,7 +45,7 @@ const setRoute: CommandDefinition<z.infer<typeof SetRouteArgs>> = {
   args: SetRouteArgs,
   newIds: () => [],
   run(doc, args) {
-    const route = doc.views.routes[args.routeId];
+    const route = routeById(doc, args.routeId);
     if (route === undefined) return { ok: false, message: "That flow line is not on any diagram." };
     route.points = args.points;
     return { ok: true, doc };

@@ -39,4 +39,17 @@ describe("createProject (SPEC.md section 4)", () => {
     const second = apply(first.doc, { type: "createProject", args: other }, "student");
     expect(second).toEqual({ ok: false, code: "refused", message: expect.stringMatching(/^[A-Z].*\.$/) });
   });
+
+  test("is refused by its own sentence on a document with only an occurrence (SPEC.md section 4)", () => {
+    const doc: ProjectDocument = {
+      ...emptyDocument(),
+      views: {
+        occurrences: { stray: { id: "stray", diagramId: "x", elementId: "y", x: 0, y: 0, width: 1, height: 1 } },
+        routes: {},
+      },
+    };
+    expect(apply(doc, { type: "createProject", args }, "student")).toEqual({
+      ok: false, code: "refused", message: "A project can be created only in an empty document.",
+    });
+  });
 });

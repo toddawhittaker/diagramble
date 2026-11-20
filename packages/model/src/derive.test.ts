@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import {
-  ancestors, childDiagram, diagramShowing, flowsTouching, isShownOn, occurrencesOn, processNumber, storeLabel,
+  ancestors, childDiagram, diagramShowing, diagrams, elementById, flowsTouching, isOffDiagramProcess, isShownOn,
+  occurrenceById, occurrencesOn, processNumber, routeById, storeLabel,
 } from "./derive.ts";
 import { emptyDocument, type ProjectDocument } from "./document.ts";
 
@@ -92,4 +93,40 @@ test("flowsTouching finds data flows at either end and control flows by target",
   expect(flowsTouching(doc, "p2").map((f) => f.id).sort()).toEqual(["bell", "fixed", "used"]);
   expect(flowsTouching(doc, "parts").map((f) => f.id)).toEqual(["used"]);
   expect(flowsTouching(doc, "p1")).toEqual([]);
+});
+
+test("a lookup by id finds only a record the document holds (SPEC.md section 3.1)", () => {
+  const doc = shop();
+  expect(elementById(doc, "p1")?.id).toBe("p1");
+  expect(elementById(doc, "toString")).toBeUndefined();
+  expect(elementById(doc, "hasOwnProperty")).toBeUndefined();
+  expect(occurrenceById(doc, "oP2")?.id).toBe("oP2");
+  expect(occurrenceById(doc, "toString")).toBeUndefined();
+  expect(routeById(doc, "toString")).toBeUndefined();
+  doc.views.routes.r1 = { id: "r1", flowId: "fixed", diagramId: "level0", sourceOccurrenceId: null, targetOccurrenceId: null, points: [] };
+  expect(routeById(doc, "r1")?.id).toBe("r1");
+  expect(routeById(doc, "nope")).toBeUndefined();
+});
+
+test("diagrams lists every diagram element (SPEC.md section 3.3)", () => {
+  expect(diagrams(shop()).map((d) => d.id).sort()).toEqual(["ctx", "level0", "level1"]);
+  expect(diagrams(emptyDocument())).toEqual([]);
+});
+
+test("an off-diagram end is a process that is not the decomposed one, above it or below it (SPEC.md section 3.4)", () => {
+  const doc = shop();
+  doc.elements.p3 = { ...common, id: "p3", kind: "process", name: "p3", parentProcessId: "p0", ordinal: 3, processDescription: "" };
+  doc.elements.p13 = { ...common, id: "p13", kind: "process", name: "p13", parentProcessId: "p1", ordinal: 3, processDescription: "" };
+  // level1 decomposes p1: p2 and p3 are outside it.
+  expect(isOffDiagramProcess(doc, "level1", "p2")).toBe(true);
+  expect(isOffDiagramProcess(doc, "level1", "p3")).toBe(true);
+  expect(isOffDiagramProcess(doc, "level1", "p1")).toBe(false); // the decomposed process
+  expect(isOffDiagramProcess(doc, "level1", "p0")).toBe(false); // above it
+  expect(isOffDiagramProcess(doc, "level1", "p12")).toBe(false); // below it
+  expect(isOffDiagramProcess(doc, "level1", "p13")).toBe(false);
+  expect(isOffDiagramProcess(doc, "level1", "rider")).toBe(false); // not a process
+  expect(isOffDiagramProcess(doc, "level1", "missing")).toBe(false);
+  expect(isOffDiagramProcess(doc, "ctx", "p2")).toBe(false); // decomposes nothing
+  expect(isOffDiagramProcess(doc, "rider", "p2")).toBe(false); // not a diagram
+  expect(isOffDiagramProcess(doc, "missing", "p2")).toBe(false);
 });

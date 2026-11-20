@@ -2,19 +2,10 @@
 // aliases, notes and a process's longer description.
 import { z } from "zod";
 import type { Element } from "../document.ts";
+import { elementById } from "../derive.ts";
 import { Id } from "../id.ts";
+import { Called } from "../names.ts";
 import type { AnyCommandDefinition, CommandDefinition } from "../registry.ts";
-
-const KIND_WORDS: Record<Element["kind"], string> = {
-  process: "process", externalEntity: "external entity", dataStore: "data store",
-  dataFlow: "data flow", controlFlow: "control flow", dataStructure: "data structure",
-  dataElement: "data element", diagram: "diagram",
-};
-
-/** An element as a student reads it: its name in quotes, or its kind when unnamed. */
-function called(element: Element): string {
-  return element.name === "" ? `the unnamed ${KIND_WORDS[element.kind]}` : `"${element.name}"`;
-}
 
 function missing(): { ok: false; message: string } {
   return { ok: false, message: "There is no element with that id." };
@@ -35,7 +26,7 @@ const rename: CommandDefinition<RenameArgs> = {
   args: RenameArgs,
   newIds: () => [],
   run(doc, args) {
-    const element = doc.elements[args.elementId];
+    const element = elementById(doc, args.elementId);
     if (!element) return missing();
     if (element.kind === "dataFlow") {
       return {
@@ -61,7 +52,7 @@ const describe: CommandDefinition<DescribeArgs> = {
   args: DescribeArgs,
   newIds: () => [],
   run(doc, args) {
-    const element = doc.elements[args.elementId];
+    const element = elementById(doc, args.elementId);
     if (!element) return missing();
     element.description = args.description;
     return { ok: true, doc };
@@ -81,7 +72,7 @@ const setAliases: CommandDefinition<SetAliasesArgs> = {
   args: SetAliasesArgs,
   newIds: () => [],
   run(doc, args) {
-    const element = doc.elements[args.elementId];
+    const element = elementById(doc, args.elementId);
     if (!element) return missing();
     element.aliases = args.aliases;
     return { ok: true, doc };
@@ -101,7 +92,7 @@ const setNotes: CommandDefinition<SetNotesArgs> = {
   args: SetNotesArgs,
   newIds: () => [],
   run(doc, args) {
-    const element = doc.elements[args.elementId];
+    const element = elementById(doc, args.elementId);
     if (!element) return missing();
     element.notes = args.notes;
     return { ok: true, doc };
@@ -121,10 +112,10 @@ const setProcessDescription: CommandDefinition<SetProcessDescriptionArgs> = {
   args: SetProcessDescriptionArgs,
   newIds: () => [],
   run(doc, args) {
-    const element = doc.elements[args.processId];
+    const element = elementById(doc, args.processId);
     if (!element) return missing();
     if (element.kind !== "process") {
-      return { ok: false, message: `${called(element)} is not a process, so it has no process description.` };
+      return { ok: false, message: `${Called(element)} is not a process, so it has no process description.` };
     }
     element.processDescription = args.text;
     return { ok: true, doc };

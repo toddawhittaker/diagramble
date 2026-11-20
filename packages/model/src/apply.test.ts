@@ -66,19 +66,31 @@ describe("apply (SPEC.md sections 3.6 and 4)", () => {
     expect(result).toEqual({ ok: false, code: "refused", message: expect.stringMatching(sentence) });
   });
 
-  test("a result that breaks an invariant is refused with the violation's ids (SPEC.md section 3.4)", () => {
-    // An occurrence of an element that does not exist: createProject leaves it, so the
+  test("a result that breaks an invariant is refused with a fixed sentence and the violation's ids (SPEC.md section 3.4)", () => {
+    // An occurrence of an element that does not exist: moving it leaves it, so the
     // view consistency check refuses the result.
     const doc: ProjectDocument = {
       ...emptyDocument(),
+      settings: { ...emptyDocument().settings, topDiagramId: "ctx" },
+      elements: {
+        ctx: {
+          kind: "diagram", id: "ctx", name: "Context diagram", description: "", aliases: [], notes: "",
+          origin: "student", diagramKind: "context", decomposesProcessId: null,
+        },
+      },
       views: {
         occurrences: { stray: { id: "stray", diagramId: "ctx", elementId: "ghost", x: 0, y: 0, width: 1, height: 1 } },
         routes: {},
       },
     };
-    const result = apply(doc, create, "student");
-    expect(result).toMatchObject({ ok: false, code: "refused", message: expect.stringMatching(sentence) });
-    expect(result.ok ? [] : result.ids).toContain("stray");
+    const move = { occurrenceId: "stray", x: 5, y: 5, width: 2, height: 2 };
+    const result = apply(doc, { type: "moveOccurrence", args: move }, "student");
+    expect(result).toMatchObject({
+      ok: false,
+      code: "refused",
+      message: "This change would leave the project in a state the model does not allow.",
+    });
+    expect(result.ok ? [] : result.ids).toEqual(["stray", "ghost"]);
   });
 
   test("never changes its input", () => {
