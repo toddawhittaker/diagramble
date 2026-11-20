@@ -34,6 +34,28 @@ account with
 the command prints the new password once. `set-password`, `disable` and `enable` work
 the same way, and `--stdin` reads a password instead of generating one.
 
+To try the Canvas launch, run the mock LTI 1.3 platform:
+
+```
+npm start --workspace @diagramble/mock-lti -- --tool-url <app origin> [--public-url <mock's address>] [--keys-url <key set address>] [--port 4000] [--host 127.0.0.1]
+```
+
+It serves a launch page and a course page that frames the app, and prints the
+`LTI_*` lines the app needs. `--public-url` defaults to `http://localhost:<port>`
+and `--keys-url` to the public address plus `/jwks`; set `--keys-url` when the app
+reaches the mock by another name, such as a Docker service name. Make the tool's
+key with `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048` and put it
+in `.env` as one double-quoted line, keeping the `BEGIN PRIVATE KEY` and
+`END PRIVATE KEY` lines and writing `\n` for each line break, which Compose expands:
+
+```
+LTI_TOOL_KEY="<BEGIN line>\n<key lines, each followed by \n>\n<END line>\n"
+```
+
+`compose.yaml` does not pass the `LTI_*` variables to the app yet, so list them
+under the app's `environment` in an uncommitted `compose.override.yaml`, which Compose
+reads on its own.
+
 `npm test` measures coverage and fails when it is under 75% for lines, branches
 and functions. Node's built-in test coverage checks the scripts' own tests, over
 the scripts together. Vitest with the V8 provider checks the five workspaces, one
