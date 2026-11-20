@@ -15,9 +15,10 @@ function page(title: string, body: string): string {
 <html lang="en">
 <head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <style>body{font-family:system-ui,sans-serif;max-width:40rem;margin:2rem auto;padding:0 1rem;line-height:1.5}
 label{display:block;margin-top:1rem;font-weight:600}select,button{font:inherit;margin-top:.25rem}
-button{margin-top:1.5rem;padding:.5rem 1rem}iframe{width:100%;height:36rem;border:2px solid #555}</style>
+button{margin-top:1.5rem;padding:.5rem 1rem}iframe{width:100%;height:min(36rem, 80vh);border:2px solid #555}</style>
 </head>
 <body>
 ${body}
@@ -62,10 +63,13 @@ export function autoPostPage(action: string, fields: Record<string, string>): st
     .join("\n");
   return page(
     "Continuing to Diagramble",
-    `<form id="post" method="post" action="${escapeHtml(action)}">
+    `<main>
+<p>Continuing to Diagramble…</p>
+<form id="post" method="post" action="${escapeHtml(action)}">
 ${inputs}
 <noscript><button type="submit">Continue</button></noscript>
 </form>
+</main>
 <script>document.getElementById("post").submit();</script>`,
   );
 }

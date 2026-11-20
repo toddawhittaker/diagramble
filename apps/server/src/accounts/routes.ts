@@ -136,7 +136,19 @@ export function accountRoutes(
   app.post("/sign-out", async (request, reply) => {
     const sent = request.cookies[cookie];
     if (sent) await endSession(db, sent);
-    const { maxAge: _maxAge, ...clear } = options;
-    return reply.clearCookie(cookie, clear).code(303).header("location", "/sign-in").send();
+    // Both cookies of this name go: the password one and a launch's partitioned one.
+    return reply
+      .header("set-cookie", [
+        app.serializeCookie(cookie, "", {
+          ...options,
+          secure: options.secure === true,
+          maxAge: 0,
+          expires: new Date(0),
+        }),
+        app.serializeCookie(cookie, "", clearLaunchCookie),
+      ])
+      .code(303)
+      .header("location", "/sign-in")
+      .send();
   });
 }

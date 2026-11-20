@@ -95,9 +95,13 @@ async function verifySignature(
   }
 }
 
-/** The audience names this client, and with several audiences `azp` does too. */
+/**
+ * The audience names this client; with several audiences `azp` must be present, and
+ * whenever `azp` is present it must name this client too.
+ */
 function audienceMatches(claims: Record<string, unknown>, clientId: string): boolean {
   const aud = claims.aud;
+  if (claims.azp !== undefined && claims.azp !== clientId) return false;
   if (Array.isArray(aud)) {
     if (!aud.includes(clientId)) return false;
     return aud.length === 1 || claims.azp === clientId;

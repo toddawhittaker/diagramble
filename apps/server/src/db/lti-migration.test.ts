@@ -177,3 +177,13 @@ describe("0002_lti: course_members", () => {
     expect(await db.selectFrom("accounts").select("id").where("id", "=", accountB).execute()).toHaveLength(1);
   });
 });
+
+describe("0002_lti: lti_login_states", () => {
+  test("indexes expires_at", async () => {
+    const result = await sql<{ indexdef: string }>`
+      select indexdef from pg_indexes where tablename = 'lti_login_states'`.execute(db);
+    expect(result.rows.map((r) => r.indexdef)).toEqual(
+      expect.arrayContaining([expect.stringMatching(/USING btree \(expires_at\)$/)]),
+    );
+  });
+});

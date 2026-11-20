@@ -6,7 +6,7 @@ export function send(res: ServerResponse, status: number, type: string, body: st
   res.writeHead(status, {
     "content-type": type,
     "cache-control": "no-store",
-    "referrer-policy": "no-referrer",
+    "referrer-policy": "strict-origin-when-cross-origin",
   });
   res.end(body);
 }
