@@ -120,6 +120,7 @@ describe("POST /sign-in", () => {
     ["an invalid username", { username: "../ada", password: PASSWORD }],
     ["a missing password", { username: "ada" }],
     ["an over-long password", { username: "ada", password: "x".repeat(1025) }],
+    ["an over-long username", { username: "a".repeat(257), password: PASSWORD }],
     ["an empty body", {}],
   ])("%s gets the same refusal, with the username kept", async (_name, body: Record<string, string>) => {
     const response = await signIn(body);
@@ -223,6 +224,49 @@ describe("the limiter", () => {
       await limited.close();
     }
   });
+});
+
+test("an over-long invalid username is counted under its first 256 characters, lowercased", async () => {
+  const keys: string[] = [];
+  const recording = { ...openLimiter, recordFailure: (username: string) => void keys.push(username) };
+  const limited = await buildServer({ db: testDb.db, settings, limiter: recording });
+  try {
+    await limited.inject({
+      method: "POST",
+      url: "/sign-in",
+      headers: { origin: ORIGIN, "content-type": FORM },
+      payload: new URLSearchParams({ username: "B".repeat(300), password: "x" }).toString(),
+    });
+    expect(keys).toEqual(["b".repeat(256)]);
+  } finally {
+    await limited.close();
+  }
+});
+
+test("request logs carry neither the cookie nor the body", async () => {
+  const lines: string[] = [];
+  const logged = await buildServer({
+    db: testDb.db,
+    settings,
+    limiter: openLimiter,
+    logger: { stream: { write: (line) => void lines.push(line) } },
+  });
+  try {
+    const response = await logged.inject({
+      method: "POST",
+      url: "/sign-in",
+      headers: { origin: ORIGIN, "content-type": FORM, cookie: `${COOKIE}=secret-token-value` },
+      payload: new URLSearchParams({ username: "ada", password: PASSWORD }).toString(),
+    });
+    expect(response.statusCode).toBe(303);
+    const log = lines.join("");
+    expect(log).toContain("/sign-in");
+    expect(log).not.toContain("secret-token-value");
+    expect(log).not.toContain(PASSWORD);
+    expect(log).not.toContain(sessionCookie(response)!.value);
+  } finally {
+    await logged.close();
+  }
 });
 
 describe("POST /sign-out", () => {

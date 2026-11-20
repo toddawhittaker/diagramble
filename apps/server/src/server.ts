@@ -19,7 +19,8 @@ export interface ServerOptions {
   /** The clock, in milliseconds; the tests move it. */
   now?: () => number;
   limiter?: ReturnType<typeof createSignInLimiter>;
-  logger?: boolean;
+  /** Request logging; `stream` lets the tests read the lines. */
+  logger?: boolean | { stream: { write: (line: string) => void } };
 }
 
 export async function buildServer({
@@ -31,7 +32,17 @@ export async function buildServer({
 }: ServerOptions): Promise<FastifyInstance> {
   const hops = settings.trustProxyHops;
   // Trust the nearest `hops` proxies, as a number would; Fastify's types take no number.
-  const app = Fastify({ trustProxy: (_address, hop) => hop < hops, logger });
+  const app = Fastify({
+    trustProxy: (_address, hop) => hop < hops,
+    logger: logger && {
+      ...(typeof logger === "object" ? logger : {}),
+      // Only the method and path: never the headers, so never the session cookie, and never the body.
+      serializers: {
+        req: (request: { method: string; url: string }) => ({ method: request.method, url: request.url }),
+        res: (reply: { statusCode: number }) => ({ statusCode: reply.statusCode }),
+      },
+    },
+  });
   await app.register(formbody);
   // Awaited so its cookie parsing runs before the guard's hook.
   await app.register(cookie);

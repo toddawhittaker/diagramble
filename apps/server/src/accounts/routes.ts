@@ -20,8 +20,11 @@ export const REFUSED =
 const PAGE_POLICY =
   "default-src 'none'; style-src 'self'; img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'";
 
+/** Longer usernames are refused like any bad body, so failure counts stay keyed by short strings. */
+const MAX_USERNAME = 256;
+
 const signInBody = z.object({
-  username: z.string(),
+  username: z.string().max(MAX_USERNAME),
   password: z.string().max(1024),
 });
 
@@ -88,7 +91,7 @@ export function accountRoutes(
 
   app.post("/sign-in", async (request, reply) => {
     const username = rawUsername(request.body);
-    const limitKey = normalizeUsername(username) ?? username.toLowerCase();
+    const limitKey = normalizeUsername(username) ?? username.slice(0, MAX_USERNAME).toLowerCase();
     const address = addressKey(request.ip);
 
     const limit = limiter.check(limitKey, address);
