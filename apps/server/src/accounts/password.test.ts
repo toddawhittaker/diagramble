@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import {
   generatePassword,
   hashPassword,
@@ -7,6 +7,9 @@ import {
   verifyAgainstDummy,
   verifyPassword,
 } from "./password.ts";
+
+// Several scrypt hashes in one test can outlast the default 5 s while the suite runs in parallel.
+vi.setConfig({ testTimeout: 20_000, hookTimeout: 20_000 });
 
 const STORED_FORM = /^\$scrypt\$ln=15,r=8,p=3\$[A-Za-z0-9_-]+\$[A-Za-z0-9_-]+$/;
 

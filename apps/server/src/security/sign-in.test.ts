@@ -2,7 +2,7 @@
 // success goes to / and nowhere else.
 
 import type { FastifyInstance } from "fastify";
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import { setDisabled } from "../accounts/store.ts";
 import { createTestDb, type TestDb } from "../db/testing.ts";
 import { buildServer } from "../server.ts";
@@ -18,12 +18,14 @@ import {
   signIn,
 } from "./harness.ts";
 
+// Several scrypt hashes in one test can outlast the default 5 s while the suite runs in parallel.
+vi.setConfig({ testTimeout: 20_000, hookTimeout: 20_000 });
+
 const SENTENCE = "That username and password do not match.";
 
 const limitless = {
-  check: () => ({ refused: false as const, delayMs: 0 }),
-  recordFailure: () => {},
-  recordSuccess: () => {},
+  attempt: () => ({ refused: false as const, delayMs: 0 }),
+  succeeded: () => {},
 };
 
 let testDb: TestDb;

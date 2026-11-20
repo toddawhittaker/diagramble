@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import type { FastifyInstance, LightMyRequestResponse } from "fastify";
-import { afterAll, beforeAll, beforeEach, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { hashPassword } from "./accounts/password.ts";
 import { NO_MATCH, REFUSED } from "./accounts/routes.ts";
 import { hashToken } from "./accounts/sessions.ts";
@@ -11,6 +11,9 @@ import { createTestDb, type TestDb } from "./db/testing.ts";
 import { OPEN_ROUTES, ORIGIN_EXEMPT_ROUTES } from "./guard.ts";
 import { buildServer } from "./server.ts";
 import type { Settings } from "./settings.ts";
+
+// Several scrypt hashes in one test can outlast the default 5 s while the suite runs in parallel.
+vi.setConfig({ testTimeout: 20_000, hookTimeout: 20_000 });
 
 const ORIGIN = "https://app.example.edu";
 const COOKIE = "__Host-diagramble-session";
@@ -276,7 +279,7 @@ test("parallel wrong passwords for one username: only the limit's number reach t
   } finally {
     await limited.close();
   }
-}, 30_000);
+});
 
 test("request logs carry neither the cookie nor the body", async () => {
   const lines: string[] = [];

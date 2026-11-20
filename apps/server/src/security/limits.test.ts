@@ -20,6 +20,9 @@ import {
   signIn,
 } from "./harness.ts";
 
+// Several scrypt hashes in one test can outlast the default 5 s while the suite runs in parallel.
+vi.setConfig({ testTimeout: 20_000, hookTimeout: 20_000 });
+
 const WINDOW_MS = 15 * 60 * 1000;
 const SENTENCE = "That username and password do not match.";
 
@@ -53,8 +56,8 @@ async function limitedServer(): Promise<{ app: FastifyInstance; time: { now: num
     now,
     limiter: {
       ...real,
-      check(username, address) {
-        const result = real.check(username, address);
+      attempt(username, address) {
+        const result = real.attempt(username, address);
         return result.refused ? result : { refused: false, delayMs: 0 };
       },
     },
@@ -192,7 +195,7 @@ describe.concurrent("the client address", () => {
       now,
       limiter: {
         ...real,
-        check(username, address) {
+        attempt(_username, address) {
           seen.push(address);
           return { refused: false, delayMs: 0 };
         },
@@ -216,12 +219,11 @@ describe.concurrent("the client address", () => {
       settings: makeSettings(HTTPS_ORIGIN, staticDir, 1),
       now,
       limiter: {
-        check(_username, address) {
+        attempt(_username, address) {
           seen.push(address);
           return { refused: false, delayMs: 0 };
         },
-        recordFailure: () => {},
-        recordSuccess: () => {},
+        succeeded: () => {},
       },
     });
     apps.push(app);

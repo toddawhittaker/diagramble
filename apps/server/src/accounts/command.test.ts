@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { Readable, Writable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { sql } from "kysely";
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import { type TestDb, createTestDb, requireDatabaseUrl } from "../db/testing.ts";
 import { type CommandIo, run } from "./command.ts";
 import { verifyPassword } from "./password.ts";
@@ -11,6 +11,9 @@ import {
   findPasswordMethod,
   loadSession,
 } from "./store.ts";
+
+// Several scrypt hashes in one test can outlast the default 5 s while the suite runs in parallel.
+vi.setConfig({ testTimeout: 20_000, hookTimeout: 20_000 });
 
 let testDb: TestDb;
 let db: TestDb["db"];

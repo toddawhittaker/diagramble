@@ -3,7 +3,7 @@
 
 import { createHash } from "node:crypto";
 import type { FastifyInstance } from "fastify";
-import { afterAll, beforeAll, beforeEach, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { setDisabled } from "../accounts/store.ts";
 import { createTestDb, type TestDb } from "../db/testing.ts";
 import { buildServer } from "../server.ts";
@@ -21,12 +21,14 @@ import {
   signIn,
 } from "./harness.ts";
 
+// Several scrypt hashes in one test can outlast the default 5 s while the suite runs in parallel.
+vi.setConfig({ testTimeout: 20_000, hookTimeout: 20_000 });
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const limitless = {
-  check: () => ({ refused: false as const, delayMs: 0 }),
-  recordFailure: () => {},
-  recordSuccess: () => {},
+  attempt: () => ({ refused: false as const, delayMs: 0 }),
+  succeeded: () => {},
 };
 
 let testDb: TestDb;
