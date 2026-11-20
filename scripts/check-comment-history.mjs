@@ -169,7 +169,7 @@ const lineAt = (src, index) => src.slice(0, index).split("\n").length;
 const TITLE = /\s*(["'`])((?:\\.|(?!\1)[^\\])*?)\1/y;
 
 // Returns the index past the parenthesis group opening at start, skipping
-// strings and comments inside it; src.length when it is never closed.
+// strings, regex literals and comments inside it; src.length when it is never closed.
 function skipParens(src, start) {
 	let depth = 0;
 	let i = start;
@@ -189,6 +189,8 @@ function skipParens(src, start) {
 		} else if (ch === "/" && src[i + 1] === "*") {
 			const end = src.indexOf("*/", i + 2);
 			i = end === -1 ? src.length : end + 2;
+		} else if (ch === "/" && regexAllowed(src, i)) {
+			i = skipRegex(src, i);
 		} else {
 			i++;
 		}
