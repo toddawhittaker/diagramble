@@ -19,7 +19,8 @@ export {
   applyPatch, diff, escapePointerToken,
   type JsonObject, type JsonValue, type Patch, type PatchOperation, type PatchResult,
 } from "./patch.ts";
-export { findViolations, type Violation } from "./invariants.ts";
+export { findViolations, isEmpty, type Violation } from "./invariants.ts";
 export {
-  ancestors, childDiagram, diagramShowing, flowsTouching, isShownOn, occurrencesOn, processNumber, storeLabel,
+  ancestors, childDiagram, diagramShowing, diagrams, elementById, flowsTouching, isOffDiagramProcess, isShownOn,
+  occurrenceById, occurrencesOn, processNumber, routeById, storeLabel,
 } from "./derive.ts";

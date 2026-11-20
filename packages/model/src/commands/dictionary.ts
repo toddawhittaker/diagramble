@@ -2,15 +2,11 @@
 // elements, and what a structure is composed of. A structure may contain itself or
 // form a cycle with another; the model allows it and a rule may report it.
 import { z } from "zod";
-import type { Element } from "../document.ts";
+import { elementById } from "../derive.ts";
 import { Id } from "../id.ts";
 import { AllowedValue, Component } from "../kinds/dictionary.ts";
+import { called, Called } from "../names.ts";
 import type { AnyCommandDefinition, CommandDefinition } from "../registry.ts";
-
-/** An element as a student reads it: its name in quotes, or its kind when unnamed. */
-function called(element: Element): string {
-  return element.name === "" ? `the unnamed ${element.kind}` : `"${element.name}"`;
-}
 
 const DefineDataArgs = z.strictObject({
   id: Id.meta({ description: "The new data definition's id." }),
@@ -47,29 +43,29 @@ const setComposition: CommandDefinition<SetCompositionArgs> = {
   args: SetCompositionArgs,
   newIds: () => [],
   run(doc, args) {
-    const structure = doc.elements[args.structureId];
+    const structure = elementById(doc, args.structureId);
     if (structure?.kind !== "dataStructure") {
       return {
         ok: false,
         message: structure
-          ? `${called(structure)} is not a data structure, so it has no parts.`
+          ? `${Called(structure)} is not a data structure, so it has no parts.`
           : "There is no data structure with that id.",
       };
     }
     for (const component of args.components) {
-      const part = doc.elements[component.dataId];
+      const part = elementById(doc, component.dataId);
       if (part?.kind !== "dataStructure" && part?.kind !== "dataElement") {
         return {
           ok: false,
           message: part
-            ? `${called(part)} is not a data structure or a data element, so it cannot be part of ${called(structure)}.`
+            ? `${Called(part)} is not a data structure or a data element, so it cannot be part of ${called(structure)}.`
             : `A part of ${called(structure)} is not an existing data structure or data element.`,
         };
       }
       if (component.limit !== null && component.occurs !== "many") {
         return {
           ok: false,
-          message: `${called(part)} has a limit but does not occur "many" times; a limit applies only to a part that occurs many times.`,
+          message: `${Called(part)} has a limit but does not occur "many" times; a limit applies only to a part that occurs many times.`,
         };
       }
     }
@@ -92,12 +88,12 @@ const setDataElement: CommandDefinition<SetDataElementArgs> = {
   args: SetDataElementArgs,
   newIds: () => [],
   run(doc, args) {
-    const element = doc.elements[args.elementId];
+    const element = elementById(doc, args.elementId);
     if (element?.kind !== "dataElement") {
       return {
         ok: false,
         message: element
-          ? `${called(element)} is not a data element, so it has no type or allowed values.`
+          ? `${Called(element)} is not a data element, so it has no type or allowed values.`
           : "There is no data element with that id.",
       };
     }

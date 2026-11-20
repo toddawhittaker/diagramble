@@ -2,6 +2,7 @@
 // occurrence, and the project settings.
 import { z } from "zod";
 import { Id } from "../id.ts";
+import { isEmpty } from "../invariants.ts";
 import type { CommandDefinition } from "../registry.ts";
 
 const CreateProjectArgs = z.strictObject({
@@ -19,7 +20,7 @@ const createProject: CommandDefinition<CreateProjectArgs> = {
   args: CreateProjectArgs,
   newIds: (args) => [args.contextDiagramId, args.processId, args.occurrenceId],
   run(doc, args, { origin }) {
-    if (Object.keys(doc.elements).length > 0) {
+    if (!isEmpty(doc)) {
       return { ok: false, message: "A project can be created only in an empty document." };
     }
     const text = { description: "", aliases: [], notes: "", origin };

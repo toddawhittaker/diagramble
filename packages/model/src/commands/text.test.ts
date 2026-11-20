@@ -129,6 +129,13 @@ describe("setProcessDescription (SPEC.md section 3.3)", () => {
     expect(message).toContain("not a process");
     refusal(shop(), { type: "setProcessDescription", args: { processId: "nothing", text: "x" } });
   });
+
+  test("names an unnamed data flow in plain words", () => {
+    const message = refusal(shop(), { type: "setProcessDescription", args: { processId: "f1", text: "x" } });
+    expect(message).toMatch(/^[A-Z"]/);
+    expect(message).toContain("data flow");
+    expect(message).not.toContain("dataFlow");
+  });
 });
 
 describe("the registry", () => {

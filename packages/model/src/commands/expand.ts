@@ -2,10 +2,11 @@
 // process, with a new flow for each data flow that touches the process on its parent
 // diagram.
 import { z } from "zod";
-import { childDiagram, diagramShowing, occurrencesOn } from "../derive.ts";
+import { childDiagram, diagramShowing, elementById, occurrencesOn } from "../derive.ts";
 import type { ProjectDocument } from "../document.ts";
 import { Id } from "../id.ts";
 import type { DataFlow } from "../kinds/dfd.ts";
+import { KIND_WORDS } from "../names.ts";
 import type { CommandDefinition } from "../registry.ts";
 
 const FlowIds = z.strictObject({
@@ -27,22 +28,11 @@ const ExpandProcessArgs = z.strictObject({
 });
 type ExpandProcessArgs = z.infer<typeof ExpandProcessArgs>;
 
-const KIND_WORDS: Record<ProjectDocument["elements"][string]["kind"], string> = {
-  process: "process",
-  externalEntity: "external entity",
-  dataStore: "data store",
-  dataFlow: "data flow",
-  controlFlow: "control flow",
-  dataStructure: "data structure",
-  dataElement: "data element",
-  diagram: "diagram",
-};
-
 /** An element for a sentence: its kind and name, or its kind alone when it has no name. */
 function describe(doc: ProjectDocument, id: Id): string {
-  const element = doc.elements[id];
+  const element = elementById(doc, id);
   if (element === undefined) return `"${id}"`;
-  const label = element.kind === "dataFlow" ? (doc.elements[element.dataId]?.name ?? "") : element.name;
+  const label = element.kind === "dataFlow" ? (elementById(doc, element.dataId)?.name ?? "") : element.name;
   const kind = KIND_WORDS[element.kind];
   return label === "" ? `an unnamed ${kind}` : `${kind} "${label}"`;
 }
@@ -73,7 +63,7 @@ const expandProcess: CommandDefinition<ExpandProcessArgs> = {
     ...Object.values(args.occurrenceIds),
   ],
   run(doc, args, { origin }) {
-    const process = doc.elements[args.processId];
+    const process = elementById(doc, args.processId);
     if (process === undefined) {
       return { ok: false, message: `There is no process with the id "${args.processId}" to expand.` };
     }
@@ -112,7 +102,7 @@ const expandProcess: CommandDefinition<ExpandProcessArgs> = {
     const placedIds = [
       ...new Set(
         carried.map((c) => c.other).filter((id) => {
-          const kind = doc.elements[id]?.kind;
+          const kind = elementById(doc, id)?.kind;
           return kind === "externalEntity" || kind === "dataStore";
         }),
       ),

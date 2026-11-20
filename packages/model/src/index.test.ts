@@ -11,7 +11,8 @@ test("the package exports apply, the session, the registry, the patch and the ch
     "apply", "startSession", "applyInSession", "replay",
     "findCommand", "findQuery", "toolDefinitions", "diff", "applyPatch", "escapePointerToken",
     "findViolations", "processNumber", "storeLabel", "diagramShowing", "childDiagram", "ancestors",
-    "occurrencesOn", "isShownOn", "flowsTouching",
+    "occurrencesOn", "isShownOn", "flowsTouching", "diagrams", "isOffDiagramProcess", "isEmpty",
+    "elementById", "occurrenceById", "routeById",
   ]) expect(typeof (api as Record<string, unknown>)[name], name).toBe("function");
   expect(Array.isArray(api.commandDefinitions) && Array.isArray(api.queryDefinitions)).toBe(true);
 });
