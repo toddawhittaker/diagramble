@@ -146,7 +146,7 @@ balancing.
 | --- | --- | --- |
 | Process | `parentProcessId` (empty for process 0), `ordinal`, `processDescription` | Its number is built from ordinals: 0, then 1, 2, 3 on the level 0 diagram, then 1.1, 1.2 below process 1. The ordinal is the last part of the number. It defaults to the next free whole number among the processes with the same parent. It can be changed, so that a process can carry the number of its use case, as the textbook's examples do (Figure 4-20) |
 | External entity | None | May appear on many diagrams |
-| Data store | None | Its label (D1, D2) is derived from creation order. May appear on many diagrams |
+| Data store | `ordinal` | Its label is D and its ordinal: D1, D2. A new store's ordinal is one more than the highest any data store in the project has, and it is never renumbered, so a label in a student's report never shifts. Map key order is never used, because PostgreSQL's `jsonb` reorders keys. May appear on many diagrams |
 | Data flow | `diagramId`, `sourceId`, `targetId`, `dataId` | Belongs to exactly one diagram. Has one source and one target. Carries exactly one data definition. One end may be an off-diagram end (see below). A flow created by `expandProcess` may have one end empty ("unattached") until the student attaches it |
 | Control flow | `diagramId`, `targetId` | Its `name` is the event that starts a process, such as "End of Term". It has no source and carries no data. It is drawn as a dotted line (pages 156 to 157) |
 | Data structure | `components`: an ordered list of `{ dataId, occurs, limit }` where `occurs` is `once`, `optional` or `many` | A named group of data, such as "Order" |
@@ -210,7 +210,7 @@ A view records how elements appear on one diagram. It holds no meaning.
 | Record | Fields | Notes |
 | --- | --- | --- |
 | Node occurrence | `id`, `diagramId`, `elementId`, `x`, `y`, `width`, `height` | An external entity or data store may have several occurrences on one diagram |
-| Flow route | `flowId`, `sourceOccurrenceId`, `targetOccurrenceId`, `points` | Says which occurrence each end attaches to. An off-diagram end has no occurrence: its field is empty, and the note is drawn at the last point of the route. A control flow's route has no source occurrence |
+| Flow route | `id`, `flowId`, `diagramId`, `sourceOccurrenceId`, `targetOccurrenceId`, `points` | Says which occurrence each end attaches to. A route has its own identifier, so that the same collection can hold the entity relationship diagram's lines, which appear on several diagrams. In Release 0 each data flow and control flow has exactly one route, on its own diagram. An off-diagram end has no occurrence: its field is empty, and the note is drawn at the last point of the route. A control flow's route has no source occurrence |
 
 Symbols follow the Gane and Sarson style that the textbook uses (Figure 4-13). A process
 is a rounded rectangle with its number in a band across the top. A data store is an
@@ -220,22 +220,49 @@ square-cornered rectangle. Release 0 draws only this style.
 Removing the last occurrence of an external entity or data store leaves the element in
 the model as "unplaced". Deleting the element is a separate command.
 
+The model also checks that the views agree with the elements: every occurrence shows a
+process, external entity or data store on an existing diagram, a route is on its flow's
+diagram, and a route's occurrence for each end is on that diagram and shows that end, or
+is empty exactly when the end is unattached, off-diagram, or a control flow's source.
+
 ### 3.6 Storage form
 
 A project is one JSON document with four parts: `schemaVersion`, `settings`
-(section 3.7), `elements` and `views`. Elements are stored in a map keyed by `id`.
+(section 3.7), `elements` and `views`. Elements are stored in a map keyed by `id`, and
+`views` holds two maps, `occurrences` and `routes`, each keyed by its record's `id`.
 Section 7 depends on this form being stable and documented.
+
+```json
+{ "schemaVersion": 1,
+  "settings": { "name": "", "topDiagramId": "<id>", "showFindings": "always", "caseText": "" },
+  "elements": { "<id>": { "id": "<id>", "kind": "process", "...": "..." } },
+  "views": { "occurrences": { "<id>": { "...": "..." } }, "routes": { "<id>": { "...": "..." } } } }
+```
+
+- Every field is always present: an empty reference is `null`, empty text is `""`, and an
+  empty list is `[]`. Unknown fields are refused. A release that adds a field raises
+  `schemaVersion` (section 3.9).
+- An identifier is 1 to 64 letters, digits, `_` or `-`, and is never `__proto__`,
+  `constructor` or `prototype`, so a JSON Patch path needs no escaping.
+- The published JSON Schema is `packages/model/schema/project-v1.schema.json`. It is made
+  from the model's Zod schemas and committed, and a test fails when it falls out of date.
+  JSON Schema cannot say that a map key equals its record's `id`; the model's invariant
+  check enforces that.
 
 The command log is kept on the server, apart from the document:
 
 - The database holds each project as one JSON document in this storage form. Loading a
   project is one read, and saving it is one write.
 - Every accepted command is a row of a separate command-log table, keyed by project and
-  kept in order, with its resulting changes in JSON Patch form (RFC 6902). The course
-  dashboard's analytics read this table.
+  kept in order. A row holds the command, its `origin` (section 3.2), its resulting
+  changes in JSON Patch form (RFC 6902), and the inverse patch that undoes them. The
+  course dashboard's analytics read this table.
+- `undo` applies the inverse of the session's last entry and `redo` applies its patch
+  again. Each is logged as a row of its own, with the patch it applied.
 - Every few hundred commands, the server also stores a snapshot of the project's
-  document. Any earlier state is rebuilt by replaying commands from the nearest snapshot
-  before it.
+  document. Any earlier state is rebuilt by applying the stored patches from the nearest
+  snapshot before it, never by running the commands again, so a later change to a
+  command's behavior never changes an old project.
 - The log and the snapshots fall under the retention policy (section 1, "Data
   retention"). When retention deletes old commands, the state at the cut point is kept
   as a snapshot, so the project stays whole.
@@ -243,8 +270,9 @@ The command log is kept on the server, apart from the document:
 
 ### 3.7 Project settings
 
-A project has three settings. All exist so that a textbook exercise can be done as it
-is set.
+A project has its `name` and three settings. The name is the one the export file of
+section 3.9 is named after, and `createProject` sets it. The three settings exist so that
+a textbook exercise can be done as it is set.
 
 | Setting | Values | Notes |
 | --- | --- | --- |
@@ -428,28 +456,44 @@ and later as tool definitions for an AI model (section 7).
 
 | Command | Effect |
 | --- | --- |
-| `createProject` | Creates the context diagram and process 0. Given a starter case, it copies that case's content instead (section 3.8) |
-| `addExternalEntity`, `addDataStore`, `addProcess` | Creates the element and one occurrence on a given diagram |
+| `createProject` | Creates the context diagram and process 0, with one occurrence of process 0 on it, and sets the project's name. Accepted only on an empty document. Given a starter case, it copies that case's content instead (section 3.8) |
+| `addExternalEntity`, `addDataStore`, `addProcess` | Creates the element and one occurrence on a given diagram. `addProcess` is refused on the context diagram, which shows only process 0 |
 | `placeExisting` | Adds an occurrence of an existing external entity or data store to a diagram |
 | `addControlFlow` | Creates a control flow into a process on a diagram, with the starting event as its name |
 | `setProcessNumber` | Changes a process's ordinal. Refused if another process with the same parent already has it |
 | `addFlow` | Creates a flow on a diagram between two elements shown there, or between one element shown there and an off-diagram process. It carries an existing data definition, or a new data structure created from a given name. The new structure has no components, so DD-01 reports it until the student defines it |
 | `defineData` | Creates a data structure or data element |
 | `setComposition` | Replaces the component list of a data structure |
-| `rename`, `describe` | Changes the name or description of any element |
+| `setDataElement` | Sets a data element's type and allowed values |
+| `rename`, `describe` | Changes the name or description of any element. `rename` is refused on a data flow, whose label is the name of the data it carries |
 | `setAliases`, `setNotes` | Replaces the aliases or the notes of any element |
 | `setProcessDescription` | Sets the longer description of a process |
 | `setFlowData` | Changes which data definition a flow carries |
+| `reconnectFlow` | Attaches one end of a data flow, or moves it to another element, with the occurrence it attaches to. It is how the student attaches an inherited flow's unattached end |
 | `expandProcess` | Creates the child diagram for a process. Refused if the process already has one. For each data flow touching the process on the parent, it creates a new flow on the child diagram carrying the same data, left unattached to any child process. If the other end is an external entity or data store, that element is placed on the child diagram. If the other end is another process, it becomes an off-diagram end. Control flows are not carried down |
 | `carryDown` | For a process that already has a child diagram, brings down the flows that were added to the parent afterwards. A flow touching the process on the parent is brought down when no flow that crosses the edge of the child diagram in the same direction carries the same data definition. Each new flow is made as `expandProcess` makes it, with its inner end unattached. Flows whose data already arrives in parts are left alone, because they balance through the dictionary |
 | `setTopDiagram`, `setShowFindings`, `setCaseText` | Change the project settings of section 3.7 |
-| `removeOccurrence` | Removes one occurrence, and the flows attached to it on that diagram |
-| `deleteElement` | Deletes an element everywhere. Refused for a data definition that is still carried or used as a component, unless `cascade` is set |
+| `moveOccurrence`, `setRoute` | Change an occurrence's position and size, or a route's bend points. They change the views only |
+| `removeOccurrence` | Removes one occurrence, and the flows attached to it on that diagram. Refused for a process's occurrence, because a process is shown on exactly one diagram |
+| `deleteElement` | Deletes an element everywhere, with its occurrences and the flows that touch it. Deleting a process deletes its whole branch: its child diagram and everything on it and below. Elements shown only there stay as unplaced. A data flow diagram is refused while it shows a process; deleting the process it decomposes is the way to remove it. A data definition that is still carried or used as a component is refused unless `cascade` is set, which deletes the flows that carry it and takes it out of every component list. The context diagram and process 0 are never deleted |
 | `undo`, `redo` | Steps through the log, within the current editing session only (section 3.9). Edits made before a reload or a takeover cannot be undone |
 
 Every command that creates an item carries the new item's `id`, made as section 3.2's
 identifier rules say. A command that creates more than one item, such as `addFlow` with a
-new data structure or `expandProcess`, carries one identifier for each.
+new data structure or `expandProcess`, carries one identifier for each, including the
+identifiers of the occurrences and routes it makes.
+
+A command is `{ type, args }`. Its arguments are a strict schema with a description on
+each field, so the same schema checks the command and becomes an AI tool's input
+(section 7 item 2). Who sent the command sets the `origin` of what it creates; no
+command's arguments carry it, so neither a student nor an AI model can claim to be a
+starter case or an agent.
+
+`apply` either returns the new document with its patch and inverse, or refuses with a
+code and one plain sentence. The code is `invalid` when the arguments fail their schema,
+`idInUse` when a new item's identifier is already in the document, with the clashing
+identifiers, so the browser can make new ones and send the command again (section 3.2),
+and `refused` when the command's own condition or an invariant of section 3.4 fails.
 
 `expandProcess` leaves each inherited flow with one end attached to the outside element
 or off-diagram note, and the other end attached to the child diagram's boundary. Until the student attaches
