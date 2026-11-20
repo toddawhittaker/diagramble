@@ -24,15 +24,18 @@ describe("migrateToLatest", () => {
     expect(applied.rows[0]?.name).toBe("0001_accounts");
   });
 
-  test("makes the three tables and the two session indexes", async () => {
+  test("makes the account and course tables and the two session indexes", async () => {
     const tables = await sql<{ table_name: string }>`
       select table_name from information_schema.tables where table_schema = 'public' order by table_name`.execute(
       testDb.db,
     );
     expect(tables.rows.map((r) => r.table_name)).toEqual([
       "accounts",
+      "course_members",
+      "courses",
       "kysely_migration",
       "kysely_migration_lock",
+      "lti_login_states",
       "sessions",
       "sign_in_methods",
     ]);

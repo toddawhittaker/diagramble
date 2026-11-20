@@ -7,7 +7,7 @@ import { z } from "zod";
 import type { Database } from "../db/schema.ts";
 import type { Settings } from "../settings.ts";
 import { normalizeUsername, verifyAgainstDummy, verifyPassword } from "./password.ts";
-import { cookieName, cookieOptions, endSession, startSession } from "./sessions.ts";
+import { clearingOptions, cookieName, cookieOptions, endSession, launchCookieOptions, startSession } from "./sessions.ts";
 import type { SignInLimiter } from "./sign-in-limit.ts";
 import { renderSignInPage, signInCss } from "./sign-in-page.ts";
 import { findPasswordMethod } from "./store.ts";
@@ -79,6 +79,7 @@ export function accountRoutes(
 ): void {
   const cookie = cookieName(settings);
   const options = cookieOptions(settings);
+  const clearLaunchCookie = clearingOptions(launchCookieOptions());
 
   app.get("/sign-in", async (request, reply) => {
     if (request.signedIn) return reply.code(303).header("location", "/").send();
@@ -110,13 +111,30 @@ export function accountRoutes(
     const sent = request.cookies[cookie];
     if (sent) await endSession(db, sent);
     const token = await startSession(db, method, new Date(now()));
-    return reply.setCookie(cookie, token, options).code(303).header("location", "/").send();
+    // A launch's partitioned cookie has the same name; clear it so the browser never
+    // sends two (SPEC.md section 1, "Canvas launch"). The plug-in keeps one cookie per
+    // name, so both lines are written here, the new session first.
+    return reply
+      .header("set-cookie", [
+        app.serializeCookie(cookie, token, options),
+        app.serializeCookie(cookie, "", clearLaunchCookie),
+      ])
+      .code(303)
+      .header("location", "/")
+      .send();
   });
 
   app.post("/sign-out", async (request, reply) => {
     const sent = request.cookies[cookie];
     if (sent) await endSession(db, sent);
-    const { maxAge: _maxAge, ...clear } = options;
-    return reply.clearCookie(cookie, clear).code(303).header("location", "/sign-in").send();
+    // Both cookies of this name go: the password one and a launch's partitioned one.
+    return reply
+      .header("set-cookie", [
+        app.serializeCookie(cookie, "", clearingOptions(options)),
+        app.serializeCookie(cookie, "", clearLaunchCookie),
+      ])
+      .code(303)
+      .header("location", "/sign-in")
+      .send();
   });
 }

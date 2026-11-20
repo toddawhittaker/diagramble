@@ -28,18 +28,33 @@ export const OPEN_ROUTES: readonly string[] = [
   "GET /health",
   // Sign-out only ends a session, so it needs none; an expired cookie still gets cleared.
   "POST /sign-out",
+  // The Canvas launch signs a person in, so it cannot need a session (SPEC.md section 1, "Canvas launch").
+  "GET /lti/login",
+  "POST /lti/login",
+  "POST /lti/launch",
+  "GET /lti/jwks",
 ];
 
 /** Routes, as "METHOD url", that prove themselves another way and skip the Origin check. */
-export const ORIGIN_EXEMPT_ROUTES: readonly string[] = [];
+export const ORIGIN_EXEMPT_ROUTES: readonly string[] = [
+  // The login grants nothing; it only stores a login state and redirects to the platform.
+  "POST /lti/login",
+  // The launch carries a signed token, and its handler requires the platform's own Origin.
+  "POST /lti/launch",
+];
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 /**
  * What a reply carries unless it sets its own: scripts only from the app's own origin, no
- * plug-ins, and no framing (SPEC.md section 1, "Host names").
+ * plug-ins, and framing only by the Canvas hosts when the launch is set up, else none
+ * (SPEC.md section 1, "Host names" and "Canvas launch"). No X-Frame-Options, which
+ * cannot list sites.
  */
-const DEFAULT_POLICY = "script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'";
+export function defaultPolicy(settings: Pick<Settings, "lti">): string {
+  const ancestors = settings.lti ? settings.lti.frameOrigins.join(" ") : "'none'";
+  return `script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors ${ancestors}`;
+}
 
 /** The routed URL, never the raw one, so a query string or path trick cannot match. */
 function routeKey(request: FastifyRequest): string | undefined {
@@ -80,12 +95,13 @@ export function installGuard(
   const cookie = cookieName(settings);
   // Over https, browsers are told to use nothing else for a year (SPEC.md section 1, "Host names").
   const https = settings.appOrigin.startsWith("https:");
+  const policy = defaultPolicy(settings);
   app.decorateRequest("signedIn", null);
 
   app.addHook("onRequest", async (request, reply) => {
     reply.header("referrer-policy", "strict-origin-when-cross-origin");
     reply.header("x-content-type-options", "nosniff");
-    reply.header("content-security-policy", DEFAULT_POLICY);
+    reply.header("content-security-policy", policy);
     if (https) reply.header("strict-transport-security", "max-age=31536000");
 
     if (!originAllowed(request, settings.appOrigin)) {

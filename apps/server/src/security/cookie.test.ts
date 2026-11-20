@@ -79,8 +79,10 @@ describe("the cookie's attributes", () => {
   test("over https: __Host- prefix, HttpOnly, Secure, Path=/, SameSite=Lax, no Domain, 24 hours", async () => {
     const response = await signIn(https, HTTPS_ORIGIN, { username: "ada", password: PASSWORD });
     expect(response.statusCode).toBe(303);
+    // The second line clears a launch's partitioned cookie of the same name.
     const lines = setCookieLines(response);
-    expect(lines).toHaveLength(1);
+    expect(lines).toHaveLength(2);
+    expect(lines[1]).toMatch(/=; .*Partitioned/);
     const attributes = lines[0]!.split(";").map((part) => part.trim());
     expect(attributes[0]).toMatch(/^__Host-diagramble-session=[A-Za-z0-9_-]+$/);
     expect(attributes).toContain("HttpOnly");
@@ -95,8 +97,10 @@ describe("the cookie's attributes", () => {
   test("over http on localhost: diagramble-session, HttpOnly, not Secure, otherwise the same", async () => {
     const response = await signIn(http, HTTP_ORIGIN, { username: "ada", password: PASSWORD });
     expect(response.statusCode).toBe(303);
+    // The second line clears a launch's partitioned cookie of the same name.
     const lines = setCookieLines(response);
-    expect(lines).toHaveLength(1);
+    expect(lines).toHaveLength(2);
+    expect(lines[1]).toMatch(/=; .*Partitioned/);
     const attributes = lines[0]!.split(";").map((part) => part.trim());
     expect(attributes[0]).toMatch(/^diagramble-session=[A-Za-z0-9_-]+$/);
     expect(attributes).toContain("HttpOnly");

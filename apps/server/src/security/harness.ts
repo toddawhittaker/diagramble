@@ -10,6 +10,7 @@ import { hashPassword } from "../accounts/password.ts";
 import { startSession } from "../accounts/sessions.ts";
 import { createPasswordAccount } from "../accounts/store.ts";
 import type { Database } from "../db/schema.ts";
+import type { LtiSettings } from "../lti/settings.ts";
 import type { Settings } from "../settings.ts";
 
 export const HTTPS_ORIGIN = "https://app.example.edu";
@@ -36,8 +37,9 @@ export function makeSettings(
   appOrigin: string,
   staticDir: string,
   trustProxyHops = 0,
+  lti: LtiSettings | null = null,
 ): Settings {
-  return { databaseUrl: "postgres://unused/x", appOrigin, port: 0, trustProxyHops, staticDir };
+  return { databaseUrl: "postgres://unused/x", appOrigin, port: 0, trustProxyHops, staticDir, lti };
 }
 
 /** Make a password account for each username, all with `PASSWORD`. */

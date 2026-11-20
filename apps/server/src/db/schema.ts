@@ -17,7 +17,7 @@ export interface AccountsTable {
 export interface SignInMethodsTable {
   id: Generated<string>;
   account_id: string;
-  kind: "password";
+  kind: "password" | "lti";
   issuer: string;
   subject: string;
   password_hash: string | null;
@@ -33,9 +33,41 @@ export interface SessionsTable {
   expires_at: Timestamp;
 }
 
+/** A login's state, kept by the SHA-256 hash of the state; the launch that returns it consumes the row. */
+export interface LtiLoginStatesTable {
+  state_hash: string;
+  nonce: string;
+  expires_at: Timestamp;
+  created_at: TimestampDefault;
+}
+
+/** A course on a platform: `context_id` is the platform's own ID for it, unique per issuer. */
+export interface CoursesTable {
+  id: Generated<string>;
+  issuer: string;
+  context_id: string;
+  title: string;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+}
+
+/** What a person is in a course; every launch refreshes the role and `last_launch_at`. */
+export type CourseRole = "student" | "instructor";
+
+export interface CourseMembersTable {
+  course_id: string;
+  account_id: string;
+  role: CourseRole;
+  first_launch_at: TimestampDefault;
+  last_launch_at: TimestampDefault;
+}
+
 /** Every table the server owns. Later epics add theirs here. */
 export interface Database {
   accounts: AccountsTable;
   sign_in_methods: SignInMethodsTable;
   sessions: SessionsTable;
+  lti_login_states: LtiLoginStatesTable;
+  courses: CoursesTable;
+  course_members: CourseMembersTable;
 }
