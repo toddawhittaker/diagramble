@@ -93,14 +93,14 @@ describe("moveOccurrence (SPEC.md sections 3.5 and 4.1)", () => {
     expect(before).toEqual(bakery());
   });
 
-  test.each([["width", 0], ["width", -5], ["height", 0], ["height", -1]])("is refused when %s is %d", (field, value) => {
+  test.each([["width", 0], ["width", -5], ["height", 0], ["height", -1]])("is invalid when %s is %d (SPEC.md section 3.5)", (field, value) => {
     const result = run(bakery(), "moveOccurrence", { ...args, [field]: value });
-    expect(result).toEqual({ ok: false, code: "refused", message: expect.stringMatching(/^[A-Z].*\.$/) });
+    expect(result).toEqual({ ok: false, code: "invalid", message: expect.stringContaining(`"${field}"`) });
   });
 
-  test("is refused when a size is not a number", () => {
+  test("is invalid when a size is not a number", () => {
     const result = run(bakery(), "moveOccurrence", { ...args, width: Number.NaN });
-    expect(result.ok).toBe(false);
+    expect(result).toMatchObject({ ok: false, code: "invalid" });
   });
 
   test("accepts negative positions", () => {

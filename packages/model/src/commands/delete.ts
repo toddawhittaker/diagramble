@@ -2,24 +2,9 @@
 import { z } from "zod";
 import type { Element, ProjectDocument } from "../document.ts";
 import { Id } from "../id.ts";
-import { occurrencesOn } from "../derive.ts";
+import { elementById, occurrenceById, occurrencesOn } from "../derive.ts";
+import { called } from "../names.ts";
 import type { CommandDefinition } from "../registry.ts";
-
-const KIND_WORDS: Record<Element["kind"], string> = {
-  process: "process",
-  externalEntity: "external entity",
-  dataStore: "data store",
-  dataFlow: "data flow",
-  controlFlow: "control flow",
-  dataStructure: "data structure",
-  dataElement: "data element",
-  diagram: "diagram",
-};
-
-/** How a message names an element: by its name, or by its kind while it has none. */
-function label(element: Element): string {
-  return element.name === "" ? `the unnamed ${KIND_WORDS[element.kind]}` : `"${element.name}"`;
-}
 
 /**
  * Deletes the seed elements and everything that cannot outlive them: the flows on a
@@ -28,6 +13,9 @@ function label(element: Element): string {
  * deleted data definition leaves every component list.
  */
 function removeWithDependents(doc: ProjectDocument, seed: Iterable<Id>): void {
+  // One pass is enough (SPEC.md section 4.1): every seed is decided before the pass, and
+  // a flow added to the set cannot make another flow need removing, because a flow's
+  // ends, diagram and data are never flows.
   const doomed = new Set<Id>(seed);
   for (const element of Object.values(doc.elements)) {
     if (element.kind === "dataFlow") {
@@ -106,17 +94,17 @@ const deleteElement: CommandDefinition<DeleteElementArgs> = {
   args: DeleteElementArgs,
   newIds: () => [],
   run(doc, args) {
-    const element = Object.hasOwn(doc.elements, args.elementId) ? doc.elements[args.elementId] : undefined;
+    const element = elementById(doc, args.elementId);
     if (element === undefined) {
       return { ok: false, message: `There is no element with the id "${args.elementId}".` };
     }
-    const name = label(element);
+    const name = called(element);
     switch (element.kind) {
       case "diagram": {
         if (element.diagramKind === "context") {
           return { ok: false, message: `The context diagram ${name} cannot be deleted because every project has one.` };
         }
-        const showsProcess = occurrencesOn(doc, element.id).some((o) => doc.elements[o.elementId]?.kind === "process");
+        const showsProcess = occurrencesOn(doc, element.id).some((o) => elementById(doc, o.elementId)?.kind === "process");
         if (showsProcess) {
           return {
             ok: false,
@@ -167,17 +155,15 @@ const removeOccurrence: CommandDefinition<RemoveOccurrenceArgs> = {
   args: RemoveOccurrenceArgs,
   newIds: () => [],
   run(doc, args) {
-    const occurrence = Object.hasOwn(doc.views.occurrences, args.occurrenceId)
-      ? doc.views.occurrences[args.occurrenceId]
-      : undefined;
+    const occurrence = occurrenceById(doc, args.occurrenceId);
     if (occurrence === undefined) {
       return { ok: false, message: `There is no occurrence with the id "${args.occurrenceId}".` };
     }
-    const shown = doc.elements[occurrence.elementId];
+    const shown = elementById(doc, occurrence.elementId);
     if (shown?.kind === "process") {
       return {
         ok: false,
-        message: `The process ${label(shown)} is shown on exactly one diagram, so delete the process instead of removing its occurrence.`,
+        message: `The process ${called(shown)} is shown on exactly one diagram, so delete the process instead of removing its occurrence.`,
       };
     }
     const attached = Object.values(doc.views.routes)

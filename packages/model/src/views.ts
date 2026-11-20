@@ -7,8 +7,8 @@ export const Occurrence = z.strictObject({
   elementId: Id.meta({ description: "The element shown." }),
   x: z.number(),
   y: z.number(),
-  width: z.number(),
-  height: z.number(),
+  width: z.number().positive(),
+  height: z.number().positive(),
 });
 export type Occurrence = z.infer<typeof Occurrence>;
 

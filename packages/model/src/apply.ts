@@ -64,7 +64,15 @@ export function apply(doc: ProjectDocument, command: Command, origin: Origin): A
   if (!result.ok) return { ok: false, code: "refused", message: result.message };
 
   const violation = findViolations(result.doc)[0];
-  if (violation) return { ok: false, code: "refused", message: violation.message, ids: violation.ids };
+  if (violation) {
+    // The violation's own message is for developers; the student gets one fixed sentence.
+    return {
+      ok: false,
+      code: "refused",
+      message: "This change would leave the project in a state the model does not allow.",
+      ids: violation.ids,
+    };
+  }
 
   return {
     ok: true,

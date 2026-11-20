@@ -1,11 +1,12 @@
 // The DFD commands of docs/SPEC.md section 4.1: nodes, flows, process numbers and the
 // flow ends of section 3.4 (invariants 2, 3 and 8).
 import { z } from "zod";
-import { ancestors, isShownOn, occurrencesOn } from "../derive.ts";
+import { elementById, isOffDiagramProcess, isShownOn, occurrencesOn } from "../derive.ts";
 import type { ProjectDocument } from "../document.ts";
 import { Id } from "../id.ts";
 import type { Origin } from "../kinds/common.ts";
 import type { Diagram } from "../kinds/diagram.ts";
+import { called } from "../names.ts";
 import type { AnyCommandDefinition, CommandDefinition } from "../registry.ts";
 
 type Refusal = { ok: false; message: string };
@@ -22,28 +23,16 @@ const placement = {
 const diagramId = Id.meta({ description: "The diagram the item is on." });
 const name = (what: string) => z.string().meta({ description: `The ${what}'s name. May be empty while work is in progress.` });
 
-const KIND_WORDS = {
-  process: "process",
-  externalEntity: "external entity",
-  dataStore: "data store",
-  dataFlow: "data flow",
-  controlFlow: "control flow",
-  dataStructure: "data structure",
-  dataElement: "data element",
-  diagram: "diagram",
-} as const;
-
-/** An element named for a student: its name in quotes, or its kind when it has none. */
-function called(doc: ProjectDocument, id: Id): string {
-  const element = doc.elements[id];
-  if (element === undefined) return `"${id}"`;
-  return element.name === "" ? `the unnamed ${KIND_WORDS[element.kind]}` : `"${element.name}"`;
+/** An element named for a student, or the id in quotes when there is no such element. */
+function calledId(doc: ProjectDocument, id: Id): string {
+  const element = elementById(doc, id);
+  return element === undefined ? `"${id}"` : called(element);
 }
 
 const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
 function diagramAt(doc: ProjectDocument, id: Id): Diagram | Refusal {
-  const element = doc.elements[id];
+  const element = elementById(doc, id);
   return element?.kind === "diagram" ? element : refuse(`There is no diagram with the id "${id}".`);
 }
 
@@ -81,22 +70,19 @@ type End = { offDiagram: boolean };
 
 /** Whether an element can be a flow's end on this diagram: shown there, or an allowed off-diagram process. */
 function checkEnd(doc: ProjectDocument, diagram: Diagram, endId: Id): End | Refusal {
-  const element = doc.elements[endId];
+  const element = elementById(doc, endId);
   if (element === undefined) return refuse(`There is no element with the id "${endId}".`);
   if (element.kind !== "process" && element.kind !== "externalEntity" && element.kind !== "dataStore") {
-    return refuse(`A flow can only start or end at a process, data store or external entity, not at ${called(doc, endId)}.`);
+    return refuse(`A flow can only start or end at a process, data store or external entity, not at ${calledId(doc, endId)}.`);
   }
   if (isShownOn(doc, endId, diagram.id)) return { offDiagram: false };
-  const p = diagram.decomposesProcessId;
-  const outsideP =
-    p !== null && element.kind === "process" && endId !== p && !ancestors(doc, p).includes(endId) && !ancestors(doc, endId).includes(p);
-  if (outsideP) return { offDiagram: true };
+  if (isOffDiagramProcess(doc, diagram.id, endId)) return { offDiagram: true };
   if (element.kind === "process") {
     return refuse(
-      `${cap(called(doc, endId))} is not shown on ${called(doc, diagram.id)}, and a flow can leave a diagram only to a process outside the one the diagram breaks down.`,
+      `${cap(calledId(doc, endId))} is not shown on ${calledId(doc, diagram.id)}, and a flow can leave a diagram only to a process outside the one the diagram breaks down.`,
     );
   }
-  return refuse(`${cap(called(doc, endId))} is not shown on ${called(doc, diagram.id)}; place it there first.`);
+  return refuse(`${cap(calledId(doc, endId))} is not shown on ${calledId(doc, diagram.id)}; place it there first.`);
 }
 
 /** The occurrence a route attaches an end to: the named one, the only one, or null off the diagram. */
@@ -110,17 +96,17 @@ function pickOccurrence(
   if (offDiagram) {
     return named === undefined
       ? { ok: true, id: null }
-      : refuse(`${cap(called(doc, elementId))} is not shown on ${called(doc, diagram)}, so it has no occurrence there to attach to.`);
+      : refuse(`${cap(calledId(doc, elementId))} is not shown on ${calledId(doc, diagram)}, so it has no occurrence there to attach to.`);
   }
   const shown = occurrencesOn(doc, diagram).filter((o) => o.elementId === elementId);
   if (named !== undefined) {
     return shown.some((o) => o.id === named)
       ? { ok: true, id: named }
-      : refuse(`The occurrence "${named}" is not a symbol for ${called(doc, elementId)} on ${called(doc, diagram)}.`);
+      : refuse(`The occurrence "${named}" is not a symbol for ${calledId(doc, elementId)} on ${calledId(doc, diagram)}.`);
   }
   const only = shown[0];
   if (shown.length === 1 && only !== undefined) return { ok: true, id: only.id };
-  return refuse(`${cap(called(doc, elementId))} is shown ${shown.length} times on ${called(doc, diagram)}; say which occurrence the flow attaches to.`);
+  return refuse(`${cap(calledId(doc, elementId))} is shown ${shown.length} times on ${calledId(doc, diagram)}; say which occurrence the flow attaches to.`);
 }
 
 const BOTH_OFF = "Only one end of a flow may be an off-diagram process.";
@@ -183,7 +169,7 @@ const addProcess: CommandDefinition<AddProcessArgs> = {
     }
     const parent = diagram.decomposesProcessId;
     if (a.ordinal !== undefined && siblings(doc, parent).some((p) => p.kind === "process" && p.ordinal === a.ordinal)) {
-      return refuse(`Another process under ${called(doc, parent)} already has the number ${a.ordinal}.`);
+      return refuse(`Another process under ${calledId(doc, parent)} already has the number ${a.ordinal}.`);
     }
     doc.elements[a.id] = {
       kind: "process", id: a.id, name: a.name, ...text(origin),
@@ -211,10 +197,10 @@ const placeExisting: CommandDefinition<PlaceExistingArgs> = {
   run(doc, a) {
     const diagram = diagramAt(doc, a.diagramId);
     if ("ok" in diagram) return diagram;
-    const element = doc.elements[a.elementId];
+    const element = elementById(doc, a.elementId);
     if (element === undefined) return refuse(`There is no element with the id "${a.elementId}".`);
     if (element.kind !== "externalEntity" && element.kind !== "dataStore") {
-      return refuse(`Only an external entity or a data store can be shown on more than one place; ${called(doc, a.elementId)} cannot.`);
+      return refuse(`Only an external entity or a data store can be shown on more than one place; ${calledId(doc, a.elementId)} cannot.`);
     }
     addOccurrence(doc, a.occurrenceId, a.diagramId, a.elementId, a);
     return { ok: true, doc };
@@ -234,11 +220,11 @@ const setProcessNumber: CommandDefinition<SetProcessNumberArgs> = {
   args: SetProcessNumberArgs,
   newIds: () => [],
   run(doc, a) {
-    const process = doc.elements[a.processId];
+    const process = elementById(doc, a.processId);
     if (process?.kind !== "process") return refuse(`There is no process with the id "${a.processId}".`);
     if (process.parentProcessId === null) return refuse("Process 0 always keeps the number 0.");
     if (siblings(doc, process.parentProcessId, process.id).some((p) => p.kind === "process" && p.ordinal === a.ordinal)) {
-      return refuse(`Another process under ${called(doc, process.parentProcessId)} already has the number ${a.ordinal}.`);
+      return refuse(`Another process under ${calledId(doc, process.parentProcessId)} already has the number ${a.ordinal}.`);
     }
     process.ordinal = a.ordinal;
     return { ok: true, doc };
@@ -266,11 +252,11 @@ const addControlFlow: CommandDefinition<AddControlFlowArgs> = {
   run(doc, a, { origin }) {
     const diagram = diagramAt(doc, a.diagramId);
     if ("ok" in diagram) return diagram;
-    if (doc.elements[a.targetId]?.kind !== "process") {
-      return refuse(`A control flow must start a process, and ${called(doc, a.targetId)} is not one.`);
+    if (elementById(doc, a.targetId)?.kind !== "process") {
+      return refuse(`A control flow must start a process, and ${calledId(doc, a.targetId)} is not one.`);
     }
     if (!isShownOn(doc, a.targetId, a.diagramId)) {
-      return refuse(`${cap(called(doc, a.targetId))} is not shown on ${called(doc, a.diagramId)}, so a control flow cannot start it there.`);
+      return refuse(`${cap(calledId(doc, a.targetId))} is not shown on ${calledId(doc, a.diagramId)}, so a control flow cannot start it there.`);
     }
     const target = pickOccurrence(doc, a.diagramId, a.targetId, false, a.targetOccurrenceId);
     if (!target.ok) return target;
@@ -284,12 +270,12 @@ const addControlFlow: CommandDefinition<AddControlFlowArgs> = {
 };
 
 function dataCheck(doc: ProjectDocument, dataId: Id): Refusal | null {
-  const kind = doc.elements[dataId]?.kind;
+  const kind = elementById(doc, dataId)?.kind;
   if (kind === "dataStructure" || kind === "dataElement") return null;
   return refuse(
     kind === undefined
       ? `There is no data structure or data element with the id "${dataId}".`
-      : `A flow can only carry a data structure or data element, not ${called(doc, dataId)}.`,
+      : `A flow can only carry a data structure or data element, not ${calledId(doc, dataId)}.`,
   );
 }
 
@@ -356,7 +342,7 @@ const setFlowData: CommandDefinition<SetFlowDataArgs> = {
   args: SetFlowDataArgs,
   newIds: () => [],
   run(doc, a) {
-    const flow = doc.elements[a.flowId];
+    const flow = elementById(doc, a.flowId);
     if (flow?.kind !== "dataFlow") return refuse(`There is no data flow with the id "${a.flowId}".`);
     const bad = dataCheck(doc, a.dataId);
     if (bad !== null) return bad;
@@ -380,7 +366,7 @@ const reconnectFlow: CommandDefinition<ReconnectFlowArgs> = {
   args: ReconnectFlowArgs,
   newIds: () => [],
   run(doc, a) {
-    const flow = doc.elements[a.flowId];
+    const flow = elementById(doc, a.flowId);
     if (flow?.kind !== "dataFlow") return refuse(`There is no data flow with the id "${a.flowId}".`);
     const diagram = diagramAt(doc, flow.diagramId);
     if ("ok" in diagram) return diagram;

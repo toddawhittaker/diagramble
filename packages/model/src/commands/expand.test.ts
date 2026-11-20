@@ -278,13 +278,23 @@ describe("expandProcess refusals (SPEC.md section 4.1)", () => {
     expect(refusal(doc, { processId: "p9", diagramId: "d9", flowIds: {}, occurrenceIds: {} })).toContain('"Stray Step"');
   });
 
-  test("a flow from the process to itself is refused", () => {
+  test("a flow from the process to itself is skipped, like a flow with an unattached outer end", () => {
     const doc = contextDoc();
     addData(doc, "loop", "Rework Loop");
     addFlow(doc, "f-loop", "ctx", "p0", "p0", "loop", "o-p0", "o-p0");
-    const message = refusal(doc, level0Args);
-    expect(message).toContain('Data flow "Rework Loop"');
-    expect(message).toContain("to itself");
+    const expanded = expand(doc, level0Args);
+    const onChild = Object.values(expanded.elements).filter((e) => e.kind === "dataFlow" && e.diagramId === "d0");
+    expect(onChild.map((e) => e.id).sort()).toEqual(["c-bill", "c-order", "c-record", "c-request"]);
+  });
+
+  test("a flowIds key for a flow from the process to itself is an extra key", () => {
+    const doc = contextDoc();
+    addData(doc, "loop", "Rework Loop");
+    addFlow(doc, "f-loop", "ctx", "p0", "p0", "loop", "o-p0", "o-p0");
+    const flowIds = { ...level0Args.flowIds, "f-loop": { flowId: "c-loop", routeId: "cr-loop" } };
+    expect(refusal(doc, { ...level0Args, flowIds })).toBe(
+      'The process "Bike Repair Shop" cannot be expanded because flowIds has data flow "Rework Loop", which is not carried down.',
+    );
   });
 
   test("a missing flowIds key is refused, naming the flow by its data", () => {
@@ -321,12 +331,6 @@ describe("expandProcess refusals (SPEC.md section 4.1)", () => {
   test("every problem in both maps is named in the one sentence", () => {
     const message = refusal(contextDoc(), { processId: "p0", diagramId: "d0", flowIds: { zz: { flowId: "a", routeId: "b" }, yy: { flowId: "c", routeId: "e" } }, occurrenceIds: { qq: "g" } });
     expect(message).toContain('flowIds has no entry for data flow "Repair Bill", data flow "Parts Order", data flow "Work Record" and data flow "Repair Request"; flowIds has "yy" and "zz", which are not carried down; occurrenceIds has no entry for external entity "Customer", data store "Repair Log" and external entity "Supplier"; occurrenceIds has "qq", which is not placed on the child diagram.');
-  });
-
-  test("an element the flow touches that is not shown on the parent diagram is refused", () => {
-    const doc = contextDoc();
-    for (const id of ["o-supplier"]) delete doc.views.occurrences[id];
-    expect(refusal(doc, level0Args)).toContain('External entity "Supplier" is not shown');
   });
 });
 

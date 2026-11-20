@@ -1,5 +1,6 @@
 // The dictionary queries (docs/SPEC.md section 4.2).
 import { z } from "zod";
+import { elementById } from "../derive.ts";
 import type { ProjectDocument } from "../document.ts";
 import { Id } from "../id.ts";
 import type { AnyQueryDefinition, QueryDefinition } from "../registry.ts";
@@ -17,7 +18,7 @@ export function dataElementsOf(doc: ProjectDocument, dataId: Id): Id[] {
   const visit = (id: Id): void => {
     if (seen.has(id)) return;
     seen.add(id);
-    const definition = doc.elements[id];
+    const definition = elementById(doc, id);
     if (definition?.kind === "dataElement") found.push(id);
     else if (definition?.kind === "dataStructure") definition.components.forEach((c) => visit(c.dataId));
   };

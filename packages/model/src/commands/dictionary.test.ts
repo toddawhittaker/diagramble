@@ -173,6 +173,33 @@ describe("setDataElement (SPEC.md section 3.3)", () => {
   });
 });
 
+describe("refusals name an unnamed data flow in plain words (SPEC.md sections 3.2 and 4.1)", () => {
+  function withFlow(): ProjectDocument {
+    const doc = shop();
+    doc.elements.flow = {
+      kind: "dataFlow", id: "flow", name: "", description: "", aliases: [], notes: "", origin: "student",
+      diagramId: "ctx", sourceId: "p0", targetId: null, dataId: "repair-order",
+    };
+    return doc;
+  }
+
+  function expectPlain(message: string): void {
+    expect(message).toMatch(/^[A-Z"]/);
+    expect(message).toContain("data flow");
+    expect(message).not.toContain("dataFlow");
+  }
+
+  test("setComposition with a data flow as the structure", () => {
+    expectPlain(refusal(withFlow(), { type: "setComposition", args: { structureId: "flow", components: [] } }));
+  });
+
+  test("setComposition with a data flow as a component", () => {
+    expectPlain(refusal(withFlow(), {
+      type: "setComposition", args: { structureId: "repair-order", components: [once("flow")] },
+    }));
+  });
+});
+
 describe("the registry", () => {
   test("the three commands are registered with one-sentence descriptions", () => {
     for (const name of ["defineData", "setComposition", "setDataElement"]) {

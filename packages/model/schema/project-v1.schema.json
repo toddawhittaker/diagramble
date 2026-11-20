@@ -689,10 +689,12 @@
                 "type": "number"
               },
               "width": {
-                "type": "number"
+                "type": "number",
+                "exclusiveMinimum": 0
               },
               "height": {
-                "type": "number"
+                "type": "number",
+                "exclusiveMinimum": 0
               }
             },
             "required": [

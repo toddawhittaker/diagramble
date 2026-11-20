@@ -1,8 +1,9 @@
-import { ancestors, diagramShowing, isShownOn } from "./derive.ts";
+import {
+  diagramShowing, diagrams, elementById, isOffDiagramProcess, isShownOn, occurrenceById,
+} from "./derive.ts";
 import type { Element, ProjectDocument } from "./document.ts";
 import type { Id } from "./id.ts";
 import type { ControlFlow, DataFlow, Process } from "./kinds/dfd.ts";
-import type { Diagram } from "./kinds/diagram.ts";
 
 // The invariants of SPEC.md section 3.4, with the map-key and view checks of
 // sections 3.5 and 3.6. A command whose result has any violation is refused. Each
@@ -24,9 +25,6 @@ function all(doc: ProjectDocument): Element[] {
 function processes(doc: ProjectDocument): Process[] {
   return all(doc).filter((e): e is Process => e.kind === "process");
 }
-function diagrams(doc: ProjectDocument): Diagram[] {
-  return all(doc).filter((e): e is Diagram => e.kind === "diagram");
-}
 function dataFlows(doc: ProjectDocument): DataFlow[] {
   return all(doc).filter((e): e is DataFlow => e.kind === "dataFlow");
 }
@@ -34,13 +32,14 @@ function controlFlows(doc: ProjectDocument): ControlFlow[] {
   return all(doc).filter((e): e is ControlFlow => e.kind === "controlFlow");
 }
 function kindOf(doc: ProjectDocument, id: Id): Kind | undefined {
-  return doc.elements[id]?.kind;
+  return elementById(doc, id)?.kind;
 }
 function isNode(doc: ProjectDocument, id: Id): boolean {
   const kind = kindOf(doc, id);
   return kind !== undefined && NODE_KINDS.includes(kind);
 }
-function isEmpty(doc: ProjectDocument): boolean {
+/** A document with no elements, occurrences or routes: the one createProject starts from. */
+export function isEmpty(doc: ProjectDocument): boolean {
   return (
     Object.keys(doc.elements).length === 0 &&
     Object.keys(doc.views.occurrences).length === 0 &&
@@ -126,14 +125,6 @@ export function checkReferences(doc: ProjectDocument): Violation[] {
   return out;
 }
 
-function isOffDiagramEnd(doc: ProjectDocument, flow: DataFlow, endId: Id): boolean {
-  const diagram = doc.elements[flow.diagramId];
-  if (diagram?.kind !== "diagram" || diagram.decomposesProcessId === null) return false;
-  if (kindOf(doc, endId) !== "process") return false;
-  const p = diagram.decomposesProcessId;
-  return endId !== p && !ancestors(doc, p).includes(endId) && !ancestors(doc, endId).includes(p);
-}
-
 /**
  * Invariant 2: a data flow's ends are shown on its diagram, except one off-diagram end:
  * on the diagram that decomposes P, a process that is not P, above P or below P.
@@ -145,7 +136,7 @@ export function checkFlowEndsShown(doc: ProjectDocument): Violation[] {
     let offDiagram = 0;
     for (const end of [flow.sourceId, flow.targetId]) {
       if (end === null || !isNode(doc, end) || isShownOn(doc, end, flow.diagramId)) continue;
-      if (isOffDiagramEnd(doc, flow, end)) {
+      if (isOffDiagramProcess(doc, flow.diagramId, end)) {
         offDiagram += 1;
       } else {
         out.push({ message: `The data flow "${flow.id}" connects to "${end}", which is not shown on its diagram.`, ids: [flow.id, end] });
@@ -223,7 +214,7 @@ export function checkProcessTree(doc: ProjectDocument): Violation[] {
         break;
       }
       seen.add(current.id);
-      const parent: Element | undefined = doc.elements[current.parentProcessId];
+      const parent: Element | undefined = elementById(doc, current.parentProcessId);
       current = parent?.kind === "process" ? parent : undefined;
     }
   }
@@ -288,7 +279,7 @@ export function checkViews(doc: ProjectDocument): Violation[] {
   }
   const routeCount = new Map<Id, Id[]>();
   for (const r of Object.values(doc.views.routes)) {
-    const flow = doc.elements[r.flowId];
+    const flow = elementById(doc, r.flowId);
     if (flow?.kind !== "dataFlow" && flow?.kind !== "controlFlow") {
       out.push({ message: `The route "${r.id}" draws "${r.flowId}", which is not a flow.`, ids: [r.id, r.flowId] });
       continue;
@@ -310,7 +301,7 @@ export function checkViews(doc: ProjectDocument): Violation[] {
         }
         continue;
       }
-      const occurrence = occurrenceId === null ? undefined : doc.views.occurrences[occurrenceId];
+      const occurrence = occurrenceId === null ? undefined : occurrenceById(doc, occurrenceId);
       if (occurrence === undefined || occurrence.diagramId !== r.diagramId || occurrence.elementId !== end) {
         out.push({ message: `The route "${r.id}" does not attach its ${label} end to an occurrence of "${end}" on its diagram.`, ids: occurrenceId === null ? [r.id] : [r.id, occurrenceId] });
       }

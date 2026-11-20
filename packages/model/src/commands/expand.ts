@@ -2,11 +2,13 @@
 // process, with a new flow for each data flow that touches the process on its parent
 // diagram.
 import { z } from "zod";
-import { childDiagram, diagramShowing, occurrencesOn } from "../derive.ts";
+import { childDiagram, diagramShowing, elementById, occurrencesOn } from "../derive.ts";
 import type { ProjectDocument } from "../document.ts";
 import { Id } from "../id.ts";
 import type { DataFlow } from "../kinds/dfd.ts";
+import { compareText, KIND_WORDS } from "../names.ts";
 import type { CommandDefinition } from "../registry.ts";
+import type { Occurrence } from "../views.ts";
 
 const FlowIds = z.strictObject({
   flowId: Id.meta({ description: "The id of the new data flow on the child diagram." }),
@@ -27,22 +29,11 @@ const ExpandProcessArgs = z.strictObject({
 });
 type ExpandProcessArgs = z.infer<typeof ExpandProcessArgs>;
 
-const KIND_WORDS: Record<ProjectDocument["elements"][string]["kind"], string> = {
-  process: "process",
-  externalEntity: "external entity",
-  dataStore: "data store",
-  dataFlow: "data flow",
-  controlFlow: "control flow",
-  dataStructure: "data structure",
-  dataElement: "data element",
-  diagram: "diagram",
-};
-
 /** An element for a sentence: its kind and name, or its kind alone when it has no name. */
 function describe(doc: ProjectDocument, id: Id): string {
-  const element = doc.elements[id];
+  const element = elementById(doc, id);
   if (element === undefined) return `"${id}"`;
-  const label = element.kind === "dataFlow" ? (doc.elements[element.dataId]?.name ?? "") : element.name;
+  const label = element.kind === "dataFlow" ? (elementById(doc, element.dataId)?.name ?? "") : element.name;
   const kind = KIND_WORDS[element.kind];
   return label === "" ? `an unnamed ${kind}` : `${kind} "${label}"`;
 }
@@ -54,10 +45,6 @@ function sentenceStart(text: string): string {
 function list(items: string[]): string {
   if (items.length < 2) return items.join("");
   return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
-}
-
-function compare(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 type Carried = { flow: DataFlow; processIsSource: boolean; other: Id };
@@ -73,7 +60,7 @@ const expandProcess: CommandDefinition<ExpandProcessArgs> = {
     ...Object.values(args.occurrenceIds),
   ],
   run(doc, args, { origin }) {
-    const process = doc.elements[args.processId];
+    const process = elementById(doc, args.processId);
     if (process === undefined) {
       return { ok: false, message: `There is no process with the id "${args.processId}" to expand.` };
     }
@@ -90,33 +77,33 @@ const expandProcess: CommandDefinition<ExpandProcessArgs> = {
 
     // The data flows to carry down: those on the parent diagram with the process at one
     // end. A flow whose other end is empty has nothing to attach on the child diagram, and
-    // a flow from the process to itself would have no end left, so neither is carried.
+    // a flow from the process to itself would have no end left, so neither is carried and
+    // neither takes a key in flowIds.
     const carried: Carried[] = [];
     const flows = Object.values(doc.elements)
       .filter((e): e is DataFlow => e.kind === "dataFlow" && e.diagramId === parentId)
-      .sort((a, b) => compare(a.id, b.id));
+      .sort((a, b) => compareText(a.id, b.id));
     for (const flow of flows) {
       const processIsSource = flow.sourceId === process.id;
       if (!processIsSource && flow.targetId !== process.id) continue;
       const other = processIsSource ? flow.targetId : flow.sourceId;
-      if (other === process.id) {
-        return {
-          ok: false,
-          message: `${sentenceStart(describe(doc, flow.id))} runs from the process "${process.name}" to itself, so it cannot be carried down.`,
-        };
-      }
-      if (other === null) continue;
+      if (other === null || other === process.id) continue;
       carried.push({ flow, processIsSource, other });
     }
 
     const placedIds = [
       ...new Set(
         carried.map((c) => c.other).filter((id) => {
-          const kind = doc.elements[id]?.kind;
+          const kind = elementById(doc, id)?.kind;
           return kind === "externalEntity" || kind === "dataStore";
         }),
       ),
-    ].sort(compare);
+    ].sort(compareText);
+    // Every refusal comes before the first write. A flow's entity or store end is shown
+    // on the flow's diagram (SPEC.md section 3.4), so each has an occurrence there to
+    // take its size from.
+    const parentOccurrences = occurrencesOn(doc, parentId).sort((a, b) => compareText(a.id, b.id));
+    const firstShown = (id: Id): Occurrence => parentOccurrences.find((o) => o.elementId === id) as Occurrence;
 
     const problems: string[] = [];
     const missingFlows = carried.filter((c) => !Object.hasOwn(args.flowIds, c.flow.id));
@@ -124,7 +111,7 @@ const expandProcess: CommandDefinition<ExpandProcessArgs> = {
       problems.push(`flowIds has no entry for ${list(missingFlows.map((c) => describe(doc, c.flow.id)))}`);
     }
     const carriedIds = new Set(carried.map((c) => c.flow.id));
-    const extraFlows = Object.keys(args.flowIds).filter((id) => !carriedIds.has(id)).sort(compare);
+    const extraFlows = Object.keys(args.flowIds).filter((id) => !carriedIds.has(id)).sort(compareText);
     if (extraFlows.length > 0) {
       problems.push(`flowIds has ${list(extraFlows.map((id) => describe(doc, id)))}, which ${extraFlows.length === 1 ? "is" : "are"} not carried down`);
     }
@@ -132,7 +119,7 @@ const expandProcess: CommandDefinition<ExpandProcessArgs> = {
     if (missingPlaced.length > 0) {
       problems.push(`occurrenceIds has no entry for ${list(missingPlaced.map((id) => describe(doc, id)))}`);
     }
-    const extraPlaced = Object.keys(args.occurrenceIds).filter((id) => !placedIds.includes(id)).sort(compare);
+    const extraPlaced = Object.keys(args.occurrenceIds).filter((id) => !placedIds.includes(id)).sort(compareText);
     if (extraPlaced.length > 0) {
       problems.push(`occurrenceIds has ${list(extraPlaced.map((id) => describe(doc, id)))}, which ${extraPlaced.length === 1 ? "is" : "are"} not placed on the child diagram`);
     }
@@ -147,12 +134,8 @@ const expandProcess: CommandDefinition<ExpandProcessArgs> = {
     };
 
     const placed = new Map<Id, Id>();
-    const parentOccurrences = occurrencesOn(doc, parentId).sort((a, b) => compare(a.id, b.id));
     for (const [index, elementId] of placedIds.entries()) {
-      const first = parentOccurrences.find((o) => o.elementId === elementId);
-      if (first === undefined) {
-        return { ok: false, message: `${sentenceStart(describe(doc, elementId))} is not shown on the diagram that shows the process "${process.name}".` };
-      }
+      const first = firstShown(elementId);
       const occurrenceId = args.occurrenceIds[elementId] as Id;
       doc.views.occurrences[occurrenceId] = {
         id: occurrenceId, diagramId: args.diagramId, elementId,
