@@ -20,6 +20,7 @@ const FORM = "application/x-www-form-urlencoded";
 const staticDir = mkdtempSync(path.join(tmpdir(), "diagramble-static-"));
 writeFileSync(path.join(staticDir, "index.html"), "<!doctype html><title>Preview</title>");
 writeFileSync(path.join(staticDir, "app.js"), "console.log('preview');");
+writeFileSync(path.join(staticDir, ".env"), "SECRET=1");
 
 const settings: Settings = {
   databaseUrl: "postgres://unused/x",
@@ -36,9 +37,8 @@ let accountId: string;
 
 /** A limiter that never slows or refuses, so these tests see only the password check. */
 const openLimiter = {
-  check: () => ({ refused: false as const, delayMs: 0 }),
-  recordFailure: () => {},
-  recordSuccess: () => {},
+  attempt: () => ({ refused: false as const, delayMs: 0 }),
+  succeeded: () => {},
 };
 
 beforeAll(async () => {
@@ -128,7 +128,7 @@ describe("POST /sign-in", () => {
     expect(sessionCookie(response)).toBeUndefined();
     expect(response.headers["content-type"]).toBe("text/html; charset=utf-8");
     expect(response.body).toContain(NO_MATCH);
-    if (body.username) expect(response.body).toContain(`value="${body.username}"`);
+    if (body.username) expect(response.body).toContain(`value="${body.username.slice(0, 256)}"`);
   });
 
   test("a disabled account gets the same refusal as a wrong password", async () => {
@@ -174,12 +174,11 @@ describe("the limiter", () => {
   test("a refusal is 429 with Retry-After and a plain sentence", async () => {
     const seen: string[] = [];
     const refusing = {
-      check: (username: string, address: string) => {
-        seen.push(username, address);
+      attempt: (username: string | undefined, address: string) => {
+        seen.push(String(username), address);
         return { refused: true as const, retryAfterSeconds: 120 };
       },
-      recordFailure: () => {},
-      recordSuccess: () => {},
+      succeeded: () => {},
     };
     const limited = await buildServer({ db: testDb.db, settings, limiter: refusing });
     try {
@@ -199,12 +198,14 @@ describe("the limiter", () => {
     }
   });
 
-  test("a failure is recorded and delayed; a success clears the username", async () => {
+  test("each attempt is counted, a failure is delayed, a success is given back", async () => {
     const calls: string[] = [];
     const recording = {
-      check: () => ({ refused: false as const, delayMs: 50 }),
-      recordFailure: (username: string) => void calls.push(`fail ${username}`),
-      recordSuccess: (username: string) => void calls.push(`ok ${username}`),
+      attempt: (username: string | undefined, address: string) => {
+        calls.push(`try ${username} ${address}`);
+        return { refused: false as const, delayMs: 50 };
+      },
+      succeeded: (username: string, address: string) => void calls.push(`ok ${username} ${address}`),
     };
     const limited = await buildServer({ db: testDb.db, settings, limiter: recording });
     try {
@@ -219,29 +220,63 @@ describe("the limiter", () => {
       expect((await send("wrong")).statusCode).toBe(401);
       expect(performance.now() - started).toBeGreaterThanOrEqual(45);
       expect((await send(PASSWORD)).statusCode).toBe(303);
-      expect(calls).toEqual(["fail ada", "ok ada"]);
+      // The raw request address goes to the limiter, which owns its normalizing.
+      expect(calls).toEqual(["try ada 127.0.0.1", "try ada 127.0.0.1", "ok ada 127.0.0.1"]);
     } finally {
       await limited.close();
     }
   });
 });
 
-test("an over-long invalid username is counted under its first 256 characters, lowercased", async () => {
-  const keys: string[] = [];
-  const recording = { ...openLimiter, recordFailure: (username: string) => void keys.push(username) };
+test("an invalid username counts only by address, still hashes, and is echoed at most 256 characters", async () => {
+  const keys: (string | undefined)[] = [];
+  const recording = {
+    ...openLimiter,
+    attempt: (username: string | undefined) => {
+      keys.push(username);
+      return { refused: false as const, delayMs: 0 };
+    },
+  };
   const limited = await buildServer({ db: testDb.db, settings, limiter: recording });
   try {
-    await limited.inject({
+    const started = performance.now();
+    const response = await limited.inject({
       method: "POST",
       url: "/sign-in",
       headers: { origin: ORIGIN, "content-type": FORM },
       payload: new URLSearchParams({ username: "B".repeat(300), password: "x" }).toString(),
     });
-    expect(keys).toEqual(["b".repeat(256)]);
+    expect(performance.now() - started).toBeGreaterThan(5);
+    expect(response.statusCode).toBe(401);
+    expect(response.body).toContain(NO_MATCH);
+    expect(response.body).toContain("B".repeat(256));
+    expect(response.body).not.toContain("B".repeat(257));
+    expect(keys).toEqual([undefined]);
   } finally {
     await limited.close();
   }
 });
+
+test("parallel wrong passwords for one username: only the limit's number reach the password check", async () => {
+  const limited = await buildServer({ db: testDb.db, settings });
+  try {
+    const responses = await Promise.all(
+      Array.from({ length: 30 }, () =>
+        limited.inject({
+          method: "POST",
+          url: "/sign-in",
+          headers: { origin: ORIGIN, "content-type": FORM },
+          payload: new URLSearchParams({ username: "grace", password: "wrong" }).toString(),
+        }),
+      ),
+    );
+    const codes = responses.map((r) => r.statusCode);
+    expect(codes.filter((c) => c === 401)).toHaveLength(10);
+    expect(codes.filter((c) => c === 429)).toHaveLength(20);
+  } finally {
+    await limited.close();
+  }
+}, 30_000);
 
 test("request logs carry neither the cookie nor the body", async () => {
   const lines: string[] = [];
@@ -387,6 +422,36 @@ describe("GET /health", () => {
     } finally {
       await broken.close();
       await dead.destroy();
+    }
+  });
+});
+
+test("a dotfile in the static folder is refused even signed in", async () => {
+  const token = await signedInToken();
+  const response = await app.inject({ url: "/.env", headers: { cookie: `${COOKIE}=${token}` } });
+  expect([403, 404]).toContain(response.statusCode);
+  expect(response.body).not.toContain("SECRET");
+});
+
+describe("Strict-Transport-Security", () => {
+  test("is sent on every reply when the app is served over https", async () => {
+    for (const url of ["/health", "/sign-in", "/app.js"]) {
+      const response = await app.inject({ url });
+      expect(response.headers["strict-transport-security"]).toBe("max-age=31536000");
+    }
+  });
+
+  test("is not sent when the app is on http://localhost", async () => {
+    const local = await buildServer({
+      db: testDb.db,
+      settings: { ...settings, appOrigin: "http://localhost" },
+      limiter: openLimiter,
+    });
+    try {
+      const response = await local.inject({ url: "/health" });
+      expect(response.headers["strict-transport-security"]).toBeUndefined();
+    } finally {
+      await local.close();
     }
   });
 });

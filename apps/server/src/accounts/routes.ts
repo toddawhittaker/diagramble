@@ -8,7 +8,7 @@ import type { Database } from "../db/schema.ts";
 import type { Settings } from "../settings.ts";
 import { normalizeUsername, verifyAgainstDummy, verifyPassword } from "./password.ts";
 import { cookieName, cookieOptions, endSession, startSession } from "./sessions.ts";
-import { addressKey, type createSignInLimiter } from "./sign-in-limit.ts";
+import type { SignInLimiter } from "./sign-in-limit.ts";
 import { renderSignInPage, signInCss } from "./sign-in-page.ts";
 import { findPasswordMethod } from "./store.ts";
 
@@ -20,7 +20,7 @@ export const REFUSED =
 const PAGE_POLICY =
   "default-src 'none'; style-src 'self'; img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'";
 
-/** Longer usernames are refused like any bad body, so failure counts stay keyed by short strings. */
+/** Longer usernames are refused like any bad body, and the page echoes no more than this. */
 const MAX_USERNAME = 256;
 
 const signInBody = z.object({
@@ -74,7 +74,7 @@ export function accountRoutes(
     db: Kysely<Database>;
     settings: Settings;
     now: () => number;
-    limiter: ReturnType<typeof createSignInLimiter>;
+    limiter: SignInLimiter;
   },
 ): void {
   const cookie = cookieName(settings);
@@ -90,11 +90,11 @@ export function accountRoutes(
   );
 
   app.post("/sign-in", async (request, reply) => {
-    const username = rawUsername(request.body);
-    const limitKey = normalizeUsername(username) ?? username.slice(0, MAX_USERNAME).toLowerCase();
-    const address = addressKey(request.ip);
+    const typed = rawUsername(request.body);
+    const limitKey = normalizeUsername(typed);
+    const username = typed.slice(0, MAX_USERNAME);
 
-    const limit = limiter.check(limitKey, address);
+    const limit = limiter.attempt(limitKey, request.ip);
     if (limit.refused) {
       reply.code(429).header("retry-after", String(limit.retryAfterSeconds));
       return sendPage(reply, { username, message: REFUSED });
@@ -102,12 +102,11 @@ export function accountRoutes(
 
     const method = await methodOpened(db, request.body);
     if (!method) {
-      limiter.recordFailure(limitKey, address);
       await new Promise((resolve) => setTimeout(resolve, limit.delayMs));
       return sendPage(reply.code(401), { username, message: NO_MATCH });
     }
 
-    limiter.recordSuccess(limitKey);
+    if (limitKey !== undefined) limiter.succeeded(limitKey, request.ip);
     const sent = request.cookies[cookie];
     if (sent) await endSession(db, sent);
     const token = await startSession(db, method, new Date(now()));
