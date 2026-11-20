@@ -9,16 +9,13 @@ import type { Id } from "../id.ts";
 import type { ControlFlow, DataFlow, DataStore, ExternalEntity, Process } from "../kinds/dfd.ts";
 import type { DataElement, DataStructure } from "../kinds/dictionary.ts";
 import type { Diagram } from "../kinds/diagram.ts";
+import { compareText } from "../names.ts";
 import type { QueryDefinition } from "../registry.ts";
 
 const NO_NAME = "(no name)";
 const NO_TYPE = "(no type)";
 const NONE = "(none)";
 const INDENT = "  ";
-
-function compareText(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
-}
 
 /** Compares dotted process numbers part by part as whole numbers; "" (no number) last. */
 function compareNumbers(a: string, b: string): number {

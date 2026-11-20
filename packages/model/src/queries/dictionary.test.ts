@@ -23,6 +23,17 @@ function bakery(structures: Record<string, Part[]>, elements: string[]): Project
 }
 
 describe("dataElementsOf (SPEC.md section 4.2)", () => {
+  test("an id that names a method of Object gives nothing and changes nothing", () => {
+    const doc = bakery({ record: [["toString"], ["flour"]] }, ["flour"]);
+    const before = Object.getOwnPropertyNames(Object.prototype).sort();
+    expect(dataElementsOf(doc, "toString")).toEqual([]);
+    expect(dataElementsOf(doc, "hasOwnProperty")).toEqual([]);
+    expect(dataElementsOf(doc, "record")).toEqual(["flour"]);
+    expect(findQuery("expandData")?.run(doc, { dataId: "toString" })).toEqual([]);
+    expect(Object.getOwnPropertyNames(Object.prototype).sort()).toEqual(before);
+    expect(Object.hasOwn(Object.prototype, "flour")).toBe(false);
+  });
+
   test("a data element expands to itself", () => {
     expect(dataElementsOf(bakery({}, ["flour"]), "flour")).toEqual(["flour"]);
   });
