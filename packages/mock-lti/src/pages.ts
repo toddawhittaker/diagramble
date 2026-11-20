@@ -18,7 +18,7 @@ function page(title: string, body: string): string {
 <meta name="color-scheme" content="light dark">
 <style>body{font-family:system-ui,sans-serif;max-width:40rem;margin:2rem auto;padding:0 1rem;line-height:1.5}
 label{display:block;margin-top:1rem;font-weight:600}select,button{font:inherit;margin-top:.25rem}
-button{margin-top:1.5rem;padding:.5rem 1rem}iframe{width:100%;height:min(36rem, 80vh);border:2px solid #555}</style>
+button{margin-top:1.5rem;padding:.5rem 1rem}body:has(iframe){max-width:none}iframe{width:100%;height:min(36rem, 80vh);border:2px solid #555}</style>
 </head>
 <body>
 ${body}
