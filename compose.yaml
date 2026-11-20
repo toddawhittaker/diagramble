@@ -1,5 +1,7 @@
 # The app and its PostgreSQL database (SPEC.md section 1, "Deployment").
 # Put POSTGRES_PASSWORD and APP_ORIGIN in a `.env` file next to this one.
+# POSTGRES_PASSWORD goes into a database URL, so use letters and digits only, for
+# example the output of `openssl rand -hex 32`.
 services:
   db:
     image: postgres:18.7

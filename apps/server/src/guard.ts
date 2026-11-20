@@ -72,12 +72,15 @@ export function installGuard(
   { db, settings, now }: { db: Kysely<Database>; settings: Settings; now: () => number },
 ): void {
   const cookie = cookieName(settings);
+  // Over https, browsers are told to use nothing else for a year (SPEC.md section 1, "Host names").
+  const https = settings.appOrigin.startsWith("https:");
   app.decorateRequest("signedIn", null);
 
   app.addHook("onRequest", async (request, reply) => {
     reply.header("referrer-policy", "strict-origin-when-cross-origin");
     reply.header("x-content-type-options", "nosniff");
     reply.header("content-security-policy", "frame-ancestors 'none'");
+    if (https) reply.header("strict-transport-security", "max-age=31536000");
 
     if (!originAllowed(request, settings.appOrigin)) {
       return reply

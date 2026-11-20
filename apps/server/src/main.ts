@@ -13,21 +13,25 @@ export async function start(
 ): Promise<{ server: FastifyInstance; close: () => Promise<void> }> {
   const settings = readSettings(env);
   const db = createDb(settings.databaseUrl);
+  let server: FastifyInstance | undefined;
   try {
     await migrateToLatest(db);
+    server = await buildServer({ db, settings, logger });
+    await server.listen({ host: "0.0.0.0", port: settings.port });
   } catch (error) {
+    // A failed start leaves nothing open: no server, no pool.
+    await server?.close();
     await db.destroy();
     throw error;
   }
-  const server = await buildServer({ db, settings, logger });
-  await server.listen({ host: "0.0.0.0", port: settings.port });
+  const running = server;
 
   let closing: Promise<void> | undefined;
   const close = () => {
     closing ??= (async () => {
       process.off("SIGTERM", onSignal);
       process.off("SIGINT", onSignal);
-      await server.close();
+      await running.close();
       await db.destroy();
     })();
     return closing;
@@ -35,7 +39,7 @@ export async function start(
   const onSignal = () => void close();
   process.once("SIGTERM", onSignal);
   process.once("SIGINT", onSignal);
-  return { server, close };
+  return { server: running, close };
 }
 
 if (import.meta.main) {
