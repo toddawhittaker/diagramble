@@ -2,9 +2,9 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { createLocalJWKSet, createRemoteJWKSet, decodeJwt, jwtVerify } from "jose";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createHandler } from "./index.ts";
 import { escapeHtml } from "./pages.ts";
 import { CLIENT_ID, COURSES, DEPLOYMENT_ID, PEOPLE, ROLE_NAMES, ROLE_URIS, UNFILLED_LOGIN_ID } from "./seed.ts";
+import { createHandler } from "./server.ts";
 import { CUSTOM_CLAIM, createSigner, DEFECTS, LTI_CLAIM, type Signer } from "./token.ts";
 
 const TOOL = "http://tool.test";

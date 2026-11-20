@@ -2,10 +2,11 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { exportJWK, generateKeyPair, type JSONWebKeySet, SignJWT } from "jose";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createHandler, NRPS_CLAIM, NRPS_MEDIA_TYPE, NRPS_SCOPE, ROLE_URIS, ROSTERS } from "./index.ts";
-import { fetchKeysFrom } from "./tool.ts";
-import { CLIENT_ID, COURSES, PEOPLE } from "./seed.ts";
+import { NRPS_CLAIM, NRPS_MEDIA_TYPE, NRPS_SCOPE } from "./roster.ts";
+import { CLIENT_ID, COURSES, PEOPLE, ROLE_URIS, ROSTERS } from "./seed.ts";
+import { createHandler } from "./server.ts";
 import { createSigner, launchClaims } from "./token.ts";
+import { fetchKeysFrom } from "./tool.ts";
 
 const ISSUER = "http://issuer.test";
 const NOW = 1_900_000_000;

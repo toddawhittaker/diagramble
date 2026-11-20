@@ -432,7 +432,7 @@ describe("the other routes keep the app's Origin rule when LTI is set", () => {
         query,
         headers: origin ? { origin } : {},
       });
-      expect(response.statusCode).toBe(302);
+      expect(response.statusCode).toBe(303);
     }
   });
 });

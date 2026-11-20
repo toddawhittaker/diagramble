@@ -19,7 +19,7 @@ import {
   signIn,
 } from "../security/harness.ts";
 import { buildServer } from "../server.ts";
-import { REFUSAL_SENTENCE } from "./pages.ts";
+import { REFUSAL_SENTENCE, renderRefusalPage } from "./pages.ts";
 import { stateCookieName } from "./state.ts";
 import { AUTH_URL, FRAME_ORIGINS, makeLtiSettings, makePlatform, PLATFORM, postLaunch, runLaunch } from "./testing.ts";
 
@@ -75,7 +75,7 @@ function expectRefused(response: Awaited<ReturnType<typeof postLaunch>>, status:
 describe("the login", () => {
   test("stores a state, sets the state cookie and redirects to the platform", async () => {
     const { login } = await launch({ person: sam });
-    expect(login.statusCode).toBe(302);
+    expect(login.statusCode).toBe(303);
     const to = new URL(login.headers.location as string);
     expect(`${to.origin}${to.pathname}`).toBe(AUTH_URL);
     expect(to.searchParams.get("redirect_uri")).toBe(`${HTTPS_ORIGIN}/lti/launch`);
@@ -376,5 +376,30 @@ describe("a password sign-in beside a launch", () => {
     const session = lines.find((l) => l !== cleared)!;
     expect(session).toMatch(/; SameSite=Lax/);
     expect(session).not.toMatch(/Partitioned/);
+  });
+});
+
+describe("when the platform's key set cannot be fetched", () => {
+  test("the launch answers 503 with the same refusal page, logs why, and makes no session", async () => {
+    const lines: string[] = [];
+    const down = await buildServer({
+      db: testDb.db,
+      settings: makeSettings(HTTPS_ORIGIN, makeStaticDir(), 0, makeLtiSettings()),
+      ltiKeys: () => Promise.reject(new Error("network down")),
+      logger: { stream: { write: (line: string) => void lines.push(line) } },
+    });
+    try {
+      const run = await runLaunch(down, platform.signer, HTTPS_ORIGIN, { person: sam });
+      expect(run.launch.statusCode).toBe(503);
+      expect(run.launch.body).toBe(renderRefusalPage());
+      expect(cookieOf(run.launch, HTTPS_COOKIE)).toBeUndefined();
+      const reasons = lines
+        .map((line) => JSON.parse(line) as { msg?: string; reason?: string; statusCode?: number })
+        .filter((entry) => entry.msg === "Canvas launch refused");
+      expect(reasons).toEqual([expect.objectContaining({ reason: "keyset_unavailable", statusCode: 503 })]);
+      expect(lines.join("\n")).not.toContain(run.form.id_token);
+    } finally {
+      await down.close();
+    }
   });
 });

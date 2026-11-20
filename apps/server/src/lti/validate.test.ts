@@ -65,7 +65,9 @@ async function tokenWith(changes: Record<string, unknown>): Promise<string> {
 
 async function reasonFor(token: string): Promise<LaunchRefusal | "ok"> {
   const result = await validateLaunch(token, input);
-  return result.ok ? "ok" : result.reason;
+  if (result.ok) return "ok";
+  if ("outage" in result) throw new Error(result.outage);
+  return result.reason;
 }
 
 describe("a good launch", () => {
@@ -93,7 +95,7 @@ describe("a good launch", () => {
       [una, "una"],
     ] as const) {
       const result = await validateLaunch(await signLaunch(signer, claims(undefined, person)), input);
-      if (!result.ok) throw new Error(result.reason);
+      if (!result.ok) throw new Error("reason" in result ? result.reason : result.outage);
       expect(chooseLtiLogin(result.launch, "00000000-0000-4000-8000-000000000000")).toBe(login);
     }
   });
@@ -186,7 +188,7 @@ describe("the signature and the algorithm", () => {
   test("a key source that fails for another reason is an unavailable key set", async () => {
     const failing = { ...input, keys: () => Promise.reject(new Error("network down")) };
     const result = await validateLaunch(await signLaunch(signer, claims()), failing);
-    expect(result).toEqual({ ok: false, reason: "keyset_unavailable" });
+    expect(result).toEqual({ ok: false, outage: "keyset_unavailable" });
   });
 
   test("checks the signature before any claim: a forged token with a wrong issuer is a bad signature", async () => {

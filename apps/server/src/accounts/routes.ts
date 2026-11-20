@@ -7,7 +7,7 @@ import { z } from "zod";
 import type { Database } from "../db/schema.ts";
 import type { Settings } from "../settings.ts";
 import { normalizeUsername, verifyAgainstDummy, verifyPassword } from "./password.ts";
-import { cookieName, cookieOptions, endSession, launchCookieOptions, startSession } from "./sessions.ts";
+import { clearingOptions, cookieName, cookieOptions, endSession, launchCookieOptions, startSession } from "./sessions.ts";
 import type { SignInLimiter } from "./sign-in-limit.ts";
 import { renderSignInPage, signInCss } from "./sign-in-page.ts";
 import { findPasswordMethod } from "./store.ts";
@@ -79,16 +79,7 @@ export function accountRoutes(
 ): void {
   const cookie = cookieName(settings);
   const options = cookieOptions(settings);
-  const launch = launchCookieOptions();
-  const clearLaunchCookie = {
-    httpOnly: launch.httpOnly,
-    secure: true,
-    path: launch.path,
-    sameSite: launch.sameSite,
-    partitioned: launch.partitioned,
-    expires: new Date(0),
-    maxAge: 0,
-  };
+  const clearLaunchCookie = clearingOptions(launchCookieOptions());
 
   app.get("/sign-in", async (request, reply) => {
     if (request.signedIn) return reply.code(303).header("location", "/").send();
@@ -125,7 +116,7 @@ export function accountRoutes(
     // name, so both lines are written here, the new session first.
     return reply
       .header("set-cookie", [
-        app.serializeCookie(cookie, token, { ...options, secure: options.secure === true }),
+        app.serializeCookie(cookie, token, options),
         app.serializeCookie(cookie, "", clearLaunchCookie),
       ])
       .code(303)
@@ -139,12 +130,7 @@ export function accountRoutes(
     // Both cookies of this name go: the password one and a launch's partitioned one.
     return reply
       .header("set-cookie", [
-        app.serializeCookie(cookie, "", {
-          ...options,
-          secure: options.secure === true,
-          maxAge: 0,
-          expires: new Date(0),
-        }),
+        app.serializeCookie(cookie, "", clearingOptions(options)),
         app.serializeCookie(cookie, "", clearLaunchCookie),
       ])
       .code(303)
