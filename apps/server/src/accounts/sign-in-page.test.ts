@@ -60,6 +60,25 @@ describe("renderSignInPage", () => {
     expect(html).toMatch(new RegExp(`role="alert"[^>]*>[\\s\\S]*${failure}`));
   });
 
+  test("names the error for assistive technology when there is a message (WCAG 3.3.1, 4.1.3)", () => {
+    const html = renderSignInPage({ username: "ada", message: failure });
+    expect(html).toMatch(/<p class="sign-in-alert" id="sign-in-error" role="alert">/);
+    expect(tagFor(html, "username")).toContain('aria-describedby="sign-in-error"');
+    expect(tagFor(html, "password")).toContain('aria-describedby="sign-in-error"');
+    expect(tagFor(html, "password")).toContain('aria-invalid="true"');
+    expect(tagFor(html, "username")).not.toContain("aria-invalid");
+    expect(html).toMatch(/<title>Error: Sign in · Diagramble<\/title>/);
+  });
+
+  test("has no error attributes and the plain title without a message", () => {
+    for (const html of [renderSignInPage({}), renderSignInPage({ username: "ada" }), renderSignInPage({ message: "" })]) {
+      expect(html).not.toContain("sign-in-error");
+      expect(html).not.toContain("aria-describedby");
+      expect(html).not.toContain("aria-invalid");
+      expect(html).toContain("<title>Sign in · Diagramble</title>");
+    }
+  });
+
   test("escapes the username, quotes included, inside the value attribute", () => {
     const html = renderSignInPage({ username: `a"><script>x</script>&'b` });
     expect(tagFor(html, "username")).toContain(
@@ -97,6 +116,13 @@ describe("signInCss", () => {
   test("is the stylesheet beside the module", () => {
     const onDisk = readFileSync(new URL("./sign-in.css", import.meta.url), "utf8");
     expect(signInCss).toBe(onDisk);
+  });
+
+  test("draws input borders in --muted, for 3:1 non-text contrast (WCAG 1.4.11)", () => {
+    const input = /\ninput \{[^}]*\}/.exec(signInCss)?.[0] ?? "";
+    expect(input).toContain("border: 1px solid var(--muted);");
+    expect(input).not.toContain("--hairline");
+    expect(signInCss).toMatch(/input:hover \{\s*border-color: var\(--ink\);/);
   });
 
   test("has a dark theme and loads no external font", () => {

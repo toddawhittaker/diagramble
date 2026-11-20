@@ -103,7 +103,8 @@ input {
   inline-size: 100%;
   min-block-size: 40px;
   padding: 6px 8px;
-  border: 1px solid var(--hairline);
+  /* The border must reach 3:1 against the page (WCAG 1.4.11). */
+  border: 1px solid var(--muted);
   border-radius: 0;
   background: var(--paper);
   color: var(--ink);
@@ -112,7 +113,7 @@ input {
 }
 
 input:hover {
-  border-color: var(--muted);
+  border-color: var(--ink);
 }
 
 input:focus {

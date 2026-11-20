@@ -41,8 +41,13 @@ const errorMark = `<svg class="mark-error" viewBox="0 0 16 16" width="16" height
 export function renderSignInPage({ username, message }: { username?: string; message?: string }): string {
   const alert = message
     ? `
-      <p class="sign-in-alert" role="alert">${errorMark}<span>${escapeHtml(message)}</span></p>`
+      <p class="sign-in-alert" id="sign-in-error" role="alert">${errorMark}<span>${escapeHtml(message)}</span></p>`
     : "";
+  // WCAG 3.3.1 and 4.1.3: the page reloads with the alert already in it, so the inputs
+  // point at it and the title announces it.
+  const describedBy = message ? ' aria-describedby="sign-in-error"' : "";
+  const invalid = message ? ' aria-invalid="true"' : "";
+  const title = message ? "Error: Sign in · Diagramble" : "Sign in · Diagramble";
   const focusUsername = username ? "" : " autofocus";
   const focusPassword = username ? " autofocus" : "";
   return `<!doctype html>
@@ -50,7 +55,7 @@ export function renderSignInPage({ username, message }: { username?: string; mes
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sign in · Diagramble</title>
+  <title>${title}</title>
   <link rel="stylesheet" href="/sign-in.css">
 </head>
 <body>
@@ -60,11 +65,11 @@ export function renderSignInPage({ username, message }: { username?: string; mes
     <form method="post" action="/sign-in">${alert}
       <p class="field">
         <label for="username">Username</label>
-        <input id="username" name="username" type="text" value="${escapeHtml(username ?? "")}" autocomplete="username" autocapitalize="none" spellcheck="false" required${focusUsername}>
+        <input id="username" name="username" type="text" value="${escapeHtml(username ?? "")}" autocomplete="username" autocapitalize="none" spellcheck="false"${describedBy} required${focusUsername}>
       </p>
       <p class="field">
         <label for="password">Password</label>
-        <input id="password" name="password" type="password" autocomplete="current-password" required${focusPassword}>
+        <input id="password" name="password" type="password" autocomplete="current-password"${describedBy}${invalid} required${focusPassword}>
       </p>
       <button type="submit" class="btn-primary">Sign in</button>
     </form>
