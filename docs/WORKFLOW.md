@@ -49,7 +49,7 @@ in `.env` as one double-quoted line, keeping the `BEGIN PRIVATE KEY` and
 `END PRIVATE KEY` lines and writing `\n` for each line break, which Compose expands:
 
 ```
-LTI_TOOL_KEY="<BEGIN line>\n<key lines, each followed by \n>\n<END line>\n"
+LTI_TOOL_KEY="<BEGIN line>\n<key line>\n<key line>\n...\n<END line>\n"
 ```
 
 `compose.yaml` does not pass the `LTI_*` variables to the app yet, so list them
