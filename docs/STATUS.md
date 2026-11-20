@@ -24,6 +24,15 @@ that is not a gap in something built goes in a GitHub issue instead.
   exactly; a boundary check that keeps the model, rules and cases free of React, the
   browser and the server; and two required CI checks over all of them, App checks
   and App tests, the second failing below 75% test coverage.
+- **Epic 2: Model.** `packages/model` holds the element kinds, views and saved document
+  of SPEC.md section 3 with a published JSON Schema, the pure `apply` that enforces every
+  invariant and returns a change and its inverse as JSON Patch, undo, redo and replay, and
+  the Release 0 commands and queries of section 4 in one registry that doubles as AI tool
+  definitions.
 
 ## Open items
+
+- `apply` assumes its input document passes the invariant check; a command given a broken
+  document can throw instead of refusing. Import must check a file with `findViolations`
+  before it reaches `apply` (SPEC.md section 3.9).
 
