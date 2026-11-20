@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { type CryptoKey, exportJWK, generateKeyPair, type JWK, SignJWT } from "jose";
+import { membershipsUrl, NRPS_CLAIM } from "./roster.ts";
 import { CLIENT_ID, type Course, DEPLOYMENT_ID, type Person, ROLE_URIS, type RoleName } from "./seed.ts";
 
 // Each defect makes a launch wrong in exactly one way, so a test knows which tool-side check refused it.
@@ -89,6 +90,7 @@ export function launchClaims(input: LaunchClaimsInput): Record<string, unknown> 
     family_name: person.familyName,
     email: person.email,
     [CUSTOM_CLAIM]: { login_id: person.loginId },
+    [NRPS_CLAIM]: { context_memberships_url: membershipsUrl(input.issuer, course.id), service_versions: ["2.0"] },
     [`${LTI_CLAIM}message_type`]: defect === "wrong_message_type" ? "LtiSubmissionReviewRequest" : "LtiResourceLinkRequest",
     [`${LTI_CLAIM}version`]: defect === "wrong_version" ? "1.1.0" : "1.3.0",
     [`${LTI_CLAIM}deployment_id`]: defect === "unknown_deployment" ? "unknown-deployment" : DEPLOYMENT_ID,

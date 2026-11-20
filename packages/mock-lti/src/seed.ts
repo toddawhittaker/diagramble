@@ -96,6 +96,12 @@ export const COURSES: readonly Course[] = [
   { key: "is420", id: "mock-course-is420", label: "IS 420", title: "IS 420 Database Design" },
 ];
 
+/** The people on each course's roster, by course key. A roster is every seed person who can launch into the course. */
+export const ROSTERS: Record<string, readonly string[]> = {
+  is301: ["ivy", "tom", "sam", "lee", "una", "ada"],
+  is420: ["ivy", "tom", "sam"],
+};
+
 export function findPerson(key: string): Person | undefined {
   return PEOPLE.find((p) => p.key === key);
 }

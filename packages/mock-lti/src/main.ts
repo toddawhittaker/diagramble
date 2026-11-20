@@ -86,6 +86,7 @@ export async function start(argv: string[], out: (line: string) => void = consol
   });
   out(`mock LTI platform listening on ${options.host}:${(server.address() as AddressInfo).port}`);
   out(`open ${options.publicUrl}/ to start a launch`);
+  out(`roster service token endpoint: ${options.publicUrl}/token (informational; the tool's server has no setting for it)`);
   out("Settings for the tool's server:");
   for (const line of settingsLines(options)) out(line);
   return server;

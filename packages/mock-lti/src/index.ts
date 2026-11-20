@@ -1,4 +1,6 @@
 export { createHandler, type MockPlatformOptions } from "./server.ts";
+export { membershipsUrl, NRPS_CLAIM, NRPS_MEDIA_TYPE, NRPS_SCOPE } from "./roster.ts";
+export { type FetchToolKeys, fetchKeysFrom } from "./tool.ts";
 export {
   CLIENT_ID,
   COURSES,
@@ -10,6 +12,7 @@ export {
   type Person,
   ROLE_NAMES,
   ROLE_URIS,
+  ROSTERS,
   type RoleName,
   UNFILLED_LOGIN_ID,
 } from "./seed.ts";

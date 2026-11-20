@@ -3,6 +3,8 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { html, json, readForm, send } from "./http.ts";
 import { autoPostPage, coursePage, errorPage, launchPage } from "./pages.ts";
 import { CLIENT_ID, type Course, DEPLOYMENT_ID, findCourse, findPerson, isRoleName, type Person, type RoleName } from "./seed.ts";
+import { createServices } from "./services.ts";
+import { type FetchToolKeys, fetchKeysFrom } from "./tool.ts";
 import { type Defect, isDefect, launchClaims, type Signer, signLaunch } from "./token.ts";
 
 export interface MockPlatformOptions {
@@ -14,6 +16,8 @@ export interface MockPlatformOptions {
   log: (line: string) => void;
   /** Seconds since the epoch. */
   now?: () => number;
+  /** Where the tool's public keys come from; defaults to its /lti/jwks. */
+  fetchToolKeys?: FetchToolKeys;
 }
 
 interface PendingLaunch {
@@ -56,6 +60,12 @@ async function authorizeParams(req: IncomingMessage, url: URL, method: string): 
 export function createHandler(options: MockPlatformOptions) {
   const { issuer, toolUrl, signer, log } = options;
   const now = options.now ?? (() => Math.floor(Date.now() / 1000));
+  const services = createServices({
+    issuer,
+    fetchKeys: options.fetchToolKeys ?? fetchKeysFrom(toolUrl),
+    now,
+    log,
+  });
   // Launches stay valid for the life of the process: the framed login re-submits the same hint.
   const pending = new Map<string, PendingLaunch>();
   let lastGood: LastGoodLaunch | undefined;
@@ -197,6 +207,7 @@ export function createHandler(options: MockPlatformOptions) {
   // POST routes that take a form body.
   const formRoutes: Record<string, Route> = {
     "/start": start,
+    "/token": services.token,
   };
 
   return async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -211,6 +222,10 @@ export function createHandler(options: MockPlatformOptions) {
       const formRoute = method === "POST" ? formRoutes[url.pathname] : undefined;
       if (formRoute) {
         await formRoute(await readForm(req), res);
+        return;
+      }
+      if (method === "GET" && url.pathname.startsWith("/nrps/")) {
+        services.memberships(req, url, res);
         return;
       }
       if (url.pathname === "/authorize" && (method === "GET" || method === "POST")) {

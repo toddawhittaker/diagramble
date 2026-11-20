@@ -91,6 +91,9 @@ describe("starting the server", () => {
     );
     const port = (running.address() as AddressInfo).port;
     expect(out.join("\n")).toMatch(/listening on 127\.0\.0\.1:\d+/);
+    expect(out).toContain(
+      "roster service token endpoint: http://localhost:4000/token (informational; the tool's server has no setting for it)",
+    );
     for (const name of ["LTI_ISSUER", "LTI_CLIENT_ID", "LTI_DEPLOYMENT_ID", "LTI_AUTH_URL", "LTI_KEYS_URL", "LTI_FRAME_ORIGINS", "LTI_TOOL_KEY"]) {
       expect(out.some((line) => line.startsWith(`${name}=`))).toBe(true);
     }
