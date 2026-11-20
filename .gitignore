@@ -17,3 +17,6 @@ dist/
 
 # Test coverage reports.
 coverage/
+
+# Local secrets for Docker Compose.
+.env
