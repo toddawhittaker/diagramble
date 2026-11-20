@@ -232,6 +232,7 @@ describe("the pages", () => {
   it("let the course page's frame fill the width", async () => {
     const framed = await start({ person: "sam", course: "is420", frame: "1" });
     const course = await (await fetch(`${base}${framed.location}`)).text();
+    expect(course).toContain("body:has(iframe){max-width:none}");
     expect(course).toContain("iframe{width:100%;height:min(36rem, 80vh)");
   });
 });
