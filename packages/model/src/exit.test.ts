@@ -164,7 +164,7 @@ describe("the bike-repair project built only through commands (SPEC.md sections 
   });
 });
 
-describe("one element on two diagrams (SPEC.md sections 3.5 and 4.1; EPICS.md Epic 2 exit)", () => {
+describe("one element on two diagrams (SPEC.md sections 3.5 and 4.1)", () => {
   test("a data store shown on two diagrams, renamed once, shows the new name on both and keeps its label", () => {
     const before = first.docs[RENAME_INDEX - 1] as ProjectDocument;
     const after = first.session.doc;
