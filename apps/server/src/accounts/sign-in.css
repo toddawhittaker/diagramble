@@ -1,0 +1,172 @@
+/* The sign-in page in the Drafting Paper style (docs/mockups/STYLES.md). System fonts
+   only: the page's Content Security Policy loads nothing but this file. */
+
+:root {
+  color-scheme: light;
+  --paper: #f7f3ea;
+  --ink: #1e2a38;
+  --muted: #6b6558;
+  --hairline: #c9c1b2;
+  --select: #1f5fa8;
+  --error: #b3261e;
+  --on-error: #ffffff;
+  --on-ink: #f7f3ea;
+  --font-title: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --paper: #1a1917;
+    --ink: #ece6d8;
+    --muted: #a39c8c;
+    --hairline: #3d3933;
+    --select: #7fb2ea;
+    --error: #f0776c;
+    --on-error: #1a1917;
+    --on-ink: #1a1917;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  display: grid;
+  place-items: start center;
+  padding: 16vh 16px 32px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sign-in {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  inline-size: 100%;
+  max-inline-size: 22rem;
+}
+
+.sign-in-head {
+  padding-block-end: 20px;
+  border-block-end: 1px solid var(--hairline);
+}
+
+.wordmark {
+  display: block;
+  color: var(--ink);
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+}
+
+label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+input {
+  inline-size: 100%;
+  min-block-size: 40px;
+  padding: 6px 8px;
+  border: 1px solid var(--hairline);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  /* 16px keeps phones from zooming into the field. */
+  font: 16px var(--font-body);
+}
+
+input:hover {
+  border-color: var(--muted);
+}
+
+input:focus {
+  outline: 2px solid var(--select);
+  outline-offset: -1px;
+}
+
+.btn-primary {
+  min-block-size: 40px;
+  margin-block-start: 4px;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--ink);
+  color: var(--on-ink);
+  font: 600 15px var(--font-body);
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: color-mix(in srgb, var(--ink) 85%, var(--paper));
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--select);
+  outline-offset: 2px;
+}
+
+.sign-in-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+}
+
+.mark-error {
+  flex: none;
+  margin-block-start: 2px;
+}
+
+.mark-error-disc {
+  fill: var(--error);
+}
+
+.mark-error-glyph {
+  fill: var(--on-error);
+}
+
+@media (forced-colors: active) {
+  .mark-error-disc {
+    fill: CanvasText;
+  }
+
+  .mark-error-glyph {
+    fill: Canvas;
+  }
+}
