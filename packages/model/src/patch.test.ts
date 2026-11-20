@@ -19,7 +19,7 @@ function applied(doc: JsonValue, ops: Patch): JsonValue {
   return result.doc;
 }
 
-/** The three round-trip properties of SPEC.md section 3.6 and EPIC-2 ruling 14. */
+/** The round-trip properties: diff then apply gives the target, and the inverse gives the source (SPEC.md section 3.6). */
 function expectRoundTrip(a: JsonValue, b: JsonValue): void {
   const frozenA = deepFreeze(copy(a));
   const frozenB = deepFreeze(copy(b));

@@ -3,7 +3,7 @@
 // `applyPatch` applies them without changing its input. Arrays and primitives that
 // differ are replaced whole, so no operation ever carries an array index. The inverse
 // of `diff(from, to)` is `diff(to, from)`.
-// See docs/SPEC.md section 3.6 and docs/EPIC-2.md ruling 14.
+// See docs/SPEC.md section 3.6, the change record in JSON Patch form.
 
 export type JsonValue =
   | null
