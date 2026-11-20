@@ -31,6 +31,7 @@ const settings: Settings = {
   port: 0,
   trustProxyHops: 0,
   staticDir,
+  lti: null,
 };
 
 let testDb: TestDb;
@@ -361,8 +362,12 @@ describe("who sees what", () => {
       "GET /sign-in.css",
       "GET /health",
       "POST /sign-out",
+      "GET /lti/login",
+      "POST /lti/login",
+      "POST /lti/launch",
+      "GET /lti/jwks",
     ]);
-    expect(ORIGIN_EXEMPT_ROUTES).toEqual([]);
+    expect(ORIGIN_EXEMPT_ROUTES).toEqual(["POST /lti/login", "POST /lti/launch"]);
     const page = await app.inject({ url: "/sign-in?x=1", headers: { accept: "text/html" } });
     expect(page.statusCode).toBe(200);
     expect(page.headers["content-type"]).toBe("text/html; charset=utf-8");

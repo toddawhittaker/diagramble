@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { describe, expect, test } from "vitest";
-import { cookieName, cookieOptions, hashToken, newToken, SESSION_SECONDS } from "./sessions.ts";
+import { cookieName, cookieOptions, hashToken, launchCookieOptions, newToken, SESSION_SECONDS } from "./sessions.ts";
 
 describe("session tokens", () => {
   test("a token is 32 random bytes in base64url, new each time", () => {
@@ -33,5 +33,16 @@ describe("the session cookie", () => {
     expect(cookieName(settings)).toBe("diagramble-session");
     expect(cookieOptions(settings).secure).toBe(false);
     expect(SESSION_SECONDS).toBe(86400);
+  });
+});
+
+test("a launch session's cookie is Secure, HttpOnly, SameSite=None, Partitioned, Path=/ for 24 hours", () => {
+  expect(launchCookieOptions()).toEqual({
+    httpOnly: true,
+    secure: true,
+    path: "/",
+    sameSite: "none",
+    partitioned: true,
+    maxAge: SESSION_SECONDS,
   });
 });

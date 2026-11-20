@@ -10,6 +10,7 @@ import { createSignInLimiter } from "./accounts/sign-in-limit.ts";
 import type { Database } from "./db/schema.ts";
 import { installGuard } from "./guard.ts";
 import { healthRoutes } from "./health.ts";
+import { type KeySource, ltiRoutes } from "./lti/routes.ts";
 import type { Settings } from "./settings.ts";
 import { staticFiles } from "./static.ts";
 
@@ -21,6 +22,8 @@ export interface ServerOptions {
   limiter?: ReturnType<typeof createSignInLimiter>;
   /** Request logging; `stream` lets the tests read the lines. */
   logger?: boolean | { stream: { write: (line: string) => void } };
+  /** The platform's keys for the launch; by default fetched from LTI_KEYS_URL. */
+  ltiKeys?: KeySource;
 }
 
 export async function buildServer({
@@ -29,6 +32,7 @@ export async function buildServer({
   now = Date.now,
   limiter = createSignInLimiter({ now }),
   logger = false,
+  ltiKeys,
 }: ServerOptions): Promise<FastifyInstance> {
   const hops = settings.trustProxyHops;
   // Trust the nearest `hops` proxies, as a number would; Fastify's types take no number.
@@ -49,6 +53,7 @@ export async function buildServer({
   installGuard(app, { db, settings, now });
   healthRoutes(app, db);
   accountRoutes(app, { db, settings, now, limiter });
+  if (settings.lti) ltiRoutes(app, { db, settings, lti: settings.lti, now, keys: ltiKeys });
   await staticFiles(app, settings.staticDir);
   return app;
 }
