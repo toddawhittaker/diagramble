@@ -121,8 +121,8 @@ describe("POST /sign-in", () => {
     ["a missing password", { username: "ada" }],
     ["an over-long password", { username: "ada", password: "x".repeat(1025) }],
     ["an empty body", {}],
-  ])("%s gets the same refusal, with the username kept", async (_name, body) => {
-    const response = await signIn(body as Record<string, string>);
+  ])("%s gets the same refusal, with the username kept", async (_name, body: Record<string, string>) => {
+    const response = await signIn(body);
     expect(response.statusCode).toBe(401);
     expect(sessionCookie(response)).toBeUndefined();
     expect(response.headers["content-type"]).toBe("text/html; charset=utf-8");

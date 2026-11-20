@@ -42,8 +42,8 @@ const env = {
 test("start migrates, listens and closes cleanly", async () => {
   const { server, close } = await start(env, { logger: false });
   try {
-    const address = server.addresses()[0];
-    const response = await fetch(`http://127.0.0.1:${address?.port}/health`);
+    const { port } = server.server.address() as { port: number };
+    const response = await fetch(`http://127.0.0.1:${port}/health`);
     expect(response.status).toBe(200);
     expect(await response.text()).toBe("ok");
   } finally {
