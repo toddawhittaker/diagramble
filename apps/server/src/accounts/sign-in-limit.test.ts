@@ -264,11 +264,86 @@ describe("memory", () => {
   test("the limiter passes its cap to both counters", () => {
     const clock = fakeClock();
     const limiter = createSignInLimiter({ now: clock.now, maxKeys: 2 });
-    fail(limiter, 10, "ada", "203.0.113.5");
+    fail(limiter, 3, "ada", "203.0.113.5");
     limiter.attempt("x", "198.51.100.1");
     limiter.attempt("y", "198.51.100.2");
-    // "ada" and 203.0.113.5 were the oldest keys, so both were dropped.
+    // "ada" and 203.0.113.5 were the oldest keys below the point where slowing starts,
+    // so both were dropped and "ada" starts again at none.
+    fail(limiter, 3, "ada", "203.0.113.5");
     expect(limiter.attempt("ada", "203.0.113.5")).toEqual({ refused: false, delayMs: 0 });
+  });
+
+  test("a flood of new usernames cannot evict a username near its limit", () => {
+    const clock = fakeClock();
+    const limiter = createSignInLimiter({ now: clock.now, maxKeys: 5 });
+    fail(limiter, 9, "victim", "203.0.113.5");
+    for (let i = 0; i < 50; i++) limiter.attempt(`flood${i}`, `198.51.100.${i}`);
+    expect(limiter.attempt("victim", "203.0.113.5").refused).toBe(false);
+    expect(limiter.attempt("victim", "203.0.113.5")).toEqual({ refused: true, retryAfterSeconds: 900 });
+  });
+
+  test("a full counter first drops every key whose window has ended", () => {
+    const clock = fakeClock();
+    const counter = createCounter(WINDOW, clock.now, 3, 2);
+    counter.hit("old1");
+    counter.hit("old2");
+    counter.hit("old2");
+    clock.advance(WINDOW - 1);
+    counter.hit("recent");
+    clock.advance(1);
+    // old1 and old2 have ended; "recent" has not. Even the key at the keep point goes.
+    counter.hit("new");
+    expect(counter.size()).toBe(2);
+    expect(counter.peek("recent").count).toBe(1);
+    expect(counter.peek("new").count).toBe(1);
+  });
+
+  test("a full counter drops the oldest key below the keep point, not an older key above it", () => {
+    const clock = fakeClock();
+    const counter = createCounter(WINDOW, clock.now, 3, 2);
+    counter.hit("kept");
+    counter.hit("kept");
+    counter.hit("low1");
+    counter.hit("low2");
+    counter.hit("new");
+    expect(counter.size()).toBe(3);
+    expect(counter.peek("kept").count).toBe(2);
+    expect(counter.peek("low1").count).toBe(0);
+    expect(counter.peek("low2").count).toBe(1);
+    expect(counter.peek("new").count).toBe(1);
+  });
+
+  test("a full counter whose keys are all at the keep point does not add a new key", () => {
+    const clock = fakeClock();
+    const counter = createCounter(WINDOW, clock.now, 2, 2);
+    for (const key of ["a", "b"]) {
+      counter.hit(key);
+      counter.hit(key);
+    }
+    expect(counter.hit("new").count).toBe(1);
+    expect(counter.size()).toBe(2);
+    expect(counter.peek("new").count).toBe(0);
+    expect(counter.peek("a").count).toBe(2);
+    expect(counter.peek("b").count).toBe(2);
+  });
+
+  test("a key the counter refused to add counts again once room opens", () => {
+    const clock = fakeClock();
+    const counter = createCounter(WINDOW, clock.now, 1, 1);
+    counter.hit("a");
+    counter.hit("new");
+    counter.clear("a");
+    counter.hit("new");
+    expect(counter.peek("new").count).toBe(1);
+  });
+
+  test("the other counter still applies when the username counter is full of near-limit keys", () => {
+    const clock = fakeClock();
+    const limiter = createSignInLimiter({ now: clock.now, maxKeys: 1 });
+    fail(limiter, 4, "ada", "203.0.113.5");
+    // "ada" is held and protected, so "bob" gets no count of his own, but his address does.
+    for (let i = 0; i < 50; i++) limiter.attempt("bob", "198.51.100.1");
+    expect(limiter.attempt("bob", "198.51.100.1")).toEqual({ refused: true, retryAfterSeconds: 900 });
   });
 
   test("undoing an unknown key stores nothing", () => {

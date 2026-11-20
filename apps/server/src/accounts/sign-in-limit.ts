@@ -22,11 +22,24 @@ export interface Counter {
   size(): number;
 }
 
-/** The most keys one counter holds; past it the oldest is dropped, so memory stays bounded. */
+/** The most keys one counter holds, so memory stays bounded. */
 export const MAX_KEYS = 100_000;
 
-/** Fixed windows keyed by whatever the caller counts: an address, a username. */
-export function createCounter(windowMs: number, now: () => number, maxKeys = MAX_KEYS): Counter {
+/**
+ * Fixed windows keyed by whatever the caller counts: an address, a username.
+ *
+ * A full counter makes room for a new key by dropping, in order: every window that has
+ * ended; then the oldest key whose count is below `keepFrom`. If every key is at or
+ * above `keepFrom`, the new key is not stored, so a flood of new keys cannot push out
+ * the count of a key that is under attack. Such a key's hit is still returned, but
+ * not held.
+ */
+export function createCounter(
+  windowMs: number,
+  now: () => number,
+  maxKeys = MAX_KEYS,
+  keepFrom = Infinity,
+): Counter {
   const windows = new Map<string, Window>();
   let lastSweep = now();
 
@@ -45,16 +58,31 @@ export function createCounter(windowMs: number, now: () => number, maxKeys = MAX
     return window;
   }
 
+  /** Whether there is room for one more key, dropping keys as the rules above say. */
+  function makeRoom(): boolean {
+    if (windows.size < maxKeys) return true;
+    const at = now();
+    // Keys are held oldest window first, so the ended ones are at the front.
+    for (const [k, w] of windows) {
+      if (at - w.startedAt < windowMs) break;
+      windows.delete(k);
+    }
+    if (windows.size < maxKeys) return true;
+    for (const [k, w] of windows) {
+      if (w.count < keepFrom) {
+        windows.delete(k);
+        return true;
+      }
+    }
+    return false;
+  }
+
   return {
     hit(key) {
       let window = live(key);
       if (!window) {
         window = { startedAt: now(), count: 0 };
-        if (windows.size >= maxKeys) {
-          const oldest = windows.keys().next().value;
-          if (oldest !== undefined) windows.delete(oldest);
-        }
-        windows.set(key, window);
+        if (makeRoom()) windows.set(key, window);
       }
       window.count += 1;
       return window;
@@ -135,8 +163,9 @@ export interface SignInLimiter {
  * its 50th.
  */
 export function createSignInLimiter({ now, maxKeys }: { now: () => number; maxKeys?: number }): SignInLimiter {
-  const byUsername = createCounter(WINDOW_MS, now, maxKeys);
-  const byAddress = createCounter(WINDOW_MS, now, maxKeys);
+  // A key at or past the count where slowing starts is under attack and is never pushed out.
+  const byUsername = createCounter(WINDOW_MS, now, maxKeys, PER_USERNAME.slowFrom);
+  const byAddress = createCounter(WINDOW_MS, now, maxKeys, PER_ADDRESS.slowFrom);
 
   return {
     attempt(username, ip) {
