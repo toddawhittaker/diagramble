@@ -116,6 +116,7 @@ describe("the default policy", () => {
   const cookie = () => ({ cookie: `${HTTPS_COOKIE}=${token}` });
   const defaults: [string, () => Promise<LightMyRequestResponse>][] = [
     ["a static file", () => app.inject({ url: "/app.js", headers: cookie() })],
+    ["the app's page", () => app.inject({ url: "/", headers: cookie() })],
     ["a 401", () => app.inject({ url: "/app.js" })],
     [
       "a 403",

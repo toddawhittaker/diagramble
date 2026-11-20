@@ -123,6 +123,11 @@ describe("what it flags in comments", () => {
 			assert.deepEqual(hits.map((h) => h.line), [5]);
 		});
 
+		test("reads past a regex literal holding a parenthesis in the table", () => {
+			const src = 'test.each([[/\\)/]])("Epic 2 title", () => {});\n';
+			assert.deepEqual(names(scanText("a.test.ts", src)), ["epic reference"]);
+		});
+
 		test("reads past quotes, parentheses and comments inside the table", () => {
 			const src = [
 				"test.each([",
