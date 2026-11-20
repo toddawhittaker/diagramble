@@ -2,7 +2,8 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import pg from "pg";
-import { afterAll, beforeAll, expect, test } from "vitest";
+import { Kysely } from "kysely";
+import { afterAll, beforeAll, expect, test, vi } from "vitest";
 import { basePrefix, hostId, requireDatabaseUrl } from "./db/testing.ts";
 import { start } from "./main.ts";
 
@@ -61,4 +62,21 @@ test("start closes the pool when migrating fails", async () => {
   const missing = new URL(url);
   missing.pathname = "/no_such_database_here";
   await expect(start({ ...env, DATABASE_URL: missing.toString() }, { logger: false })).rejects.toThrow();
+});
+
+test("start closes the server and the pool when listening fails", async () => {
+  const first = await start(env, { logger: false });
+  try {
+    const { port } = first.server.server.address() as { port: number };
+    const destroy = vi.spyOn(Kysely.prototype, "destroy");
+    try {
+      await expect(start({ ...env, PORT: String(port) }, { logger: false })).rejects.toThrow(/EADDRINUSE/);
+      expect(destroy).toHaveBeenCalledTimes(1);
+    } finally {
+      destroy.mockRestore();
+    }
+    expect(process.listenerCount("SIGTERM")).toBe(1);
+  } finally {
+    await first.close();
+  }
 });
