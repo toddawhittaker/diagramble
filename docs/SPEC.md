@@ -470,7 +470,7 @@ and later as tool definitions for an AI model (section 7).
 | `setProcessDescription` | Sets the longer description of a process |
 | `setFlowData` | Changes which data definition a flow carries |
 | `reconnectFlow` | Attaches one end of a data flow, or moves it to another element, with the occurrence it attaches to. It is how the student attaches an inherited flow's unattached end |
-| `expandProcess` | Creates the child diagram for a process. Refused if the process already has one. For each data flow touching the process on the parent, it creates a new flow on the child diagram carrying the same data, left unattached to any child process. If the other end is an external entity or data store, that element is placed on the child diagram. If the other end is another process, it becomes an off-diagram end. Control flows are not carried down |
+| `expandProcess` | Creates the child diagram for a process. Refused if the process already has one. For each data flow touching the process on the parent, it creates a new flow on the child diagram carrying the same data, left unattached to any child process. If the other end is an external entity or data store, that element is placed on the child diagram. If the other end is another process, it becomes an off-diagram end. Control flows are not carried down, and neither is a flow whose other end is unattached or a flow from the process to itself. The command carries the identifiers of the child diagram and of each new flow, route and occurrence, and is refused unless they cover exactly the flows it carries and the elements it places |
 | `carryDown` | For a process that already has a child diagram, brings down the flows that were added to the parent afterwards. A flow touching the process on the parent is brought down when no flow that crosses the edge of the child diagram in the same direction carries the same data definition. Each new flow is made as `expandProcess` makes it, with its inner end unattached. Flows whose data already arrives in parts are left alone, because they balance through the dictionary |
 | `setTopDiagram`, `setShowFindings`, `setCaseText` | Change the project settings of section 3.7 |
 | `moveOccurrence`, `setRoute` | Change an occurrence's position and size, or a route's bend points. They change the views only |
@@ -512,7 +512,7 @@ added in the first release. They are not part of Release 0.
 | `getModel` | The whole model in its storage form |
 | `getOutline` | The model as indented plain text, in diagram order |
 | `getElement` | One element with its occurrences |
-| `whereUsed` | Every diagram, flow and data structure that refers to an element |
+| `whereUsed` | Every diagram, flow and data structure that refers to an element: the diagrams that show it or decompose it, the flows that touch it, carry it or sit on it, and the structures that list it as a component |
 | `expandData` | The data elements a definition is ultimately composed of |
 | `search` | Every element whose name, aliases, description or notes contain the given text. It can be narrowed to one kind of element, to one diagram, and to elements with no description or elements used nowhere. This is the repository search of Visible Analyst, and it answers tidy-up questions before a project is handed in |
 | `getFragment` | One process of a diagram with its flows and the elements at their other ends. This is the textbook's DFD fragment (page 146). See section 8.4 |
