@@ -42,9 +42,8 @@ first-release and second-release screens of the specification. It is frozen, a r
 for screen layout only, and is deleted once `apps/web` has the Release 2 screens.
 `prototype/README.md` describes its parts.
 
-Prerequisites: the `.nvmrc` Node (a SessionStart hook puts it on PATH in Claude
-sessions; humans run `nvm use`), and gitleaks for the pre-commit hook
-(`git config core.hooksPath .githooks` once per clone).
+Prerequisites: the `.nvmrc` Node (a SessionStart hook puts it on PATH; humans run `nvm use`),
+gitleaks for the pre-commit hook (`git config core.hooksPath .githooks` once per clone).
 
 | Command | What it does |
 |---|---|
@@ -53,6 +52,7 @@ sessions; humans run `nvm use`), and gitleaks for the pre-commit hook
 | `npm run build` | Build `apps/web` with Vite |
 | `npm run test:browser` | The browser tests, in the workspaces that have them |
 | `npm run dev --workspace @diagramble/web` | Serve the web app with Vite |
+| `docker compose up -d --build` | Run the app and PostgreSQL as deployed; WORKFLOW.md, "Local development", covers the `.env`, the test database and the `account` command |
 | `npm ci`, `npm run typecheck` / `lint` / `test` / `build` / `dev` | The same checks for the prototype, run in `prototype/`; `dev` serves http://localhost:5173 |
 | `node scripts/check-comment-history.mjs` | Fails on project history in comments, repo-wide |
 | `node scripts/check-docs-links.mjs` | Fails on a broken relative link or image in Markdown |

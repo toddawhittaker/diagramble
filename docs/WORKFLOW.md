@@ -18,6 +18,22 @@ npm run test:browser  # the browser tests, in the workspaces that have them
 npm run dev --workspace @diagramble/web   # serves the web app with Vite
 ```
 
+`apps/server`'s tests need PostgreSQL, as CI provides it. Start one with
+`docker run -d --rm -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=diagramble_test postgres:18`
+and set `DATABASE_URL=postgres://postgres:postgres@localhost:5432/diagramble_test`.
+Each test file makes and drops its own database. Without `DATABASE_URL` those tests
+stop and print this command.
+
+To run the app as it is deployed, put `POSTGRES_PASSWORD` (letters and digits only,
+for example from `openssl rand -hex 32`, because it goes into a URL) and `APP_ORIGIN`
+in a `.env` file at the root, which Git ignores, and run `docker compose up -d --build`.
+The app listens on `127.0.0.1:3000` for a reverse proxy on the same host; the Compose
+network is named `diagramble`, so a proxy in another container can join it. Make an
+account with
+`docker compose exec app npm run account --workspace @diagramble/server -- make <username>`;
+the command prints the new password once. `set-password`, `disable` and `enable` work
+the same way, and `--stdin` reads a password instead of generating one.
+
 `npm test` measures coverage and fails when it is under 75% for lines, branches
 and functions. Node's built-in test coverage checks the scripts' own tests, over
 the scripts together. Vitest with the V8 provider checks the five workspaces, one
