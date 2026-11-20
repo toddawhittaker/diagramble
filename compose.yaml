@@ -1,0 +1,40 @@
+# The app and its PostgreSQL database (SPEC.md section 1, "Deployment").
+# Put POSTGRES_PASSWORD and APP_ORIGIN in a `.env` file next to this one.
+# POSTGRES_PASSWORD goes into a database URL, so use letters and digits only, for
+# example the output of `openssl rand -hex 32`.
+services:
+  db:
+    image: postgres:18.7
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: diagramble
+      POSTGRES_USER: diagramble
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U diagramble -d diagramble"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://diagramble:${POSTGRES_PASSWORD}@db:5432/diagramble
+      APP_ORIGIN: ${APP_ORIGIN:?Set APP_ORIGIN in .env, for example https://diagramble.example.edu}
+      TRUST_PROXY_HOPS: 1
+    ports:
+      - "127.0.0.1:3000:3000"
+
+volumes:
+  db-data:
+
+# A fixed name lets a reverse proxy running outside this file join the network.
+networks:
+  default:
+    name: diagramble

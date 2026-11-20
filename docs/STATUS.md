@@ -29,10 +29,20 @@ that is not a gap in something built goes in a GitHub issue instead.
   invariant and returns a change and its inverse as JSON Patch, undo, redo and replay, and
   the Release 0 commands and queries of section 4 in one registry that doubles as AI tool
   definitions.
+- **Epic 3: Server and sign-in.** `apps/server` is a Fastify server on PostgreSQL through
+  Kysely that serves the prototype's build behind a password sign-in, with accounts kept
+  apart from their sign-in methods, hashed 24-hour sessions, an exact `Origin` check on
+  every request that can change anything, limits on failed sign-ins, and a server command
+  for accounts; the Docker image and Compose file run it behind the deployment's own
+  reverse proxy (SPEC.md section 1, "Sign-in", "Host names" and "Deployment").
 
 ## Open items
 
 - `apply` assumes its input document passes the invariant check; a command given a broken
   document can throw instead of refusing. Import must check a file with `findViolations`
   before it reaches `apply` (SPEC.md section 3.9).
-
+- A sign-in that checks the old password just as `account set-password` commits can keep
+  a session made with the old password, because the session is written after the
+  command ends the account's sessions. `disable` then `enable` ends it.
+- The prototype has no sign-out button, because no file in `prototype/` may change.
+  `POST /sign-out` works; the web app adds the button.
