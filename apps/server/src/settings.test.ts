@@ -19,6 +19,7 @@ describe("readSettings", () => {
       port: 3000,
       trustProxyHops: 0,
       staticDir: dir,
+      lti: null,
     });
   });
 

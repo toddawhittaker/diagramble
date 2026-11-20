@@ -31,6 +31,7 @@ const settings: Settings = {
   port: 0,
   trustProxyHops: 0,
   staticDir,
+  lti: null,
 };
 
 let testDb: TestDb;
