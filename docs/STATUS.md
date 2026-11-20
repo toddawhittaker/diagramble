@@ -32,3 +32,7 @@ that is not a gap in something built goes in a GitHub issue instead.
 
 ## Open items
 
+- `apply` assumes its input document passes the invariant check; a command given a broken
+  document can throw instead of refusing. Import must check a file with `findViolations`
+  before it reaches `apply` (SPEC.md section 3.9).
+
