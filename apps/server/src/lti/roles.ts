@@ -2,23 +2,22 @@ import type { CourseRole } from "../db/schema.ts";
 
 const LIS = "http://purl.imsglobal.org/vocab/lis/v2/";
 
-/** Context (membership) roles that make someone teaching staff; a course administrator counts. */
+/**
+ * The context (membership) roles that make someone teaching staff; a course administrator
+ * counts. One list serves the bare short forms (which LTI 1.3 reads as context roles), the
+ * `membership#` URIs, and the principals whose sub-roles are still staff, such as
+ * `membership/Instructor#TeachingAssistant` or `membership/TeachingAssistant#Grader`.
+ */
 const STAFF = new Set(["Instructor", "TeachingAssistant", "ContentDeveloper", "Administrator"]);
 
-/** Principal roles whose sub-roles are still staff, e.g. `membership/Instructor#TeachingAssistant`. */
-const STAFF_PRINCIPALS = new Set(["Instructor", "ContentDeveloper"]);
-
-/** Bare short forms, which LTI 1.3 reads as context roles. */
-const SHORT_FORMS = new Set(["Instructor", "TeachingAssistant", "ContentDeveloper"]);
-
 function isInstructorRole(role: string): boolean {
-  if (SHORT_FORMS.has(role)) return true;
+  if (STAFF.has(role)) return true;
   if (!role.startsWith(LIS)) return false;
   const rest = role.slice(LIS.length);
   if (rest.startsWith("membership#")) return STAFF.has(rest.slice("membership#".length));
   if (rest.startsWith("membership/")) {
     const principal = rest.slice("membership/".length).split("#")[0] ?? "";
-    return STAFF_PRINCIPALS.has(principal);
+    return STAFF.has(principal);
   }
   // An institution-wide Instructor role says nothing about this course; administrators do run it.
   return rest === "institution/person#Administrator" || rest === "system/person#Administrator";

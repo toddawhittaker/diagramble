@@ -8,7 +8,6 @@ import type { LtiSettings } from "./settings.ts";
 export type LaunchRefusal =
   | "alg_not_allowed"
   | "bad_signature"
-  | "keyset_unavailable"
   | "wrong_issuer"
   | "wrong_audience"
   | "expired"
@@ -35,7 +34,13 @@ export interface LtiLaunch {
   role: CourseRole;
 }
 
-export type LaunchResult = { ok: true; launch: LtiLaunch } | { ok: false; reason: LaunchRefusal };
+/** A failure of ours or the platform's, not of the person's token: the key set could not be fetched. */
+export type LaunchOutage = "keyset_unavailable";
+
+export type LaunchResult =
+  | { ok: true; launch: LtiLaunch }
+  | { ok: false; reason: LaunchRefusal }
+  | { ok: false; outage: LaunchOutage };
 
 export interface ValidateLaunchInput {
   settings: Pick<LtiSettings, "issuer" | "clientId" | "deploymentId">;
@@ -70,7 +75,7 @@ function objectClaim(value: unknown): Record<string, unknown> | null {
 async function verifySignature(
   idToken: string,
   keys: JWTVerifyGetKey,
-): Promise<{ claims: Record<string, unknown> } | { reason: LaunchRefusal }> {
+): Promise<{ claims: Record<string, unknown> } | { reason: LaunchRefusal } | { outage: LaunchOutage }> {
   let alg: unknown;
   try {
     alg = decodeProtectedHeader(idToken).alg;
@@ -91,7 +96,7 @@ async function verifySignature(
     ) {
       return { reason: "bad_signature" };
     }
-    return { reason: "keyset_unavailable" };
+    return { outage: "keyset_unavailable" };
   }
 }
 
@@ -147,6 +152,7 @@ export async function validateLaunch(idToken: string, input: ValidateLaunchInput
   const refuse = (reason: LaunchRefusal): LaunchResult => ({ ok: false, reason });
 
   const verified = await verifySignature(idToken, input.keys);
+  if ("outage" in verified) return { ok: false, outage: verified.outage };
   if ("reason" in verified) return refuse(verified.reason);
   const { claims } = verified;
 

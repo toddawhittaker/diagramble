@@ -5,7 +5,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { createRemoteJWKSet, type JWTVerifyGetKey } from "jose";
 import type { Kysely } from "kysely";
-import { cookieName, cookieOptions, endSession, launchCookieOptions, startSession } from "../accounts/sessions.ts";
+import { clearingOptions, cookieName, cookieOptions, endSession, launchCookieOptions, startSession } from "../accounts/sessions.ts";
 import { createLtiAccount, findLtiMethod } from "../accounts/store.ts";
 import type { Database } from "../db/schema.ts";
 import type { Settings } from "../settings.ts";
@@ -50,14 +50,8 @@ export function ltiRoutes(
   const launchOrigins = new Set([new URL(lti.authUrl).origin, ...lti.frameOrigins]);
   launchOrigins.delete(settings.appOrigin);
   const stateCookie = stateCookieName(settings);
-  const cleared = { maxAge: 0, expires: new Date(0) };
-  const password = cookieOptions(settings);
-  const clearStateLine = app.serializeCookie(stateCookie, "", { ...stateCookieOptions(), secure: true, ...cleared });
-  const clearPasswordSessionLine = app.serializeCookie(sessionCookie, "", {
-    ...password,
-    secure: password.secure === true,
-    ...cleared,
-  });
+  const clearStateLine = app.serializeCookie(stateCookie, "", clearingOptions(stateCookieOptions()));
+  const clearPasswordSessionLine = app.serializeCookie(sessionCookie, "", clearingOptions(cookieOptions(settings)));
 
   /** The refusal page, with the reason in the log line only. */
   function refuse(request: FastifyRequest, reply: FastifyReply, status: number, reason: string): FastifyReply {
@@ -76,7 +70,7 @@ export function ltiRoutes(
     await saveLoginState(db, { state: started.state, nonce: started.nonce }, new Date(now()));
     return reply
       .setCookie(stateCookie, started.state, stateCookieOptions())
-      .code(request.method === "GET" ? 302 : 303)
+      .code(303)
       .header("location", started.redirectUrl)
       .send();
   }
@@ -106,7 +100,10 @@ export function ltiRoutes(
       appOrigin: settings.appOrigin,
       now: new Date(now()),
     });
-    if (!checked.ok) return refuseAndClear(401, checked.reason);
+    if (!checked.ok) {
+      // An outage is not the person's fault: 503, and the log names it.
+      return "outage" in checked ? refuseAndClear(503, checked.outage) : refuseAndClear(401, checked.reason);
+    }
     const { launch } = checked;
 
     const method =
@@ -134,7 +131,7 @@ export function ltiRoutes(
     // plug-in keeps one cookie per name, so the lines are written here.
     return reply
       .header("set-cookie", [
-        app.serializeCookie(sessionCookie, token, { ...launchCookieOptions(), secure: true }),
+        app.serializeCookie(sessionCookie, token, launchCookieOptions()),
         clearPasswordSessionLine,
         clearStateLine,
       ])

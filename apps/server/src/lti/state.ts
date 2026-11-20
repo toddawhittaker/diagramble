@@ -1,6 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import type { CookieSerializeOptions } from "@fastify/cookie";
-import { hashToken } from "../accounts/sessions.ts";
+import { hashToken, hostPrefix, launchCookieOptions, type SessionCookieOptions } from "../accounts/sessions.ts";
 import type { Settings } from "../settings.ts";
 import { LOGIN_STATE_SECONDS } from "./store.ts";
 
@@ -10,25 +9,16 @@ import { LOGIN_STATE_SECONDS } from "./store.ts";
  * section 1, "Host names").
  */
 export function stateCookieName(settings: Pick<Settings, "appOrigin">): string {
-  return settings.appOrigin.startsWith("https:")
-    ? "__Host-diagramble-lti-state"
-    : "diagramble-lti-state";
+  return `${hostPrefix(settings)}diagramble-lti-state`;
 }
 
 /**
  * The platform's launch is a cross-site form post, often inside a frame, so the
- * cookie is `SameSite=None` and `Partitioned`: the browser keeps it per
- * top-level site. Browsers accept `Secure` on http://localhost.
+ * cookie has a launch session's options (`SameSite=None`, `Partitioned`, Secure) and
+ * lasts as long as the state.
  */
-export function stateCookieOptions(): CookieSerializeOptions {
-  return {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    partitioned: true,
-    path: "/",
-    maxAge: LOGIN_STATE_SECONDS,
-  };
+export function stateCookieOptions(): SessionCookieOptions {
+  return { ...launchCookieOptions(), maxAge: LOGIN_STATE_SECONDS };
 }
 
 /**
