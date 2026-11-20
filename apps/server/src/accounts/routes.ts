@@ -122,9 +122,15 @@ export function accountRoutes(
     const token = await startSession(db, method, new Date(now()));
     // A launch's partitioned cookie has the same name; clear it so the browser never
     // sends two (SPEC.md section 1, "Canvas launch"). The plug-in keeps one cookie per
-    // name, so this line goes in as a raw header beside it.
-    reply.header("set-cookie", app.serializeCookie(cookie, "", clearLaunchCookie));
-    return reply.setCookie(cookie, token, options).code(303).header("location", "/").send();
+    // name, so both lines are written here, the new session first.
+    return reply
+      .header("set-cookie", [
+        app.serializeCookie(cookie, token, { ...options, secure: options.secure === true }),
+        app.serializeCookie(cookie, "", clearLaunchCookie),
+      ])
+      .code(303)
+      .header("location", "/")
+      .send();
   });
 
   app.post("/sign-out", async (request, reply) => {

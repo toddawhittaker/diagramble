@@ -19,7 +19,7 @@ import {
 import type { FastifyInstance, LightMyRequestResponse } from "fastify";
 import { createLocalJWKSet } from "jose";
 import type { LtiSettings } from "./settings.ts";
-import { STATE_COOKIE } from "./state.ts";
+import { stateCookieName } from "./state.ts";
 
 export const PLATFORM = "https://canvas.mock.test";
 export const AUTH_URL = `${PLATFORM}/api/lti/authorize_redirect`;
@@ -64,12 +64,12 @@ export interface LaunchOptions {
 export interface LaunchRun {
   login: LightMyRequestResponse;
   launch: LightMyRequestResponse;
-  /** The form and state cookie sent, so a test can send them again. */
+  /** The form and the state cookie, as `name=value`, so a test can send them again. */
   form: { state: string; id_token: string };
   stateCookie: string;
 }
 
-/** The launch POST with a given form and state cookie, from the platform's origin. */
+/** The launch POST with a given form and state cookie (`name=value`), from the platform's origin. */
 export function postLaunch(
   app: FastifyInstance,
   form: Record<string, string>,
@@ -82,7 +82,7 @@ export function postLaunch(
     headers: {
       origin: PLATFORM,
       "content-type": "application/x-www-form-urlencoded",
-      cookie: `${STATE_COOKIE}=${stateCookie}`,
+      cookie: stateCookie,
       ...headers,
     },
     payload: new URLSearchParams(form).toString(),
@@ -109,7 +109,8 @@ export async function runLaunch(
   const redirect = new URL(location);
   const state = redirect.searchParams.get("state") ?? "";
   const nonce = redirect.searchParams.get("nonce") ?? "";
-  const stateCookie = login.cookies.find((c) => c.name === STATE_COOKIE)?.value ?? "";
+  const name = stateCookieName({ appOrigin: toolUrl });
+  const stateCookie = `${name}=${login.cookies.find((c) => c.name === name)?.value ?? ""}`;
   const claims = launchClaims({
     issuer: PLATFORM,
     toolUrl,

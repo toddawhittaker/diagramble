@@ -9,10 +9,10 @@ import { cookieName, endSession, launchCookieOptions, startSession } from "../ac
 import { createLtiAccount, findLtiMethod } from "../accounts/store.ts";
 import type { Database } from "../db/schema.ts";
 import type { Settings } from "../settings.ts";
-import { isNavigation, startLogin } from "./login.ts";
+import { isNavigation, type LtiLoginParams, startLogin } from "./login.ts";
 import { refusalPolicy, renderRefusalPage } from "./pages.ts";
 import type { LtiSettings } from "./settings.ts";
-import { STATE_COOKIE, stateCookieOptions, statesMatch } from "./state.ts";
+import { checkLaunchState, stateCookieName, stateCookieOptions } from "./state.ts";
 import { consumeLoginState, saveLoginState, upsertCourse, upsertMembership } from "./store.ts";
 import { toolJwks } from "./tool-key.ts";
 import { validateLaunch } from "./validate.ts";
@@ -46,7 +46,8 @@ export function ltiRoutes(
 ): void {
   const sessionCookie = cookieName(settings);
   const platformOrigin = new URL(lti.authUrl).origin;
-  const { maxAge: _maxAge, ...clearState } = stateCookieOptions;
+  const stateCookie = stateCookieName(settings);
+  const { maxAge: _maxAge, ...clearState } = stateCookieOptions();
 
   /** The refusal page, with the reason in the log line only. */
   function refuse(request: FastifyRequest, reply: FastifyReply, status: number, reason: string): FastifyReply {
@@ -59,12 +60,12 @@ export function ltiRoutes(
   }
 
   async function login(request: FastifyRequest, reply: FastifyReply, params: unknown): Promise<FastifyReply> {
-    if (!isNavigation(request.headers)) return refuse(request, reply, 400, "not a navigation");
-    const started = startLogin((params ?? {}) as Record<string, unknown>, lti, settings.appOrigin);
+    if (!isNavigation(request.headers)) return refuse(request, reply, 400, "not_navigation");
+    const started = startLogin((params ?? {}) as LtiLoginParams, lti, settings.appOrigin);
     if (!started.ok) return refuse(request, reply, 400, started.reason);
     await saveLoginState(db, { state: started.state, nonce: started.nonce }, new Date(now()));
     return reply
-      .setCookie(STATE_COOKIE, started.state, stateCookieOptions)
+      .setCookie(stateCookie, started.state, stateCookieOptions())
       .code(request.method === "GET" ? 302 : 303)
       .header("location", started.redirectUrl)
       .send();
@@ -75,18 +76,22 @@ export function ltiRoutes(
 
   app.post("/lti/launch", async (request, reply) => {
     // The guard exempts this route from the app's own Origin; only the platform's will do.
-    if (request.headers.origin !== platformOrigin) return refuse(request, reply, 403, "wrong origin");
+    if (request.headers.origin !== platformOrigin) return refuse(request, reply, 403, "wrong_origin");
     const state = field(request.body, "state");
-    if (!statesMatch(request.cookies[STATE_COOKIE], state)) {
-      return refuse(request, reply, 401, "state cookie does not match");
-    }
+    const stateProblem = checkLaunchState(state, request.cookies[stateCookie]);
+    if (stateProblem) return refuse(request, reply, 401, stateProblem);
     const nonce = await consumeLoginState(db, state as string, new Date(now()));
-    if (nonce === undefined) return refuse(request, reply, 401, "state unknown, used or expired");
+    if (nonce === undefined) return refuse(request, reply, 401, "state_unknown");
     const idToken = field(request.body, "id_token") ?? "";
-    const checked = await validateLaunch(idToken, { settings: lti, keys, nonce, now: new Date(now()) });
+    const checked = await validateLaunch(idToken, {
+      settings: lti,
+      keys,
+      nonce,
+      appOrigin: settings.appOrigin,
+      now: new Date(now()),
+    });
     if (!checked.ok) return refuse(request, reply, 401, checked.reason);
     const { launch } = checked;
-    if (!launch.context) return refuse(request, reply, 401, "no course context");
 
     const method =
       (await findLtiMethod(db, launch.issuer, launch.subject)) ??
@@ -96,7 +101,7 @@ export function ltiRoutes(
         loginId: launch.loginId,
         email: launch.email,
       }));
-    if (method.disabled) return refuse(request, reply, 403, "account disabled");
+    if (method.disabled) return refuse(request, reply, 403, "account_disabled");
 
     const courseId = await upsertCourse(db, {
       issuer: launch.issuer,
@@ -110,7 +115,7 @@ export function ltiRoutes(
     const token = await startSession(db, method, new Date(now()));
     return reply
       .setCookie(sessionCookie, token, launchCookieOptions())
-      .clearCookie(STATE_COOKIE, clearState)
+      .clearCookie(stateCookie, clearState)
       .code(303)
       .header("location", `/?course=${encodeURIComponent(courseId)}`)
       .send();

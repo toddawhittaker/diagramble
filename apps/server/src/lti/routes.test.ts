@@ -20,9 +20,10 @@ import {
 } from "../security/harness.ts";
 import { buildServer } from "../server.ts";
 import { REFUSAL_SENTENCE } from "./pages.ts";
-import { STATE_COOKIE } from "./state.ts";
+import { stateCookieName } from "./state.ts";
 import { AUTH_URL, FRAME_ORIGINS, makeLtiSettings, makePlatform, PLATFORM, postLaunch, runLaunch } from "./testing.ts";
 
+const STATE_COOKIE = stateCookieName({ appOrigin: HTTPS_ORIGIN });
 const ivy = PEOPLE.find((p) => p.key === "ivy")!;
 const sam = PEOPLE.find((p) => p.key === "sam")!;
 const course = COURSES[0]!;
@@ -92,7 +93,7 @@ describe("the login", () => {
       method: "POST",
       url: "/lti/login",
       headers: { origin: PLATFORM, "content-type": "application/x-www-form-urlencoded" },
-      payload: new URLSearchParams({ iss: PLATFORM, login_hint: sam.sub }).toString(),
+      payload: new URLSearchParams({ iss: PLATFORM, login_hint: sam.sub, target_link_uri: `${HTTPS_ORIGIN}/` }).toString(),
     });
     expect(response.statusCode).toBe(303);
     expect(response.headers.location).toMatch(new RegExp(`^${AUTH_URL}\\?`));
@@ -160,10 +161,13 @@ describe("a good launch", () => {
 
 /** A launch that also sends a session cookie beside the state cookie. */
 async function runLaunchWithSession(token: string) {
-  const login = await app.inject({ url: "/lti/login", query: { iss: PLATFORM, login_hint: sam.sub } });
+  const login = await app.inject({
+    url: "/lti/login",
+    query: { iss: PLATFORM, login_hint: sam.sub, target_link_uri: `${HTTPS_ORIGIN}/` },
+  });
   const redirect = new URL(login.headers.location as string);
   const state = redirect.searchParams.get("state")!;
-  const stateCookie = cookieOf(login, STATE_COOKIE)!.value;
+  const stateCookie = `${STATE_COOKIE}=${cookieOf(login, STATE_COOKIE)!.value}`;
   const { launchClaims, signLaunch } = await import("@diagramble/mock-lti");
   const claims = launchClaims({
     issuer: PLATFORM,
@@ -175,7 +179,7 @@ async function runLaunchWithSession(token: string) {
     now: Math.floor(Date.now() / 1000),
   });
   return postLaunch(app, { state, id_token: await signLaunch(platform.signer, claims) }, stateCookie, {
-    cookie: `${STATE_COOKIE}=${stateCookie}; ${HTTPS_COOKIE}=${token}`,
+    cookie: `${stateCookie}; ${HTTPS_COOKIE}=${token}`,
   });
 }
 
@@ -187,7 +191,7 @@ describe("the launch's Origin", () => {
     ["another site", "https://evil.example"],
   ])("%s is refused with 403", async (_name, origin) => {
     const run = await launch({ person: sam });
-    const headers: Record<string, string> = { "content-type": "application/x-www-form-urlencoded", cookie: `${STATE_COOKIE}=${run.stateCookie}` };
+    const headers: Record<string, string> = { "content-type": "application/x-www-form-urlencoded", cookie: run.stateCookie };
     if (origin !== undefined) headers.origin = origin;
     const response = await app.inject({
       method: "POST",
@@ -207,7 +211,7 @@ describe("refusals", () => {
     const again = await postLaunch(app, run.form, run.stateCookie);
     expectRefused(again, 401);
     const logged = logLines.map((l) => JSON.parse(l) as Record<string, unknown>).find((l) => l.reason);
-    expect(logged?.reason).toBe("state unknown, used or expired");
+    expect(logged?.reason).toBe("state_unknown");
   });
 
   test("a state cookie that does not match the form is refused", async () => {
@@ -238,7 +242,7 @@ describe("refusals", () => {
     expect(log).toContain("Canvas launch refused");
     expect(log).not.toContain(run.form.id_token);
     expect(log).not.toContain(run.form.state);
-    expect(log).not.toContain(run.stateCookie);
+    expect(log).not.toContain(run.stateCookie.split("=")[1]!);
   });
 });
 

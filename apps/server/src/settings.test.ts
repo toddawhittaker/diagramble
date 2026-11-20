@@ -1,9 +1,11 @@
+import { generateKeyPairSync } from "node:crypto";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { readSettings } from "./settings.ts";
 
+const TOOL_KEY = generateKeyPairSync("rsa", { modulusLength: 2048 }).privateKey.export({ type: "pkcs8", format: "pem" }) as string;
 const dir = mkdtempSync(path.join(tmpdir(), "diagramble-settings-"));
 const good = {
   DATABASE_URL: "postgres://u:p@db:5432/diagramble",
@@ -62,5 +64,19 @@ describe("readSettings", () => {
 
   test("refuses a file as STATIC_DIR", () => {
     expect(() => readSettings({ ...good, STATIC_DIR: import.meta.filename })).toThrow(/STATIC_DIR/);
+  });
+
+  test("reads the LTI settings when they are set, and refuses some without the rest", () => {
+    const lti = {
+      LTI_ISSUER: "https://canvas.example.edu",
+      LTI_CLIENT_ID: "1000",
+      LTI_DEPLOYMENT_ID: "1:abc",
+      LTI_AUTH_URL: "https://sso.canvaslms.com/api/lti/authorize_redirect",
+      LTI_KEYS_URL: "https://sso.canvaslms.com/api/lti/security/jwks",
+      LTI_FRAME_ORIGINS: "https://school.instructure.com",
+      LTI_TOOL_KEY: TOOL_KEY,
+    };
+    expect(readSettings({ ...good, ...lti }).lti).toMatchObject({ issuer: lti.LTI_ISSUER, frameOrigins: [lti.LTI_FRAME_ORIGINS] });
+    expect(() => readSettings({ ...good, LTI_ISSUER: lti.LTI_ISSUER })).toThrow(/LTI_CLIENT_ID/);
   });
 });
