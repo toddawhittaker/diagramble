@@ -85,6 +85,88 @@ describe("what it flags in comments", () => {
 		assert.deepEqual(good, []);
 	});
 
+	describe("a title in the curried each form", () => {
+		const table = "[[1, 2], [3, 4]]";
+		const forms = ["test", "it", "describe"].flatMap((fn) =>
+			[
+				fn,
+				`${fn}.skip`,
+				`${fn}.only`,
+				`${fn}.concurrent`,
+				`${fn}.concurrent.only`,
+			].map((head) => `${head}.each`),
+		);
+		for (const head of forms) {
+			test(`flags history in ${head}([...])("title")`, () => {
+				const src = `${head}(${table})("handles issue 9 for %i", () => {});\n`;
+				const hits = scanText("a.test.ts", src);
+				assert.deepEqual(names(hits), ["issue reference"]);
+				assert.equal(hits[0].line, 1);
+			});
+
+			test(`flags history in ${head}\`table\`("title")`, () => {
+				const src = `${head}\`\n  a | b\n  \${1} | \${2}\n\`("part of Epic 3", () => {});\n`;
+				const hits = scanText("a.test.ts", src);
+				assert.deepEqual(names(hits), ["epic reference"]);
+				assert.equal(hits[0].line, 4);
+			});
+
+			test(`lets a clean title through in ${head}`, () => {
+				const src = `${head}(${table})("rejects a cycle (SPEC.md 3.4)", () => {});\n`;
+				assert.deepEqual(scanText("a.test.ts", src), []);
+			});
+		}
+
+		test("reports the line of the title, not of the each call", () => {
+			const src = 'test.each([\n  [1],\n  [2],\n])(\n  "from PR 7",\n  () => {},\n);\n';
+			const hits = scanText("a.test.ts", src);
+			assert.deepEqual(hits.map((h) => h.line), [5]);
+		});
+
+		test("reads past a regex literal holding a parenthesis in the table", () => {
+			const src = 'test.each([[/\\)/]])("Epic 2 title", () => {});\n';
+			assert.deepEqual(names(scanText("a.test.ts", src)), ["epic reference"]);
+		});
+
+		test("reads past quotes, parentheses and comments inside the table", () => {
+			const src = [
+				"test.each([",
+				'  ["a (b", "it\'s"], // don\'t trip on this',
+				"  /* ) */ [`c ) d`],",
+				'])("see issue 5", () => {});',
+				"",
+			].join("\n");
+			assert.deepEqual(scanText("a.test.ts", src).map((h) => h.line), [4]);
+		});
+
+		test("reads a title written in single quotes or backticks", () => {
+			assert.equal(scanText("a.test.ts", "it.each([1])('task T4', () => {});\n").length, 1);
+			assert.equal(scanText("a.test.ts", "it.each([1])(`task T4`, () => {});\n").length, 1);
+		});
+
+		test("reads a table held in a variable", () => {
+			assert.equal(scanText("a.test.ts", 'test.each(cases)("Epic 2", () => {});\n').length, 1);
+		});
+
+		test("finds a second curried title after a first one", () => {
+			const src = 'test.each([1])("ok", () => {});\ntest.each([2])("Epic 2", () => {});\n';
+			assert.deepEqual(scanText("a.test.ts", src).map((h) => h.line), [2]);
+		});
+
+		test("ignores an each call with no title call after it", () => {
+			assert.deepEqual(scanText("a.test.ts", "const t = test.each([1]);\nconst u = test.each([1]) ;\n"), []);
+			assert.deepEqual(scanText("a.test.ts", "const t = test.each;\ntest.each([1\n"), []);
+		});
+
+		test("does not read an each call on some other object", () => {
+			assert.deepEqual(scanText("a.test.ts", 'list.test.each([1])("Epic 2", () => {});\n'), []);
+		});
+
+		test("does not read the curried form in a file that is not a test file", () => {
+			assert.deepEqual(scanText("a.ts", 'test.each([1])("Epic 2", () => {});\n'), []);
+		});
+	});
+
 	test("does not read the title of a test in a file that is not a test file", () => {
 		assert.deepEqual(scanText("a.ts", 'it("issue 9", () => {});\n'), []);
 	});

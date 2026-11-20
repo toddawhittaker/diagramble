@@ -163,12 +163,70 @@ function jinjaComments(src) {
 	return out;
 }
 
+const lineAt = (src, index) => src.slice(0, index).split("\n").length;
+
+// Matches a quoted title at the sticky position: optional space, then the string.
+const TITLE = /\s*(["'`])((?:\\.|(?!\1)[^\\])*?)\1/y;
+
+// Returns the index past the parenthesis group opening at start, skipping
+// strings, regex literals and comments inside it; src.length when it is never closed.
+function skipParens(src, start) {
+	let depth = 0;
+	let i = start;
+	while (i < src.length) {
+		const ch = src[i];
+		if (ch === "(") {
+			depth++;
+			i++;
+		} else if (ch === ")") {
+			i++;
+			if (--depth === 0) return i;
+		} else if (ch === '"' || ch === "'" || ch === "`") {
+			i = skipString(src, i, 0).i;
+		} else if (ch === "/" && src[i + 1] === "/") {
+			const end = src.indexOf("\n", i);
+			i = end === -1 ? src.length : end;
+		} else if (ch === "/" && src[i + 1] === "*") {
+			const end = src.indexOf("*/", i + 2);
+			i = end === -1 ? src.length : end + 2;
+		} else if (ch === "/" && regexAllowed(src, i)) {
+			i = skipRegex(src, i);
+		} else {
+			i++;
+		}
+	}
+	return i;
+}
+
+// The index of the "(" that opens the title call after test.each(table) or
+// test.each`table`, or -1 when the call is not followed by one.
+function eachTitleCall(src, at) {
+	let i = at;
+	while (/\s/.test(src[i] ?? "")) i++;
+	if (src[i] === "(") i = skipParens(src, i);
+	else if (src[i] === "`") i = skipString(src, i, 0).i;
+	else return -1;
+	while (/\s/.test(src[i] ?? "")) i++;
+	return src[i] === "(" ? i : -1;
+}
+
 function testTitles(src) {
 	const out = [];
 	const re =
 		/(?<![.\w$])(?:test|it|describe)(?:\.\w+)*\(\s*(["'`])((?:\\.|(?!\1)[^\\])*?)\1/g;
 	for (const m of src.matchAll(re)) {
-		out.push({ line: src.slice(0, m.index).split("\n").length, text: m[2] });
+		out.push({ line: lineAt(src, m.index), text: m[2] });
+	}
+	// The curried form: test.each(table)("title") and test.each`table`("title").
+	const each = /(?<![.\w$])(?:test|it|describe)(?:\.\w+)*\.each(?![\w$])/g;
+	for (const m of src.matchAll(each)) {
+		const call = eachTitleCall(src, m.index + m[0].length);
+		if (call === -1) continue;
+		TITLE.lastIndex = call + 1;
+		const title = TITLE.exec(src);
+		if (!title) continue;
+		const quote = call + 1 + title[0].indexOf(title[1]);
+		out.push({ line: lineAt(src, quote), text: title[2] });
 	}
 	return out;
 }

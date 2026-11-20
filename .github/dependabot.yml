@@ -16,3 +16,18 @@ updates:
     groups:
       actions:
         patterns: ["*"]
+  # Covers the base images in the root Dockerfile (node) and compose.yaml (postgres).
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      docker:
+        patterns: ["*"]
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      docker-compose:
+        patterns: ["*"]

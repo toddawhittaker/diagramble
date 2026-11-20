@@ -26,6 +26,15 @@ const PAGE_POLICY = [
   "base-uri 'none'",
 ];
 
+// What every reply carries unless it sets its own: scripts only from the app's own origin
+// (SPEC.md section 1, "Host names").
+const DEFAULT_POLICY = [
+  "script-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+];
+
 let testDb: TestDb;
 let app: FastifyInstance;
 let token: string;
@@ -100,6 +109,24 @@ describe("every reply", () => {
     expect(response.statusCode).toBe(status);
     expect(response.headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
     expect(directives(response)).toContain("frame-ancestors 'none'");
+  });
+});
+
+describe("the default policy", () => {
+  const cookie = () => ({ cookie: `${HTTPS_COOKIE}=${token}` });
+  const defaults: [string, () => Promise<LightMyRequestResponse>][] = [
+    ["a static file", () => app.inject({ url: "/app.js", headers: cookie() })],
+    ["the app's page", () => app.inject({ url: "/", headers: cookie() })],
+    ["a 401", () => app.inject({ url: "/app.js" })],
+    [
+      "a 403",
+      () => app.inject({ method: "POST", url: "/sign-in", headers: { origin: "null" } }),
+    ],
+    ["a 404", () => app.inject({ url: "/no/such/page", headers: cookie() })],
+  ];
+
+  test.each(defaults)("%s limits scripts to the app's own origin", async (_name, send) => {
+    expect(directives(await send()).sort()).toEqual([...DEFAULT_POLICY].sort());
   });
 });
 
