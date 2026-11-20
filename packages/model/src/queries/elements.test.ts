@@ -83,6 +83,15 @@ describe("whereUsed (SPEC.md section 4.2)", () => {
     expect(run("ds-record")).toEqual({ diagrams: [], flows: ["f-pull", "f-record", "f-reread"], structures: [] });
   });
 
+  test("lists a decomposed process's child diagram with the diagram that shows it", () => {
+    expect(run("p2")).toEqual({ diagrams: ["d0", "d2"], flows: ["f-loose"], structures: [] });
+  });
+
+  test("lists the data flows and control flows on a diagram", () => {
+    expect(run("d0")).toEqual({ diagrams: [], flows: ["c-drop", "f-loose", "f-order", "f-record"], structures: [] });
+    expect(run("d2")).toEqual({ diagrams: [], flows: ["f-fault", "f-pull", "f-reread"], structures: [] });
+  });
+
   test("returns three empty lists for an element used nowhere", () => {
     expect(run("e-supplier")).toEqual({ diagrams: [], flows: [], structures: [] });
   });

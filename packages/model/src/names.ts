@@ -25,3 +25,8 @@ export function Called(element: Element): string {
   const text = called(element);
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+/** Orders strings by code unit, so the order never depends on the locale. */
+export function compareText(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}

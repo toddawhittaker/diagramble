@@ -13,6 +13,9 @@ import type { CommandDefinition } from "../registry.ts";
  * deleted data definition leaves every component list.
  */
 function removeWithDependents(doc: ProjectDocument, seed: Iterable<Id>): void {
+  // One pass is enough (SPEC.md section 4.1): every seed is decided before the pass, and
+  // a flow added to the set cannot make another flow need removing, because a flow's
+  // ends, diagram and data are never flows.
   const doomed = new Set<Id>(seed);
   for (const element of Object.values(doc.elements)) {
     if (element.kind === "dataFlow") {
