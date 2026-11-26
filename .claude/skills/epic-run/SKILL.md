@@ -7,8 +7,11 @@ description: Use when the orchestrator starts or continues a Diagramble epic (a 
 
 The main session orchestrates; agents do the work (CLAUDE.md, "How work
 gets done here"). Plans and folding follow docs/WORKFLOW.md, "Epic plans".
-Keep a memory file for the epic with every ruling and a dated progress
-line per step, so the run survives a context reset.
+Keep the run's place in `HANDOFF.md` at the repository root (local,
+ignored by Git), so the run survives a context reset: every ruling, and a
+dated progress line as each step finishes. Append that line in the same
+batch of tool calls as the next real action, never as a step by itself.
+Do not put epic status in memory.
 
 An epic is a GitHub milestone named `Epic <n>: <name>`; its issues are the
 work it closes.
@@ -30,8 +33,8 @@ work it closes.
    closes, the waves, and the rulings made. Ask for approval and wait.
    Change the plan if the user asks, and show it again. Spawn no task agent
    until the user approves, unless the request already said to run the epic
-   through without stopping (an AFK run). Record the approval in the
-   epic's memory file so a continued run does not ask again.
+   through without stopping (an AFK run). Record the approval in
+   `HANDOFF.md` so a continued run does not ask again.
 4. **Split tasks** so no two agents edit the same files. When files must
    overlap, the later task waits for the earlier one. Start each task as
    soon as the PRs in its "starts after" column have merged, cut from the
@@ -107,8 +110,8 @@ work it closes.
 13. **Check CI yourself.** `gh pr checks <epic PR>` must be all green, not
     just the merger's word; push runs and pull request runs can differ.
 14. **Stop.** Report the PR and wait. The user merges main. After the
-    merge, close the milestone and delete the epic and task branches and
-    the agents' worktrees without asking.
+    merge, close the milestone and delete the epic and task branches,
+    the agents' worktrees and `HANDOFF.md` without asking.
 
 ## Gotchas
 
