@@ -20,3 +20,6 @@ coverage/
 
 # Local secrets for Docker Compose.
 .env
+
+# The resume point of unfinished work; local to one machine
+/HANDOFF.md
