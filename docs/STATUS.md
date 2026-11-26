@@ -35,6 +35,11 @@ that is not a gap in something built goes in a GitHub issue instead.
   every request that can change anything, limits on failed sign-ins, and a server command
   for accounts; the Docker image and Compose file run it behind the deployment's own
   reverse proxy (SPEC.md section 1, "Sign-in", "Host names" and "Deployment").
+- **Epic 4: Canvas launch.** `apps/server` signs a person in from one LTI 1.3 platform set
+  by seven `LTI_*` settings, with a checked, single-use login state, a partitioned session
+  cookie that works inside Canvas's frame, and the course and the person's role recorded
+  each launch; `packages/mock-lti` is a mock platform with deliberate defects and a roster
+  service for tests, development and the trial (SPEC.md section 1, "Canvas launch").
 
 ## Open items
 
@@ -46,3 +51,9 @@ that is not a gap in something built goes in a GitHub issue instead.
   command ends the account's sessions. `disable` then `enable` ends it.
 - The prototype has no sign-out button, because no file in `prototype/` may change.
   `POST /sign-out` works; the web app adds the button.
+- `/lti/login` has no per-address limit; an index keeps its table cheap to clean, but a
+  flood can still grow it.
+- Safari's handling of a partitioned launch cookie inside Canvas's frame is unchecked; the
+  proof ran Chromium.
+- The launch Origin rule is proved only against the mock; the first real Canvas
+  registration confirms which host posts the launch.

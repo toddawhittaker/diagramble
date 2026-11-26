@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { Kysely } from "kysely";
 import { sql } from "kysely";
 import type { Database } from "../db/schema.ts";
@@ -157,4 +158,103 @@ export async function deleteSession(db: Kysely<Database>, id: string): Promise<v
 /** End every session of an account. */
 export async function deleteSessionsFor(db: Kysely<Database>, accountId: string): Promise<void> {
   await db.deleteFrom("sessions").where("account_id", "=", accountId).execute();
+}
+
+/** An `lti` method and its account. The method's issuer is the platform's `iss` exactly as sent. */
+export interface LtiMethod {
+  accountId: string;
+  methodId: string;
+  disabled: boolean;
+}
+
+/** The longest login an account takes (SPEC.md section 3.9). */
+const MAX_LOGIN_LENGTH = 255;
+
+function capLogin(value: string): string {
+  return [...value].slice(0, MAX_LOGIN_LENGTH).join("");
+}
+
+/**
+ * The login a new account made by a launch gets (SPEC.md section 3.9). It is the
+ * platform's login ID, trimmed and cut to 255 characters. A missing or empty one,
+ * or one starting with `$` (the platform left a variable unfilled), gives way to
+ * the part of the email before `@`, and with no usable email, to `user` followed
+ * by the first 8 characters of the account ID.
+ */
+export function chooseLtiLogin(
+  claims: { loginId?: string | null; email?: string | null },
+  accountId: string,
+): string {
+  const loginId = claims.loginId?.trim() ?? "";
+  if (loginId !== "" && !loginId.startsWith("$")) return capLogin(loginId);
+  const email = claims.email ?? "";
+  const at = email.indexOf("@");
+  const local = at > 0 ? email.slice(0, at).trim() : "";
+  if (local !== "") return capLogin(local);
+  return `user${accountId.slice(0, 8)}`;
+}
+
+/**
+ * The `lti` method of a platform's person, found by the platform's `iss` and the
+ * person's `sub`; `undefined` when there is none. A password method is never
+ * returned, whatever its login.
+ */
+export async function findLtiMethod(
+  db: Kysely<Database>,
+  issuer: string,
+  subject: string,
+): Promise<LtiMethod | undefined> {
+  const row = await db
+    .selectFrom("sign_in_methods")
+    .innerJoin("accounts", "accounts.id", "sign_in_methods.account_id")
+    .select([
+      "accounts.id as accountId",
+      "sign_in_methods.id as methodId",
+      "accounts.disabled_at as disabledAt",
+    ])
+    .where("sign_in_methods.kind", "=", "lti")
+    .where("sign_in_methods.issuer", "=", issuer)
+    .where("sign_in_methods.subject", "=", subject)
+    .executeTakeFirst();
+  if (!row) return undefined;
+  return { accountId: row.accountId, methodId: row.methodId, disabled: row.disabledAt !== null };
+}
+
+/**
+ * Make an account and its `lti` method in one transaction, for a person's first
+ * launch. The login is chosen by `chooseLtiLogin` from the launch's claims and the
+ * new account's ID, which is made here. When another first launch of the same
+ * person wins the unique key, this returns the winner's account and method.
+ */
+export async function createLtiAccount(
+  db: Kysely<Database>,
+  person: { issuer: string; subject: string; loginId?: string | null; email?: string | null },
+): Promise<LtiMethod> {
+  const accountId = randomUUID();
+  try {
+    return await db.transaction().execute(async (trx) => {
+      await trx
+        .insertInto("accounts")
+        .values({ id: accountId, login: chooseLtiLogin(person, accountId) })
+        .execute();
+      const method = await trx
+        .insertInto("sign_in_methods")
+        .values({
+          account_id: accountId,
+          kind: "lti",
+          issuer: person.issuer,
+          subject: person.subject,
+          password_hash: null,
+        })
+        .returning("id")
+        .executeTakeFirstOrThrow();
+      return { accountId, methodId: method.id, disabled: false };
+    });
+  } catch (error) {
+    if ((error as { code?: string }).code === UNIQUE_VIOLATION) {
+      const winner = await findLtiMethod(db, person.issuer, person.subject);
+      if (winner) return winner;
+    }
+    throw error;
+  }
 }

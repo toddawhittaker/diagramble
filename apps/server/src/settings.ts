@@ -3,6 +3,7 @@
 
 import { statSync } from "node:fs";
 import { z } from "zod";
+import { type LtiSettings, readLtiSettings } from "./lti/settings.ts";
 
 function isPostgresUrl(value: string): boolean {
   return /^postgres(ql)?:\/\//.test(value) && URL.canParse(value) && new URL(value).hostname !== "";
@@ -53,9 +54,14 @@ export interface Settings {
   port: number;
   trustProxyHops: number;
   staticDir: string;
+  /** The Canvas launch, or `null` when no LTI_* variable is set (SPEC.md section 1, "Canvas launch"). */
+  lti: LtiSettings | null;
 }
 
-/** The settings from `env`; throws one sentence naming the first bad or missing variable. */
+/**
+ * The settings from `env`; throws one sentence naming the first bad or missing variable,
+ * or, for the LTI_* variables, the missing ones.
+ */
 export function readSettings(env: Record<string, string | undefined>): Settings {
   const result = settingsSchema.safeParse(env);
   if (!result.success) {
@@ -69,5 +75,6 @@ export function readSettings(env: Record<string, string | undefined>): Settings 
     port: s.PORT,
     trustProxyHops: s.TRUST_PROXY_HOPS,
     staticDir: s.STATIC_DIR,
+    lti: readLtiSettings(env),
   };
 }

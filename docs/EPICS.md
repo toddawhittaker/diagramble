@@ -200,12 +200,12 @@ Epics 2, 5 and 6. Size M.
   launch is accepted from the platform's site and that nothing else is let past the check.
 - The launch's course and whether the person is an instructor are kept, because Epic 7
   finds the student's project by course: one project per student per course.
-- The launch only signs a person in (SPEC.md section 1, "Grading"). The roster service
-  comes with the course dashboard, R2-l.
+- The launch only signs a person in (SPEC.md section 1, "Grading"). No server code calls
+  the roster service; the course dashboard, R2-l, is its first user.
 - A mock LTI 1.3 platform in `packages/mock-lti` for development, CI and the Release 0
   trial (SPEC.md sections 2 item 6 and 12): people and courses to launch as, a launch
-  that sends each person's login ID as the `$Canvas.user.loginId` custom variable, launching
-  inside a frame, a roster service, and a signed-launch generator with deliberate
+  that sends each person's login ID in the custom claim `login_id`, a course page that
+  frames the tool, a roster service, and a signed-launch generator with 16 deliberate
   defects for negative tests. It is never in the Docker image.
 - Tests against the mock platform, with good launches and launches carrying each defect.
 

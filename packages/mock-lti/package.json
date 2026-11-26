@@ -1,0 +1,20 @@
+{
+  "name": "@diagramble/mock-lti",
+  "private": true,
+  "type": "module",
+  "license": "BUSL-1.1",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run",
+    "start": "node src/main.ts"
+  },
+  "dependencies": {
+    "jose": "6.2.18"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6"
+  }
+}

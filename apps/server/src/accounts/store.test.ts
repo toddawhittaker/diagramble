@@ -3,10 +3,13 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { type TestDb, createTestDb } from "../db/testing.ts";
 import {
   UsernameTakenError,
+  chooseLtiLogin,
+  createLtiAccount,
   createPasswordAccount,
   createSession,
   deleteSession,
   deleteSessionsFor,
+  findLtiMethod,
   findPasswordMethod,
   loadSession,
   setDisabled,
@@ -171,15 +174,14 @@ describe("the schema's own rules", () => {
     ).rejects.toMatchObject({ code: "23514" });
   });
 
-  test("only a password method may carry a hash, and only known kinds are allowed", async () => {
+  test("only a password method may carry a hash, and only the two known kinds are allowed", async () => {
     const account = await db.insertInto("accounts").values({ login: "hash-check-2" }).returning("id").executeTakeFirstOrThrow();
     const insertKind = (kind: string, hash: string | null) =>
       sql`insert into sign_in_methods (account_id, kind, issuer, subject, password_hash)
-          values (${account.id}, ${kind}, 'https://lms.example', 'sub-1', ${hash})`.execute(db);
-    // The `lti` kind is not known yet, so the kind check refuses it with or without a hash.
+          values (${account.id}, ${kind}, 'https://lms.example', 'sub-hash-check', ${hash})`.execute(db);
     await expect(insertKind("lti", "h")).rejects.toMatchObject({ code: "23514" });
-    await expect(insertKind("lti", null)).rejects.toMatchObject({ code: "23514" });
     await expect(insertKind("other", null)).rejects.toMatchObject({ code: "23514" });
+    await insertKind("lti", null);
   });
 
   test("deleting an account deletes its methods and sessions", async () => {
@@ -302,5 +304,141 @@ describe("sessions", () => {
       .values({ id: "stale-1", account_id: accountId, method_id: methodId, expires_at: earlier })
       .execute();
     expect(await loadSession(db, "stale-1", now)).toBeUndefined();
+  });
+});
+
+describe("chooseLtiLogin", () => {
+  const id = "1234abcd-0000-4000-8000-000000000000";
+
+  test("uses the login ID, trimmed", () => {
+    expect(chooseLtiLogin({ loginId: "  ada.l  ", email: "x@y.example" }, id)).toBe("ada.l");
+  });
+
+  test("cuts a login ID to 255 characters, counting characters and not bytes", () => {
+    expect(chooseLtiLogin({ loginId: "a".repeat(300) }, id)).toBe("a".repeat(255));
+    expect(chooseLtiLogin({ loginId: "é😀".repeat(200) }, id)).toBe("é😀".repeat(127) + "é");
+  });
+
+  test.each([
+    ["missing", undefined],
+    ["null", null],
+    ["empty", ""],
+    ["blank", "   "],
+    ["an unfilled variable", "$Canvas.user.loginId"],
+    ["an unfilled variable after trimming", "  $Canvas.user.loginId"],
+  ])("falls back to the email's local part when the login ID is %s", (_name, loginId) => {
+    expect(chooseLtiLogin({ loginId, email: "grace.h@school.example" }, id)).toBe("grace.h");
+  });
+
+  test.each([
+    ["missing", undefined],
+    ["empty", ""],
+    ["without an @", "not-an-email"],
+    ["with nothing before the @", "@school.example"],
+    ["with a blank before the @", "  @school.example"],
+  ])("falls back to user and 8 characters of the ID when the email is %s", (_name, email) => {
+    expect(chooseLtiLogin({ loginId: "$Canvas.user.loginId", email }, id)).toBe("user1234abcd");
+  });
+
+  test("uses the user fallback when there are no claims at all", () => {
+    expect(chooseLtiLogin({}, id)).toBe("user1234abcd");
+  });
+
+  test("keeps the part before the first @ and cuts it to 255 characters", () => {
+    expect(chooseLtiLogin({ email: "a@b@c.example" }, id)).toBe("a");
+    expect(chooseLtiLogin({ email: `${"e".repeat(300)}@c.example` }, id)).toBe("e".repeat(255));
+  });
+});
+
+describe("createLtiAccount and findLtiMethod", () => {
+  const issuer = "https://lms.example";
+
+  test("makes an account with an lti method that has no password hash", async () => {
+    const made = await createLtiAccount(db, { issuer, subject: "sub-1", loginId: "lti-ada" });
+    expect(made.disabled).toBe(false);
+    const account = await db.selectFrom("accounts").selectAll().where("id", "=", made.accountId).executeTakeFirstOrThrow();
+    expect(account.login).toBe("lti-ada");
+    const method = await db.selectFrom("sign_in_methods").selectAll().where("id", "=", made.methodId).executeTakeFirstOrThrow();
+    expect(method).toMatchObject({
+      account_id: made.accountId,
+      kind: "lti",
+      issuer,
+      subject: "sub-1",
+      password_hash: null,
+    });
+  });
+
+  test("gives the account the login chosen from its own new ID when the claims have none", async () => {
+    const made = await createLtiAccount(db, { issuer, subject: "sub-nologin", loginId: "$Canvas.user.loginId" });
+    const account = await db.selectFrom("accounts").select("login").where("id", "=", made.accountId).executeTakeFirstOrThrow();
+    expect(account.login).toBe(`user${made.accountId.slice(0, 8)}`);
+  });
+
+  test("uses the email's local part when the login ID is unfilled", async () => {
+    const made = await createLtiAccount(db, {
+      issuer,
+      subject: "sub-email",
+      loginId: "$Canvas.user.loginId",
+      email: "hopper@school.example",
+    });
+    const account = await db.selectFrom("accounts").select("login").where("id", "=", made.accountId).executeTakeFirstOrThrow();
+    expect(account.login).toBe("hopper");
+  });
+
+  test("finds the method by issuer and subject, with whether the account is disabled", async () => {
+    const made = await createLtiAccount(db, { issuer, subject: "sub-find", loginId: "finder" });
+    expect(await findLtiMethod(db, issuer, "sub-find")).toEqual({
+      accountId: made.accountId,
+      methodId: made.methodId,
+      disabled: false,
+    });
+    await setDisabled(db, made.accountId, true);
+    expect(await findLtiMethod(db, issuer, "sub-find")).toMatchObject({ accountId: made.accountId, disabled: true });
+  });
+
+  test("finds nothing for another subject or another issuer", async () => {
+    await createLtiAccount(db, { issuer, subject: "sub-scope", loginId: "scoped" });
+    expect(await findLtiMethod(db, issuer, "sub-other")).toBeUndefined();
+    expect(await findLtiMethod(db, "https://other.example", "sub-scope")).toBeUndefined();
+    expect(await findLtiMethod(db, `${issuer}/`, "sub-scope")).toBeUndefined();
+  });
+
+  test("never returns a password account, whatever its login or subject", async () => {
+    await createPasswordAccount(db, "pw-twin", "hash");
+    expect(await findLtiMethod(db, "", "pw-twin")).toBeUndefined();
+    const made = await createLtiAccount(db, { issuer, subject: "pw-twin", loginId: "pw-twin" });
+    const found = await findLtiMethod(db, issuer, "pw-twin");
+    expect(found?.accountId).toBe(made.accountId);
+    const password = await findPasswordMethod(db, "pw-twin");
+    expect(password?.accountId).not.toBe(made.accountId);
+  });
+
+  test("gives an lti person with a password account's login a separate account", async () => {
+    const pw = await createPasswordAccount(db, "shared-login", "hash");
+    const made = await createLtiAccount(db, { issuer, subject: "sub-shared", loginId: "shared-login" });
+    expect(made.accountId).not.toBe(pw.accountId);
+    expect(await findLtiMethod(db, issuer, "sub-shared")).toMatchObject({ accountId: made.accountId });
+  });
+
+  test("returns the winner's account when two first launches run at once", async () => {
+    const person = { issuer, subject: "sub-race", loginId: "racer" };
+    const [a, b] = await Promise.all([createLtiAccount(db, person), createLtiAccount(db, person)]);
+    expect(a).toEqual(b);
+    const accounts = await db.selectFrom("accounts").select("id").where("login", "=", "racer").execute();
+    expect(accounts).toEqual([{ id: a.accountId }]);
+    const methods = await db.selectFrom("sign_in_methods").select("id").where("subject", "=", "sub-race").execute();
+    expect(methods).toEqual([{ id: a.methodId }]);
+  });
+
+  test("returns the existing account when the person is made again later", async () => {
+    const first = await createLtiAccount(db, { issuer, subject: "sub-again", loginId: "again" });
+    const second = await createLtiAccount(db, { issuer, subject: "sub-again", loginId: "changed" });
+    expect(second).toEqual(first);
+    const account = await db.selectFrom("accounts").select("login").where("id", "=", first.accountId).executeTakeFirstOrThrow();
+    expect(account.login).toBe("again");
+  });
+
+  test("rethrows a failure that is not a lost race", async () => {
+    await expect(createLtiAccount(db, { issuer, subject: "sub-\u0000nul", loginId: "nul" })).rejects.toThrow();
   });
 });

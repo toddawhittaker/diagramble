@@ -21,27 +21,55 @@ export function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
-function isHttps(settings: Pick<Settings, "appOrigin">): boolean {
-  return settings.appOrigin.startsWith("https:");
-}
+/** Cookie options whose `secure` is always a plain boolean, so they pass to the serializer as they are. */
+export type SessionCookieOptions = CookieSerializeOptions & { secure: boolean };
 
 /**
- * Over https the cookie carries the `__Host-` prefix, which browsers accept only
- * when it is Secure, Path=/ and has no Domain, so it stays host-only (SPEC.md
+ * The prefix of a cookie's name. Over https it is `__Host-`, which browsers accept only
+ * when the cookie is Secure, Path=/ and has no Domain, so it stays host-only (SPEC.md
  * section 1, "Host names").
  */
-export function cookieName(settings: Pick<Settings, "appOrigin">): string {
-  return isHttps(settings) ? "__Host-diagramble-session" : "diagramble-session";
+export function hostPrefix(settings: Pick<Settings, "appOrigin">): "__Host-" | "" {
+  return settings.appOrigin.startsWith("https:") ? "__Host-" : "";
 }
 
-export function cookieOptions(settings: Pick<Settings, "appOrigin">): CookieSerializeOptions {
+export function cookieName(settings: Pick<Settings, "appOrigin">): string {
+  return `${hostPrefix(settings)}diagramble-session`;
+}
+
+export function cookieOptions(settings: Pick<Settings, "appOrigin">): SessionCookieOptions {
   return {
     httpOnly: true,
-    secure: isHttps(settings),
+    secure: settings.appOrigin.startsWith("https:"),
     path: "/",
     sameSite: "lax",
     maxAge: SESSION_SECONDS,
   };
+}
+
+/**
+ * The options of a session made by a Canvas launch (SPEC.md section 1, "Canvas launch"):
+ * SameSite=None so the cookie travels inside Canvas's frame, and Partitioned so the
+ * browser keeps it only under the site that framed the app. Always Secure, which
+ * SameSite=None requires; browsers treat localhost as secure.
+ */
+export function launchCookieOptions(): SessionCookieOptions {
+  return {
+    httpOnly: true,
+    secure: true,
+    path: "/",
+    sameSite: "none",
+    partitioned: true,
+    maxAge: SESSION_SECONDS,
+  };
+}
+
+/**
+ * The options that clear a cookie set with `options`: the same name, path, SameSite and
+ * Partitioned (a browser matches on them), ending at once.
+ */
+export function clearingOptions(options: SessionCookieOptions): SessionCookieOptions {
+  return { ...options, maxAge: 0, expires: new Date(0) };
 }
 
 /** Start a session for a sign-in method and return its token. */
